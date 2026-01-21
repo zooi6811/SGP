@@ -1,0 +1,25 @@
+{
+    "inventory": {
+        "HDPE 5712 NP": 5000,
+        "HDPE(OGA)": 3000,
+        "CaCO3": 1000,
+        "LDPE NATURAL": 8000,
+        "LDPE RECYCLE": 2000,
+        "HF0961": 1500,
+        "XP 6056RA": 1000,
+        "EX1999": 1000,
+        "LLDPE 0209 SA": 2500,
+        "Slip Agent": 500
+    },
+    "jobs": [
+        {
+            "job_id": "1234",
+            "client": "123",
+            "product": "Std",
+            "weight": 9876987.0,
+            "recipe_code": "RCP-LD-CLR",
+            "due_date": "2026-01-21"
+        }
+    ],
+    "logs": []
+}
