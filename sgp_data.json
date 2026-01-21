@@ -11,15 +11,96 @@
         "LLDPE 0209 SA": 2500,
         "Slip Agent": 500
     },
-    "jobs": [
+    "jobs": [],
+    "logs": [],
+    "machines": [
         {
-            "job_id": "1234",
-            "client": "123",
-            "product": "Std",
-            "weight": 9876987.0,
-            "recipe_code": "RCP-LD-CLR",
-            "due_date": "2026-01-21"
+            "machine_id": "B1",
+            "machine_type": "Blowing",
+            "max_width_mm": "650 MM",
+            "materials": "LDPE",
+            "status": "Running",
+            "notes": ""
+        },
+        {
+            "machine_id": "B2",
+            "machine_type": "Blowing",
+            "max_width_mm": "650 MM",
+            "materials": "LDPE",
+            "status": "Running",
+            "notes": ""
+        },
+        {
+            "machine_id": "B3",
+            "machine_type": "Blowing",
+            "max_width_mm": "1100 MM",
+            "materials": "LDPE",
+            "status": "Idle",
+            "notes": ""
+        },
+        {
+            "machine_id": "B4",
+            "machine_type": "Blowing",
+            "max_width_mm": "1400 MM",
+            "materials": "LDPE",
+            "status": "Idle",
+            "notes": ""
+        },
+        {
+            "machine_id": "B5",
+            "machine_type": "Blowing",
+            "max_width_mm": "1100 MM",
+            "materials": "LDPE / SHEET",
+            "status": "Idle",
+            "notes": ""
+        },
+        {
+            "machine_id": "B6",
+            "machine_type": "Blowing",
+            "max_width_mm": "1700 MM",
+            "materials": "LDPE / SHEET",
+            "status": "Idle",
+            "notes": ""
+        },
+        {
+            "machine_id": "B7",
+            "machine_type": "Blowing",
+            "max_width_mm": "1700 MM",
+            "materials": "LDPE / SHEET",
+            "status": "Idle",
+            "notes": ""
+        },
+        {
+            "machine_id": "C1",
+            "machine_type": "Cutting",
+            "max_width_mm": "900 MM",
+            "materials": "PE, PP, LD, HD",
+            "status": "Idle",
+            "notes": ""
+        },
+        {
+            "machine_id": "C2",
+            "machine_type": "Cutting",
+            "max_width_mm": "700 MM",
+            "materials": "PE, PP, LD, HD",
+            "status": "Idle",
+            "notes": ""
+        },
+        {
+            "machine_id": "C3",
+            "machine_type": "Cutting",
+            "max_width_mm": "1100 MM",
+            "materials": "PE, PP, LD, HD",
+            "status": "Idle",
+            "notes": ""
+        },
+        {
+            "machine_id": "C4",
+            "machine_type": "Cutting",
+            "max_width_mm": "2700 MM",
+            "materials": "PE, PP, LD, HD",
+            "status": "Idle",
+            "notes": ""
         }
-    ],
-    "logs": []
+    ]
 }

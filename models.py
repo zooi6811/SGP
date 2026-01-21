@@ -53,3 +53,33 @@ class ProductionLog:
     def from_dict(cls, data):
         return cls(data["log_id"], data["date"], data["job_id"], 
                    data["output_kg"], data["wastage_kg"], data["materials_consumed"])
+    
+class Machine:
+    def __init__(self, machine_id, machine_type, max_width_mm, materials, status="Idle", notes=""):
+        self.machine_id = machine_id
+        self.machine_type = machine_type # "Blowing" or "Cutting"
+        self.max_width_mm = max_width_mm
+        self.materials = materials       # e.g. "HDPE, LDPE"
+        self.status = status             # "Running", "Maintenance", "Idle", "Breakdown"
+        self.notes = notes
+
+    def to_dict(self):
+        return {
+            "machine_id": self.machine_id,
+            "machine_type": self.machine_type,
+            "max_width_mm": self.max_width_mm,
+            "materials": self.materials,
+            "status": self.status,
+            "notes": self.notes
+        }
+
+    @classmethod
+    def from_dict(cls, data):
+        return cls(
+            data["machine_id"], 
+            data["machine_type"], 
+            data["max_width_mm"], 
+            data["materials"], 
+            data.get("status", "Idle"), 
+            data.get("notes", "")
+        )

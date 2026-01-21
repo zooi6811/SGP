@@ -1,6 +1,6 @@
 import json
 import os
-from models import Recipe, Job, ProductionLog
+from models import Recipe, Job, ProductionLog, Machine
 
 # --- CONFIGURATION ---
 DATA_FILE = "sgp_data.json"
@@ -13,31 +13,48 @@ RECIPES = {
     'RCP-LD-IND': Recipe('RCP-LD-IND', 'Industrial Slit Bag', {'LDPE RECYCLE': 0.50, 'LLDPE 0209 SA': 0.40, 'Slip Agent': 0.10})
 }
 
-# --- GLOBAL STATE ---
-INVENTORY = {} # Will load from file
-JOBS = []      # Will load from file
-LOGS = []      # Will load from file
+# --- STATIC MACHINE CONFIGURATION (From your CSVs) ---
+# We define the "Default" state of the factory here.
+DEFAULT_MACHINES = [
+    # Blowing Machines (B-Lines)
+    Machine("B1", "Blowing", "650 MM", "LDPE", "Idle"),
+    Machine("B2", "Blowing", "650 MM", "LDPE", "Idle"),
+    Machine("B3", "Blowing", "1100 MM", "LDPE", "Idle"),
+    Machine("B4", "Blowing", "1400 MM", "LDPE", "Idle"),
+    Machine("B5", "Blowing", "1100 MM", "LDPE / SHEET", "Idle"),
+    Machine("B6", "Blowing", "1700 MM", "LDPE / SHEET", "Idle"),
+    Machine("B7", "Blowing", "1700 MM", "LDPE / SHEET", "Idle"), # Added common big line
+    
+    # Cutting Machines (C-Lines)
+    Machine("C1", "Cutting", "900 MM", "PE, PP, LD, HD", "Idle"),
+    Machine("C2", "Cutting", "700 MM", "PE, PP, LD, HD", "Idle"),
+    Machine("C3", "Cutting", "1100 MM", "PE, PP, LD, HD", "Idle"),
+    Machine("C4", "Cutting", "2700 MM", "PE, PP, LD, HD", "Idle")
+]
 
-# --- PERSISTENCE ENGINE ---
+# --- GLOBAL STATE ---
+INVENTORY = {}
+JOBS = []
+LOGS = []
+MACHINES = [] # New List
 
 def save_data():
-    """Writes current state to JSON file."""
     data = {
         "inventory": INVENTORY,
         "jobs": [j.to_dict() for j in JOBS],
-        "logs": [l.to_dict() for l in LOGS]
+        "logs": [l.to_dict() for l in LOGS],
+        "machines": [m.to_dict() for m in MACHINES] # Save Machine Status
     }
     try:
         with open(DATA_FILE, 'w') as f:
             json.dump(data, f, indent=4)
-        print("Data saved successfully.")
+        print("Data saved.")
     except Exception as e:
-        print(f"Error saving data: {e}")
+        print(f"Error saving: {e}")
 
 def load_data():
-    """Reads state from JSON file."""
-    global INVENTORY, JOBS, LOGS
-    
+    global INVENTORY, JOBS, LOGS, MACHINES
+
     # Default Initial Inventory (if no file exists)
     default_inventory = {
         'HDPE 5712 NP': 5000, 'HDPE(OGA)': 3000, 'CaCO3': 1000,
@@ -46,33 +63,30 @@ def load_data():
     }
 
     if not os.path.exists(DATA_FILE):
-        print("No data file found. Creating new database.")
         INVENTORY = default_inventory
         JOBS = []
         LOGS = []
-        save_data() # Create the file
+        MACHINES = DEFAULT_MACHINES # Start with default list
+        save_data()
         return
 
     try:
         with open(DATA_FILE, 'r') as f:
             data = json.load(f)
             
-        # Restore Inventory
         INVENTORY = data.get("inventory", default_inventory)
-        
-        # Restore Jobs (Convert dicts back to Objects)
         JOBS = [Job.from_dict(j) for j in data.get("jobs", [])]
-        
-        # Restore Logs
         LOGS = [ProductionLog.from_dict(l) for l in data.get("logs", [])]
         
-        print(f"Loaded {len(JOBS)} jobs and {len(LOGS)} logs.")
-        
+        # Load Machines (or use default if missing in file)
+        if "machines" in data:
+            MACHINES = [Machine.from_dict(m) for m in data["machines"]]
+        else:
+            MACHINES = DEFAULT_MACHINES
+            
     except Exception as e:
-        print(f"Error loading data: {e}. Starting fresh.")
-        INVENTORY = default_inventory
-        JOBS = []
-        LOGS = []
+        print(f"Error loading: {e}")
+        MACHINES = DEFAULT_MACHINES
 
 # --- AUTO-LOAD ON STARTUP ---
 load_data()

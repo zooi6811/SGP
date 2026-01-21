@@ -1,27 +1,35 @@
-from database import RECIPES, INVENTORY, JOBS, LOGS, save_data
+from database import RECIPES, INVENTORY, MACHINES, JOBS, LOGS, save_data
 from models import ProductionLog
 from models import Job
 
 def add_new_job(job_id, client, product, weight, recipe_code, due_date):
-    """Validates and adds a job to the database."""
-    # Basic Validation
     if not (job_id and client and weight and recipe_code):
         raise ValueError("All fields are required.")
     
+    # Check if Job ID already exists to prevent duplicates
+    if any(str(j.job_id) == str(job_id) for j in JOBS):
+         raise ValueError(f"Job ID {job_id} already exists!")
+
     try:
         weight_val = float(weight)
     except ValueError:
         raise ValueError("Weight must be a number.")
 
-    new_job = Job(job_id, client, product, weight_val, recipe_code, due_date)
+    new_job = Job(str(job_id), client, product, weight_val, recipe_code, due_date)
     JOBS.append(new_job)
-
+    
     save_data()
     return new_job
 
 def delete_job_by_id(job_id):
-    global JOBS
-    JOBS = [j for j in JOBS if j.job_id != str(job_id)]
+    global JOBS # Use the global variable imported at top of file
+    
+    # Filter the list (keep everything that DOES NOT match the ID)
+    # We force str() conversion to ensure "101" matches 101
+    new_list = [j for j in JOBS if str(j.job_id) != str(job_id)]
+    
+    # Update the EXISTING list object (do not create a new variable)
+    JOBS[:] = new_list
 
     save_data()
 
@@ -118,3 +126,13 @@ def submit_daily_log(job_id, date, output_kg, wastage_kg):
     
     save_data()
     return new_log
+
+def update_machine_status(machine_id, new_status, new_notes):
+    """Updates the status of a specific machine."""
+    for machine in MACHINES:
+        if machine.machine_id == machine_id:
+            machine.status = new_status
+            machine.notes = new_notes
+            save_data()
+            return True
+    return False
