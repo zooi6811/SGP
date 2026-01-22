@@ -62,15 +62,12 @@ def get_job_details(job_id):
 # 2. PRODUCTION & INVENTORY LOGIC
 # ==========================================
 
-def submit_daily_log(job_id, date, output_kg, wastage_kg):
+def submit_daily_log(job_id, date, output_kg, wastage_kg, stage):
     """
-    1. Calculates Material Consumption (Output + Waste).
-    2. Deducts materials from Inventory.
-    3. Saves a Production Log.
+    Updated to include Stage tracking and Auto-Completion.
     """
     job = get_job_details(job_id)
-    if not job: 
-        raise ValueError("Job not found.")
+    if not job: raise ValueError("Job not found.")
     
     if job.recipe_code not in RECIPES:
         raise ValueError(f"Recipe {job.recipe_code} not found in database.")
@@ -83,29 +80,73 @@ def submit_daily_log(job_id, date, output_kg, wastage_kg):
     except ValueError:
         raise ValueError("Output and Wastage must be numbers.")
 
-    # Calculate Total Mass Processed
-    total_mass = out_val + waste_val
-    
-    # Calculate Usage based on Recipe Ratios
+    # Calculate Material Usage (Only deduct for Extrusion/Blowing to avoid double counting material)
+    # Other stages (Cutting/Printing) process existing film, they generate waste but don't consume raw resin.
     materials_used = {}
-    for mat, ratio in recipe.materials.items():
-        used_qty = round(total_mass * ratio, 2)
-        materials_used[mat] = used_qty
+    
+    if stage == "Extrusion":
+        total_mass = out_val + waste_val
+        for mat, ratio in recipe.materials.items():
+            used_qty = round(total_mass * ratio, 2)
+            materials_used[mat] = used_qty
 
-    # DEDUCT FROM INVENTORY (Allow negatives for tracking deficits)
-    for mat, qty in materials_used.items():
-        if mat in INVENTORY:
-            INVENTORY[mat] -= qty
-        else:
-            INVENTORY[mat] = -qty # Record deficit if material unknown
+        # DEDUCT FROM INVENTORY
+        for mat, qty in materials_used.items():
+            if mat in INVENTORY: INVENTORY[mat] -= qty
+            else: INVENTORY[mat] = -qty 
+    else:
+        # For non-extrusion stages, we might track 'Film' usage, but for now 
+        # let's assume we only track raw material deduction at Extrusion.
+        pass 
             
     # Create and Save Log
     log_id = f"LOG-{len(LOGS)+1:04d}"
-    new_log = ProductionLog(log_id, date, job_id, out_val, waste_val, materials_used)
+    new_log = ProductionLog(log_id, date, job_id, out_val, waste_val, materials_used, stage)
     LOGS.append(new_log)
-    save_data()
     
+    # --- AUTO COMPLETION CHECK ---
+    # We update the job status if the *Last Stage* (Packaging) is full.
+    # Also set to 'In Progress' if it was Pending.
+    
+    progress_data = get_job_progress(job_id)
+    pkg_total = progress_data['stages']['Packaging']['current']
+    
+    if pkg_total >= job.weight:
+        job.status = "Completed"
+    elif job.status == "Pending":
+        job.status = "In Progress"
+
+    save_data()
     return new_log
+
+def get_job_progress(job_id):
+    """
+    Calculates the total output for each stage of a specific job.
+    Returns a dict with percentage and raw numbers.
+    """
+    job = get_job_details(job_id)
+    if not job: return {}
+
+    stages = ['Extrusion', 'Printing', 'Cutting', 'Packaging']
+    data = {s: {'current': 0.0, 'percent': 0.0} for s in stages}
+    
+    # Sum up logs
+    for log in LOGS:
+        if str(log.job_id) == str(job_id):
+            if log.stage in data:
+                data[log.stage]['current'] += log.output_kg
+    
+    # Calculate Percentages
+    for s in stages:
+        curr = data[s]['current']
+        if job.weight > 0:
+            pct = (curr / job.weight) * 100
+        else:
+            pct = 0
+        data[s]['percent'] = min(pct, 100.0) # Cap at 100% for visual bar
+        data[s]['raw_percent'] = pct # Keep real value (e.g. 105%) for text
+
+    return {'job': job, 'stages': data}
 
 def calculate_material_requirements():
     """
@@ -179,16 +220,15 @@ def generate_smart_schedule():
     3. Assigns Jobs to the Machine that finishes SOONEST.
     4. Flags 'Impossible' and 'Late' jobs.
     """
-    # 1. Priority Sort
-    pending_jobs = sorted(JOBS, key=lambda x: x.due_date)
+    # 1. Filter & Sort (Ignore Completed)
+    pending_jobs = [j for j in JOBS if j.status != "Completed"]
+    pending_jobs.sort(key=lambda x: x.due_date)
     
-    # 2. Timeline Setup (Tracks when each machine becomes free)
+    # 2. Timeline Setup
     machine_timelines = {m.machine_id: datetime.datetime.now() for m in MACHINES}
-    
     schedule_plan = []
 
     for job in pending_jobs:
-        
         # Get Job Material Type (needed for machine compatibility check)
         if job.recipe_code not in RECIPES:
             # Skip jobs with broken recipes, or flag them
@@ -302,10 +342,77 @@ def generate_smart_schedule():
             "end": end.strftime("%a %H:%M"),
             "hours": round(duration, 1),
             "status": status,
-            "note": note
+            "note": note,
+            "raw_start": start # Helper for filtering "Today"
         })
 
     # Final Sort: Group by Machine, then by Start Time
-    schedule_plan.sort(key=lambda x: (x['machine'], x['start']))
-    
+    schedule_plan.sort(key=lambda x: (x.get('raw_start', datetime.datetime.max)))
     return schedule_plan
+
+# ==========================================
+# 5. DASHBOARD ANALYTICS (NEW)
+# ==========================================
+
+def get_dashboard_stats():
+    """
+    Calculates KPIs for the Dashboard:
+    - Previous Day Output
+    - Current Week Output (Mon-Sun)
+    - Current Month Output
+    """
+    today = datetime.date.today()
+    yesterday = today - datetime.timedelta(days=1)
+    
+    # Determine start of current week (Monday)
+    start_week = today - datetime.timedelta(days=today.weekday())
+    
+    stats = {
+        "yesterday": 0.0,
+        "week": 0.0,
+        "month": 0.0
+    }
+    
+    for log in LOGS:
+        try:
+            log_date = datetime.datetime.strptime(log.date, "%Y-%m-%d").date()
+        except ValueError:
+            continue
+            
+        # Total output (Good + Waste? Usually Dashboard shows Good Output)
+        # Let's show Good Output for value, maybe waste in detailed reports.
+        amount = log.output_kg 
+        
+        if log_date == yesterday:
+            stats["yesterday"] += amount
+            
+        if log_date >= start_week:
+            stats["week"] += amount
+            
+        if log_date.month == today.month and log_date.year == today.year:
+            stats["month"] += amount
+            
+    return stats
+
+def get_todays_target(schedule):
+    """
+    Estimates the target output for TODAY based on the generated schedule.
+    Sum of (Machine Capacity * Scheduled Hours) for jobs starting/running today.
+    """
+    today_str = datetime.date.today().strftime("%a") # e.g., "Mon"
+    total_target = 0.0
+    
+    for row in schedule:
+        # Check if the job is scheduled for today (Simple string check for now)
+        # In a real app, we'd use real datetime objects, but our schedule returns strings like "Mon 14:00"
+        if today_str in row['start']:
+            # We assume the machine runs for the full duration listed in the schedule entry
+            # row['hours'] is the duration of the job
+            # We need to find the machine capacity
+            machine = next((m for m in MACHINES if m.machine_id == row['machine']), None)
+            if machine:
+                # If duration > 24h, this calculation is rough, but fine for daily dashboard
+                hours = min(row['hours'], 24.0) 
+                total_target += (machine.capacity_kg_hr * hours)
+                
+    return total_target

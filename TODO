@@ -1,3 +1,28 @@
 TODO:
-- automatically detect that orders have been completed 
-- order progress summary
+- automatically detect that orders have been completed ✔
+- order progress summary ✔
+- introduce more constraints
+    - production speed
+    - daily production limit
+    - manpower (only a few machines can be run at one time)
+- organise output into extrusion, cutting, and packaging ✔
+- easy-edit recipes
+- add printing machines
+- output summary highlight page (shows daily, weekly, monthly output) ✔
+- generate report/csv based on inputs/outputs
+- sort scheduler based on which jobs need to be run first ✔
+- add priority customer flag
+- auto-generate job IDs
+- ability to split orders automatically
+- automatic material order request
+- shortcut functionality
+- sort out who should run what machine everyday, everyone should have a personalised schedule and personalised data entry
+
+CONSIDERATIONS:
+- labelling, stickers
+- reporting
+- plant design optimisation
+- plant cleanup
+- procedure planning
+- operator incentive
+- WIP readystock
