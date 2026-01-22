@@ -73,7 +73,7 @@ if page == "🚀 Dashboard":
             df_today = pd.DataFrame(today_jobs)
             st.dataframe(
                 df_today[['machine', 'start', 'client', 'hours']],
-                use_container_width=True,
+                width='stretch',
                 hide_index=True
             )
         else:
@@ -93,7 +93,7 @@ if page == "🚀 Dashboard":
 
             st.dataframe(
                 df_queue[['start', 'job', 'client', 'status']].style.map(color_status, subset=['status']),
-                use_container_width=True,
+                width='stretch',
                 hide_index=True
             )
         else:
@@ -142,7 +142,7 @@ elif page == "📅 Job Entry":
     active_jobs = [j for j in database.JOBS if j.status != "Completed"]
     if active_jobs:
         df_jobs = pd.DataFrame([j.to_dict() for j in active_jobs])
-        st.dataframe(df_jobs[['job_id', 'client', 'product', 'due_date', 'weight']], use_container_width=True)
+        st.dataframe(df_jobs[['job_id', 'client', 'product', 'due_date', 'weight']], width="stretch")
         
         with st.expander("🗑️ Delete a Job"):
             to_delete = st.selectbox("Select Job to Delete", [j.job_id for j in active_jobs])
@@ -169,7 +169,7 @@ elif page == "⏱️ Smart Schedule":
             df_sched,
             column_order=("machine", "start", "end", "job", "client", "status", "note"),
             hide_index=True,
-            use_container_width=True,
+            width='stretch',
             height=600
         )
     else:
@@ -252,7 +252,7 @@ elif page == "✅ Daily Logs":
             df_logs = df_logs.iloc[::-1] 
             st.dataframe(
                 df_logs[['date', 'job_id', 'stage', 'output_kg', 'wastage_kg']], 
-                use_container_width=True,
+                width="stretch",
                 hide_index=True
             )
 
@@ -321,7 +321,7 @@ elif page == "📦 Inventory":
 
         st.dataframe(
             df_inv[['material', 'stock', 'needed', 'available', 'status']].style.map(stock_color, subset=['status']),
-            use_container_width=True,
+            width='stretch',
             hide_index=True
         )
         

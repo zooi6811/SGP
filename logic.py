@@ -274,7 +274,7 @@ def generate_smart_schedule():
                 "client": job.client,
                 "start": "-", 
                 "end": "-", 
-                "hours": "-",
+                "hours": 0.0,
                 "status": "IMPOSSIBLE", 
                 "note": f"Err: W:{job.width_mm}/T:{job.thickness_mm}/{job_mat_type}"
             })
