@@ -1,0 +1,459 @@
+{
+    "inventory": {
+        "HDPE 5712 NP": 25000.0,
+        "HDPE(OGA)": 18500.0,
+        "CaCO3": 2500.0,
+        "LDPE NATURAL": 12000.0,
+        "LDPE RECYCLE": 2000.0,
+        "HF0961": -1500.0,
+        "XP 6056RA": 2000.0,
+        "EX1999": 1200.0,
+        "LLDPE 0209 SA": 4700.0,
+        "Slip Agent": -400.0,
+        "FR Masterbatch": 450.0,
+        "MB BLACK": 2000.0
+    },
+    "jobs": [
+        {
+            "job_id": "JOB-LATE-01",
+            "client": "Urgent Co.",
+            "product": "Late Shrink Film",
+            "weight": 5000.0,
+            "recipe_code": "RCP-LD-CLR",
+            "due_date": "2026-01-15",
+            "width_mm": 600.0,
+            "thickness_mm": 0.05,
+            "status": "Pending"
+        },
+        {
+            "job_id": "JOB-FAIL-02",
+            "client": "Impossible Inc",
+            "product": "Giant Sheet",
+            "weight": 2000.0,
+            "recipe_code": "RCP-LD-IND",
+            "due_date": "2026-02-10",
+            "width_mm": 3000.0,
+            "thickness_mm": 0.08,
+            "status": "Pending"
+        },
+        {
+            "job_id": "JOB-WIDE-03",
+            "client": "IKEA Logistics",
+            "product": "Pallet Cover A",
+            "weight": 15000.0,
+            "recipe_code": "RCP-LD-IND",
+            "due_date": "2026-02-05",
+            "width_mm": 1600.0,
+            "thickness_mm": 0.1,
+            "status": "Pending"
+        },
+        {
+            "job_id": "JOB-WIDE-04",
+            "client": "IKEA Logistics",
+            "product": "Pallet Cover B",
+            "weight": 12000.0,
+            "recipe_code": "RCP-LD-IND",
+            "due_date": "2026-02-06",
+            "width_mm": 1650.0,
+            "thickness_mm": 0.12,
+            "status": "Pending"
+        },
+        {
+            "job_id": "JOB-HDPE-05",
+            "client": "Tesco",
+            "product": "Checkout Bag",
+            "weight": 3000.0,
+            "recipe_code": "RCP-HD-STD",
+            "due_date": "2026-01-30",
+            "width_mm": 450.0,
+            "thickness_mm": 0.03,
+            "status": "Pending"
+        },
+        {
+            "job_id": "JOB-HDPE-06",
+            "client": "Aeon Big",
+            "product": "Bio Bag",
+            "weight": 4000.0,
+            "recipe_code": "RCP-HD-ATLAS",
+            "due_date": "2026-02-01",
+            "width_mm": 500.0,
+            "thickness_mm": 0.04,
+            "status": "Completed"
+        },
+        {
+            "job_id": "JOB-THICK-07",
+            "client": "Construction Ltd",
+            "product": "Heavy Liner",
+            "weight": 8000.0,
+            "recipe_code": "RCP-LD-BLK",
+            "due_date": "2026-02-15",
+            "width_mm": 1000.0,
+            "thickness_mm": 0.2,
+            "status": "Pending"
+        },
+        {
+            "job_id": "JOB-STD-08",
+            "client": "Local Bakery",
+            "product": "Bread Bag",
+            "weight": 500.0,
+            "recipe_code": "RCP-LD-CLR",
+            "due_date": "2026-01-28",
+            "width_mm": 300.0,
+            "thickness_mm": 0.04,
+            "status": "Pending"
+        },
+        {
+            "job_id": "JOB-STD-09",
+            "client": "Local Bakery",
+            "product": "Bun Bag",
+            "weight": 500.0,
+            "recipe_code": "RCP-LD-CLR",
+            "due_date": "2026-01-28",
+            "width_mm": 350.0,
+            "thickness_mm": 0.04,
+            "status": "Pending"
+        },
+        {
+            "job_id": "JOB-FR-10",
+            "client": "Air Cargo",
+            "product": "Fire Retardant Sheet",
+            "weight": 2500.0,
+            "recipe_code": "RCP-HD-FR",
+            "due_date": "2026-02-02",
+            "width_mm": 1200.0,
+            "thickness_mm": 0.08,
+            "status": "Pending"
+        },
+        {
+            "job_id": "JOB-RUSH-11",
+            "client": "Flash Delivery",
+            "product": "Express Film",
+            "weight": 1000.0,
+            "recipe_code": "RCP-LD-CLR",
+            "due_date": "2026-01-25",
+            "width_mm": 600.0,
+            "thickness_mm": 0.05,
+            "status": "Pending"
+        },
+        {
+            "job_id": "JOB-HUGE-12",
+            "client": "Port Klang Logistics",
+            "product": "Container Liner",
+            "weight": 25000.0,
+            "recipe_code": "RCP-LD-IND",
+            "due_date": "2026-02-28",
+            "width_mm": 1700.0,
+            "thickness_mm": 0.15,
+            "status": "Pending"
+        },
+        {
+            "job_id": "JOB-TINY-13",
+            "client": "Sample Lab",
+            "product": "Test Run",
+            "weight": 50.0,
+            "recipe_code": "RCP-LD-CLR",
+            "due_date": "2026-01-26",
+            "width_mm": 400.0,
+            "thickness_mm": 0.05,
+            "status": "Pending"
+        },
+        {
+            "job_id": "JOB-TINY-14",
+            "client": "Sample Lab",
+            "product": "Test Run B",
+            "weight": 50.0,
+            "recipe_code": "RCP-HD-STD",
+            "due_date": "2026-01-26",
+            "width_mm": 400.0,
+            "thickness_mm": 0.03,
+            "status": "Pending"
+        },
+        {
+            "job_id": "JOB-MID-15",
+            "client": "Sony Electronics",
+            "product": "Component Bag",
+            "weight": 2000.0,
+            "recipe_code": "RCP-LD-CLR",
+            "due_date": "2026-02-10",
+            "width_mm": 550.0,
+            "thickness_mm": 0.06,
+            "status": "Pending"
+        },
+        {
+            "job_id": "JOB-2026-01",
+            "client": "Nonya",
+            "product": "Std",
+            "weight": 150000.0,
+            "recipe_code": "RCP-HD-FR",
+            "due_date": "2026-01-22",
+            "width_mm": 300.0,
+            "thickness_mm": 211.0,
+            "status": "Pending"
+        }
+    ],
+    "logs": [
+        {
+            "log_id": "LOG-0001",
+            "date": "2026-01-20",
+            "job_id": "JOB-LATE-01",
+            "output_kg": 1000.0,
+            "wastage_kg": 50.0,
+            "materials_consumed": {
+                "LDPE NATURAL": 840.0,
+                "LDPE RECYCLE": 210.0
+            },
+            "stage": "Extrusion"
+        },
+        {
+            "log_id": "LOG-0002",
+            "date": "2026-01-21",
+            "job_id": "JOB-STD-08",
+            "output_kg": 200.0,
+            "wastage_kg": 5.0,
+            "materials_consumed": {
+                "LDPE NATURAL": 164.0,
+                "LDPE RECYCLE": 41.0
+            },
+            "stage": "Extrusion"
+        },
+        {
+            "log_id": "LOG-0003",
+            "date": "2026-01-21",
+            "job_id": "JOB-WIDE-04",
+            "output_kg": 12000.0,
+            "wastage_kg": 0.0,
+            "materials_consumed": {
+                "LDPE RECYCLE": 6000.0,
+                "LLDPE 0209 SA": 4800.0,
+                "Slip Agent": 1200.0
+            },
+            "stage": "Extrusion"
+        },
+        {
+            "log_id": "LOG-0004",
+            "date": "2026-01-22",
+            "job_id": "JOB-HDPE-06",
+            "output_kg": 1000.0,
+            "wastage_kg": 0.0,
+            "materials_consumed": {},
+            "stage": "Printing"
+        },
+        {
+            "log_id": "LOG-0005",
+            "date": "2026-01-22",
+            "job_id": "JOB-HDPE-06",
+            "output_kg": 1000.0,
+            "wastage_kg": 0.0,
+            "materials_consumed": {},
+            "stage": "Printing"
+        },
+        {
+            "log_id": "LOG-0006",
+            "date": "2026-01-22",
+            "job_id": "JOB-HDPE-06",
+            "output_kg": 4000.0,
+            "wastage_kg": 0.0,
+            "materials_consumed": {
+                "HF0961": 2000.0,
+                "XP 6056RA": 1000.0,
+                "EX1999": 1000.0
+            },
+            "stage": "Extrusion"
+        },
+        {
+            "log_id": "LOG-0007",
+            "date": "2026-01-22",
+            "job_id": "JOB-HDPE-06",
+            "output_kg": 3000.0,
+            "wastage_kg": 0.0,
+            "materials_consumed": {},
+            "stage": "Cutting"
+        },
+        {
+            "log_id": "LOG-0008",
+            "date": "2026-01-22",
+            "job_id": "JOB-HDPE-06",
+            "output_kg": 1000.0,
+            "wastage_kg": 0.0,
+            "materials_consumed": {},
+            "stage": "Cutting"
+        },
+        {
+            "log_id": "LOG-0009",
+            "date": "2026-01-22",
+            "job_id": "JOB-HDPE-06",
+            "output_kg": 4000.0,
+            "wastage_kg": 0.0,
+            "materials_consumed": {},
+            "stage": "Packaging"
+        },
+        {
+            "log_id": "LOG-0010",
+            "date": "2026-01-22",
+            "job_id": "JOB-HDPE-06",
+            "output_kg": 2000.0,
+            "wastage_kg": 0.0,
+            "materials_consumed": {},
+            "stage": "Printing"
+        }
+    ],
+    "machines": [
+        {
+            "machine_id": "B1",
+            "machine_type": "Blowing",
+            "max_width_mm": "650.0 MM",
+            "allowed_materials": [
+                "LDPE"
+            ],
+            "min_thick": 0.02,
+            "max_thick": 0.15,
+            "status": "Running",
+            "notes": "Running smooth",
+            "capacity_kg_hr": 120.0
+        },
+        {
+            "machine_id": "B2",
+            "machine_type": "Blowing",
+            "max_width_mm": "650.0 MM",
+            "allowed_materials": [
+                "LDPE"
+            ],
+            "min_thick": 0.02,
+            "max_thick": 0.15,
+            "status": "Running",
+            "notes": "Screw cleaning required",
+            "capacity_kg_hr": 120.0
+        },
+        {
+            "machine_id": "B3",
+            "machine_type": "Blowing",
+            "max_width_mm": "1100.0 MM",
+            "allowed_materials": [
+                "LDPE"
+            ],
+            "min_thick": 0.02,
+            "max_thick": 0.15,
+            "status": "Breakdown",
+            "notes": "",
+            "capacity_kg_hr": 180.0
+        },
+        {
+            "machine_id": "B4",
+            "machine_type": "Blowing",
+            "max_width_mm": "1400.0 MM",
+            "allowed_materials": [
+                "LDPE"
+            ],
+            "min_thick": 0.02,
+            "max_thick": 0.15,
+            "status": "Running",
+            "notes": "Scheduled for service next week",
+            "capacity_kg_hr": 200.0
+        },
+        {
+            "machine_id": "B5",
+            "machine_type": "Blowing",
+            "max_width_mm": "1100.0 MM",
+            "allowed_materials": [
+                "LDPE",
+                "SHEET",
+                "HDPE"
+            ],
+            "min_thick": 0.05,
+            "max_thick": 0.25,
+            "status": "Running",
+            "notes": "Ready for assignment",
+            "capacity_kg_hr": 180.0
+        },
+        {
+            "machine_id": "B6",
+            "machine_type": "Blowing",
+            "max_width_mm": "1700.0 MM",
+            "allowed_materials": [
+                "LDPE",
+                "SHEET",
+                "HDPE"
+            ],
+            "min_thick": 0.05,
+            "max_thick": 0.25,
+            "status": "Running",
+            "notes": "High Priority Line",
+            "capacity_kg_hr": 250.0
+        },
+        {
+            "machine_id": "B7",
+            "machine_type": "Blowing",
+            "max_width_mm": "1700.0 MM",
+            "allowed_materials": [
+                "LDPE",
+                "SHEET",
+                "HDPE"
+            ],
+            "min_thick": 0.05,
+            "max_thick": 0.25,
+            "status": "Running",
+            "notes": "High Priority Line",
+            "capacity_kg_hr": 300.0
+        },
+        {
+            "machine_id": "C1",
+            "machine_type": "Cutting",
+            "max_width_mm": "900.0 MM",
+            "allowed_materials": [
+                "HDPE",
+                "LDPE",
+                "PP"
+            ],
+            "min_thick": 0.01,
+            "max_thick": 1.0,
+            "status": "Running",
+            "notes": "",
+            "capacity_kg_hr": 100.0
+        },
+        {
+            "machine_id": "C2",
+            "machine_type": "Cutting",
+            "max_width_mm": "700.0 MM",
+            "allowed_materials": [
+                "HDPE",
+                "LDPE",
+                "PP"
+            ],
+            "min_thick": 0.01,
+            "max_thick": 1.0,
+            "status": "Running",
+            "notes": "",
+            "capacity_kg_hr": 100.0
+        },
+        {
+            "machine_id": "C3",
+            "machine_type": "Cutting",
+            "max_width_mm": "1100.0 MM",
+            "allowed_materials": [
+                "HDPE",
+                "LDPE",
+                "PP"
+            ],
+            "min_thick": 0.01,
+            "max_thick": 1.0,
+            "status": "Running",
+            "notes": "",
+            "capacity_kg_hr": 150.0
+        },
+        {
+            "machine_id": "C4",
+            "machine_type": "Cutting",
+            "max_width_mm": "2700.0 MM",
+            "allowed_materials": [
+                "HDPE",
+                "LDPE",
+                "PP"
+            ],
+            "min_thick": 0.01,
+            "max_thick": 1.0,
+            "status": "Running",
+            "notes": "",
+            "capacity_kg_hr": 200.0
+        }
+    ]
+}
