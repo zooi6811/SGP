@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { 
   ClipboardList, 
   Settings, 
@@ -336,7 +336,7 @@ const dict = {
     "Daily Production Report": "Laporan Pengeluaran Harian",
     "Operational Log & Analytics": "Log Operasi & Analitis",
     "Draft Auto-Saved": "Draf Disimpan Secara Auto",
-    "Log bags incrementally as they are packed onto the pallet.": "Log beg secara berperingkat semasa ia dibungkus ke atas pallet.",
+    "Log beg secara berperingkat semasa ia dibungkus ke atas pallet.": "Log beg secara berperingkat semasa ia dibungkus ke atas pallet.",
     "Load hoppers incrementally. Click '+ Add Another Material' when a new batch is added semasa syif.": "Muatkan corong secara berperingkat. Klik '+ Tambah Bahan Lain' apabila kumpulan baru ditambah semasa syif.",
     "Optional": "Pilihan"
   }
@@ -455,6 +455,24 @@ const App = () => {
   const [quickScrapType, setQuickScrapType] = useState('setupScrap');
   const [quickScrapWeight, setQuickScrapWeight] = useState('');
 
+  // --- SUGGESTION LISTS (QoL Improvement) ---
+  const [localHistory, setLocalHistory] = useState({
+    machineIds: [],
+    batchNos: [],
+    suppliers: [],
+    downtimeReasons: []
+  });
+
+  // Load local history on mount
+  useEffect(() => {
+    setLocalHistory({
+      machineIds: JSON.parse(localStorage.getItem('hist_machines') || '[]'),
+      batchNos: JSON.parse(localStorage.getItem('hist_batches') || '[]'),
+      suppliers: JSON.parse(localStorage.getItem('hist_suppliers') || '[]'),
+      downtimeReasons: JSON.parse(localStorage.getItem('hist_downtime') || '[]')
+    });
+  }, []);
+
   // Auto-save form data
   useEffect(() => {
     if (isLoggedIn) {
@@ -474,6 +492,39 @@ const App = () => {
   });
   const [isFetchingDashboard, setIsFetchingDashboard] = useState(false);
   const [dashboardError, setDashboardError] = useState(null);
+
+  // Derive active Job Orders from dashboard data, sorted by most recent activity
+  const joSuggestions = useMemo(() => {
+    if (!dashboardData?.masterOrders) return [];
+    const currentInput = (formData.jobOrder || '').toLowerCase();
+    
+    // Map orders to include their most recent timestamp (creation or last update)
+    const joWithTimestamps = dashboardData.masterOrders.map(order => {
+      const createdTime = new Date(order.date).getTime() || 0;
+      const updatedTime = dashboardData.joTotals[order.jo]?.lastUpdated || 0;
+      return {
+        jo: order.jo,
+        latestTime: Math.max(createdTime, updatedTime)
+      };
+    });
+
+    // Sort descending by most recent activity
+    joWithTimestamps.sort((a, b) => b.latestTime - a.latestTime);
+
+    // Extract unique JO strings in sorted order
+    const sortedUniqueJOs = Array.from(new Set(joWithTimestamps.map(item => item.jo)));
+
+    // Filter by current input and limit to 5 results
+    return sortedUniqueJOs
+      .filter(jo => jo.toLowerCase().includes(currentInput))
+      .slice(0, 5);
+  }, [dashboardData, formData.jobOrder]);
+
+  // Derive Material Names from recent incoming logs
+  const materialSuggestions = useMemo(() => {
+    if (!dashboardData?.incoming) return [];
+    return Array.from(new Set(dashboardData.incoming.map(row => row[2])));
+  }, [dashboardData]);
 
   // Flag Modal State
   const [isFlagModalOpen, setIsFlagModalOpen] = useState(false);
@@ -670,6 +721,31 @@ const App = () => {
       });
       alert(`Report saved successfully! [Department: ${t(department)}]`);
       
+      // --- UPDATE LOCAL HISTORY FOR SUGGESTIONS ---
+      const updateHist = (key, value) => {
+        if (!value) return JSON.parse(localStorage.getItem(key) || '[]');
+        const current = JSON.parse(localStorage.getItem(key) || '[]');
+        const updated = Array.from(new Set([value, ...current])).slice(0, 10); // Keep last 10 unique entries
+        localStorage.setItem(key, JSON.stringify(updated));
+        return updated;
+      };
+
+      // Extract batch numbers from main form and extrusion quick-add array
+      let batchesToSave = formData.batchNumber ? [formData.batchNumber] : [];
+      (formData.extrusionMaterials || []).forEach(m => { if (m.batchNo) batchesToSave.push(m.batchNo); });
+      let currentBatches = JSON.parse(localStorage.getItem('hist_batches') || '[]');
+      batchesToSave.forEach(b => { currentBatches = Array.from(new Set([b, ...currentBatches])); });
+      currentBatches = currentBatches.slice(0, 15);
+      localStorage.setItem('hist_batches', JSON.stringify(currentBatches));
+
+      setLocalHistory({
+        machineIds: updateHist('hist_machines', formData.machineId),
+        batchNos: currentBatches,
+        suppliers: updateHist('hist_suppliers', formData.supplier),
+        downtimeReasons: updateHist('hist_downtime', formData.downtimeReason)
+      });
+      // --------------------------------------------
+
       // Wipe the local draft and reset the form, keeping the user's base info
       localStorage.removeItem(STORAGE_KEY);
       setFormData(getInitialFormData(currentUser)); 
@@ -798,6 +874,26 @@ const App = () => {
 
       <div className="max-w-7xl mx-auto bg-white rounded-xl shadow-md border border-slate-200 overflow-hidden">
         
+        {/* --- DATALISTS FOR AUTO-SUGGESTIONS --- */}
+        <datalist id="jo-suggestions">
+          {joSuggestions.map(jo => <option key={jo} value={jo} />)}
+        </datalist>
+        <datalist id="material-suggestions">
+          {materialSuggestions.map(mat => <option key={mat} value={mat} />)}
+        </datalist>
+        <datalist id="machine-suggestions">
+          {localHistory.machineIds.map(m => <option key={m} value={m} />)}
+        </datalist>
+        <datalist id="batch-suggestions">
+          {localHistory.batchNos.map(b => <option key={b} value={b} />)}
+        </datalist>
+        <datalist id="supplier-suggestions">
+          {localHistory.suppliers.map(s => <option key={s} value={s} />)}
+        </datalist>
+        <datalist id="downtime-suggestions">
+          {localHistory.downtimeReasons.map(d => <option key={d} value={d} />)}
+        </datalist>
+
         {/* Header & Department Toggle */}
         <div className="bg-slate-800 text-white p-6 print:bg-white print:text-slate-800 print:border-b">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
@@ -1225,7 +1321,7 @@ const App = () => {
                 {(department === 'Extrusion' || department === 'Cutting' || department === 'Quality Control') && (
                   <div>
                     <label className="block text-sm font-medium text-slate-600 mb-1">{t("Machine No.")}</label>
-                    <input type="text" name="machineId" value={formData.machineId} onChange={handleInputChange} required={department !== 'Quality Control'} placeholder={department === 'Extrusion' ? "EXT-01" : department === 'Cutting' ? "CUT-01" : "e.g. EXT-01"} className="w-full h-[42px] px-3 py-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white" />
+                    <input type="text" name="machineId" value={formData.machineId} onChange={handleInputChange} required={department !== 'Quality Control'} placeholder={department === 'Extrusion' ? "EXT-01" : department === 'Cutting' ? "CUT-01" : "e.g. EXT-01"} className="w-full h-[42px] px-3 py-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white" list="machine-suggestions" />
                   </div>
                 )}
               </div>
@@ -1244,7 +1340,7 @@ const App = () => {
                   
                   <div className="mb-4">
                     <label className="block text-sm font-medium text-slate-600 mb-1">{t("Job Order No.")}</label>
-                    <input type="text" name="jobOrder" value={formData.jobOrder} onChange={handleInputChange} required placeholder="WO-12345" className="w-full p-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white" />
+                    <input type="text" name="jobOrder" value={formData.jobOrder} onChange={handleInputChange} required placeholder="WO-12345" className="w-full p-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white" list="jo-suggestions" />
                   </div>
 
                   {department === 'Extrusion' ? (
@@ -1264,6 +1360,7 @@ const App = () => {
                               onChange={e => setQuickMaterialBatch(e.target.value)} 
                               className="w-full p-2 border border-blue-200 rounded-md focus:ring-2 focus:ring-blue-500 bg-white shadow-sm" 
                               placeholder={t("Optional")} 
+                              list="batch-suggestions"
                             />
                           </div>
                           <div className="flex-1">
@@ -1490,7 +1587,7 @@ const App = () => {
                   <div className="space-y-4">
                     <div className="md:col-span-2">
                       <label className="block text-sm font-medium text-slate-600 mb-1">{t("Job Order No.")}</label>
-                      <input type="text" name="jobOrder" value={formData.jobOrder} onChange={handleInputChange} required placeholder="WO-12345" className="w-full p-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white" />
+                      <input type="text" name="jobOrder" value={formData.jobOrder} onChange={handleInputChange} required placeholder="WO-12345" className="w-full p-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white" list="jo-suggestions" />
                     </div>
                     <div className="flex gap-2">
                       <div className="flex-1">
@@ -1592,7 +1689,7 @@ const App = () => {
                 <div className="space-y-4">
                   <div>
                     <label className="block text-sm font-medium text-slate-600 mb-1">{t("Job Order No.")}</label>
-                    <input type="text" name="jobOrder" value={formData.jobOrder} onChange={handleInputChange} required placeholder="WO-12345" className="w-full p-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white" />
+                    <input type="text" name="jobOrder" value={formData.jobOrder} onChange={handleInputChange} required placeholder="WO-12345" className="w-full p-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white" list="jo-suggestions" />
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
@@ -1620,7 +1717,7 @@ const App = () => {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-slate-600 mb-1">{t("Material Name / ID")}</label>
-                      <input type="text" name="restockMaterial" value={formData.restockMaterial} onChange={handleInputChange} required placeholder="e.g. LLDPE-1002" className="w-full p-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white" />
+                      <input type="text" name="restockMaterial" value={formData.restockMaterial} onChange={handleInputChange} required placeholder="e.g. LLDPE-1002" className="w-full p-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white" list="material-suggestions" />
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-slate-600 mb-1">{t("Incoming / Received Amount (kg)")}</label>
@@ -1631,7 +1728,7 @@ const App = () => {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-slate-600 mb-1">{t("Supplier Name")}</label>
-                      <input type="text" name="supplier" value={formData.supplier} onChange={handleInputChange} placeholder={t("Optional")} className="w-full p-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white" />
+                      <input type="text" name="supplier" value={formData.supplier} onChange={handleInputChange} placeholder={t("Optional")} className="w-full p-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white" list="supplier-suggestions" />
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-slate-600 mb-1">{t("Purchase Order (PO) No.")}</label>
@@ -1642,7 +1739,7 @@ const App = () => {
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4 border-t border-slate-200 mt-4">
                     <div>
                       <label className="block text-sm font-medium text-slate-600 mb-1">{t("Batch No.")}</label>
-                      <input type="text" name="batchNumber" value={formData.batchNumber} onChange={handleInputChange} placeholder="e.g. B-202311" className="w-full p-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white" />
+                      <input type="text" name="batchNumber" value={formData.batchNumber} onChange={handleInputChange} placeholder="e.g. B-202311" className="w-full p-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white" list="batch-suggestions" />
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-slate-600 mb-1">{t("Storage Location / Zone")}</label>
@@ -1686,7 +1783,7 @@ const App = () => {
                 <div className="space-y-6">
                   <div>
                     <label className="block text-sm font-medium text-slate-600 mb-1">{t("Job Order No. (Under Inspection)")}</label>
-                    <input type="text" name="jobOrder" value={formData.jobOrder} onChange={handleInputChange} required placeholder="WO-12345" className="w-full p-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white" />
+                    <input type="text" name="jobOrder" value={formData.jobOrder} onChange={handleInputChange} required placeholder="WO-12345" className="w-full p-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white" list="jo-suggestions" />
                   </div>
 
                   <div className="space-y-3 pt-2">
@@ -1802,6 +1899,7 @@ const App = () => {
                       onChange={handleInputChange} 
                       className="w-full p-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white"
                       placeholder="e.g., Heater band replacement, blade change..."
+                      list="downtime-suggestions"
                     />
                   </div>
                 </div>
