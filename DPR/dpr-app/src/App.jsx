@@ -132,7 +132,10 @@ const dict = {
     "Draft Auto-Saved": "Draft Auto-Saved",
     "Log bags incrementally as they are packed onto the pallet.": "Log bags incrementally as they are packed onto the pallet.",
     "Load hoppers incrementally. Click '+ Add Another Material' when a new batch is added during the shift.": "Load hoppers incrementally. Click '+ Add Another Material' when a new batch is added during the shift.",
-    "Optional": "Optional"
+    "Optional": "Optional",
+    "Material ID": "Material ID",
+    "Material Name": "Material Name",
+    "bag": "bag"
   },
   bn: {
     "Production Hub": "উৎপাদন হাব",
@@ -235,7 +238,10 @@ const dict = {
     "Draft Auto-Saved": "খসড়া অটো-সেভ হয়েছে",
     "Log bags incrementally as they are packed onto the pallet.": "প্যালেটে প্যাক করার সাথে সাথে ব্যাগের ওজন ক্রমান্বয়ে লগ করুন।",
     "Load hoppers incrementally. Click '+ Add Another Material' when a new batch is added during the shift.": "হপারে মাল যোগ করার সাথে সাথে লগ করুন। শিফটে নতুন ব্যাচ যোগ হলে '+ আরও কাঁচামাল যোগ করুন'-এ ক্লিক করুন।",
-    "Optional": "ঐচ্ছিক"
+    "Optional": "ঐচ্ছিক",
+    "Material ID": "কাঁচামালের আইডি",
+    "Material Name": "কাঁচামালের নাম",
+    "bag": "ব্যাগ"
   },
   ms: {
     "Production Hub": "Pusat Pengeluaran",
@@ -338,7 +344,10 @@ const dict = {
     "Draft Auto-Saved": "Draf Disimpan Secara Auto",
     "Log beg secara berperingkat semasa ia dibungkus ke atas pallet.": "Log beg secara berperingkat semasa ia dibungkus ke atas pallet.",
     "Load hoppers incrementally. Click '+ Add Another Material' when a new batch is added semasa syif.": "Muatkan corong secara berperingkat. Klik '+ Tambah Bahan Lain' apabila kumpulan baru ditambah semasa syif.",
-    "Optional": "Pilihan"
+    "Optional": "Pilihan",
+    "Material ID": "ID Bahan",
+    "Material Name": "Nama Bahan",
+    "bag": "beg"
   }
 };
 
@@ -451,6 +460,9 @@ const App = () => {
   // Accumulator Quick Add States
   const [quickRollWeight, setQuickRollWeight] = useState('');
   const [quickMaterialBatch, setQuickMaterialBatch] = useState('');
+  const [quickMaterialId, setQuickMaterialId] = useState('');
+  const [quickMaterialName, setQuickMaterialName] = useState('');
+  const [quickMaterialUom, setQuickMaterialUom] = useState('kg');
   const [quickMaterialWeight, setQuickMaterialWeight] = useState('');
   const [quickScrapType, setQuickScrapType] = useState('setupScrap');
   const [quickScrapWeight, setQuickScrapWeight] = useState('');
@@ -525,6 +537,25 @@ const App = () => {
     if (!dashboardData?.incoming) return [];
     return Array.from(new Set(dashboardData.incoming.map(row => row[2])));
   }, [dashboardData]);
+
+  // Auto-fill material name and ID based on batch number
+  useEffect(() => {
+    if (quickMaterialBatch && dashboardData?.incoming) {
+      // Search for the batch number (assuming index 5 in Incoming Goods array)
+      const match = dashboardData.incoming.find(row => row[5] === quickMaterialBatch);
+      if (match) {
+        setQuickMaterialName(match[2] || '');
+        // If your Google Script later includes the ID in the incoming array (e.g. index 6), it will pick it up here.
+        setQuickMaterialId(match[6] || 'N/A'); 
+      } else {
+        setQuickMaterialName('');
+        setQuickMaterialId('');
+      }
+    } else {
+      setQuickMaterialName('');
+      setQuickMaterialId('');
+    }
+  }, [quickMaterialBatch, dashboardData]);
 
   // Flag Modal State
   const [isFlagModalOpen, setIsFlagModalOpen] = useState(false);
@@ -613,10 +644,29 @@ const App = () => {
 
   const handleAddMaterial = () => {
     if (!quickMaterialWeight || isNaN(quickMaterialWeight)) return;
-    const newMats = [...(formData.extrusionMaterials || []), { id: Date.now(), batchNo: quickMaterialBatch || 'N/A', quantity: Number(quickMaterialWeight), time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) }];
+    
+    const isBag = quickMaterialUom === 'bag';
+    const weightInKg = isBag ? Number(quickMaterialWeight) * 25 : Number(quickMaterialWeight);
+
+    const newMats = [...(formData.extrusionMaterials || []), { 
+      id: Date.now(), 
+      batchNo: quickMaterialBatch || 'N/A', 
+      materialId: quickMaterialId || 'N/A',
+      materialName: quickMaterialName || 'N/A',
+      uom: quickMaterialUom,
+      originalQuantity: Number(quickMaterialWeight),
+      quantity: weightInKg, 
+      time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) 
+    }];
+    
     setFormData(prev => ({ ...prev, extrusionMaterials: newMats }));
+    
+    // Reset fields
     setQuickMaterialBatch('');
+    setQuickMaterialId('');
+    setQuickMaterialName('');
     setQuickMaterialWeight('');
+    setQuickMaterialUom('kg');
   };
 
   const handleRemoveMaterial = (id) => setFormData(prev => ({ ...prev, extrusionMaterials: (prev.extrusionMaterials || []).filter(m => m.id !== id) }));
@@ -1350,48 +1400,82 @@ const App = () => {
                         <div className="flex items-center justify-between mb-3">
                           <h3 className="text-sm font-semibold text-blue-800 flex items-center gap-1.5"><Clock size={16}/> {t("Shift Accumulator (Materials)")}</h3>
                         </div>
-                        <p className="text-xs text-slate-500 mb-3">{t("Load hoppers incrementally. Click '+ Add Another Material' when a new batch is added during the shift.")}</p>
-                        <div className="flex gap-2 items-end mb-3">
-                          <div className="flex-1">
-                            <label className="block text-xs font-medium text-blue-700 mb-1">{t("Batch No.")}</label>
-                            <input 
-                              type="text" 
-                              value={quickMaterialBatch} 
-                              onChange={e => setQuickMaterialBatch(e.target.value)} 
-                              className="w-full p-2 border border-blue-200 rounded-md focus:ring-2 focus:ring-blue-500 bg-white shadow-sm" 
-                              placeholder={t("Optional")} 
-                              list="batch-suggestions"
-                            />
+                        <p className="text-xs text-slate-500 mb-4">{t("Load hoppers incrementally. Click '+ Add Another Material' when a new batch is added during the shift.")}</p>
+                        
+                        <div className="flex flex-col gap-3 mb-3">
+                          {/* Simplified Input Row */}
+                          <div className="flex gap-2 items-end">
+                            <div className="flex-[1.5]">
+                              <label className="block text-xs font-medium text-blue-700 mb-1">{t("Batch No.")}</label>
+                              <input 
+                                type="text" 
+                                value={quickMaterialBatch} 
+                                onChange={e => setQuickMaterialBatch(e.target.value)} 
+                                className="w-full p-2 border border-blue-200 rounded-md focus:ring-2 focus:ring-blue-500 bg-white shadow-sm font-semibold text-blue-900" 
+                                placeholder="Scan or type..." 
+                                list="batch-suggestions"
+                              />
+                            </div>
+                            <div className="flex-1">
+                              <label className="block text-xs font-medium text-blue-700 mb-1">{t("Quantity")}</label>
+                              <input 
+                                type="number" 
+                                step="0.01" 
+                                value={quickMaterialWeight} 
+                                onChange={e => setQuickMaterialWeight(e.target.value)} 
+                                onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), handleAddMaterial())}
+                                className="w-full p-2 border border-blue-200 rounded-md focus:ring-2 focus:ring-blue-500 bg-white shadow-sm" 
+                                placeholder="0.00" 
+                              />
+                            </div>
+                            <div className="w-24">
+                              <label className="block text-xs font-medium text-blue-700 mb-1">{t("Unit")}</label>
+                              <select 
+                                value={quickMaterialUom} 
+                                onChange={e => setQuickMaterialUom(e.target.value)} 
+                                className="w-full p-2 border border-blue-200 rounded-md focus:ring-2 focus:ring-blue-500 bg-white shadow-sm"
+                              >
+                                <option value="kg">kg</option>
+                                <option value="bag">{t("bag")}</option>
+                              </select>
+                            </div>
+                            <button 
+                              type="button" 
+                              onClick={handleAddMaterial}
+                              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors shadow-sm whitespace-nowrap h-[42px]"
+                            >
+                              {t("+ Add")}
+                            </button>
                           </div>
-                          <div className="flex-1">
-                            <label className="block text-xs font-medium text-blue-700 mb-1">{t("Quantity (kg)")}</label>
-                            <input 
-                              type="number" 
-                              step="0.01" 
-                              value={quickMaterialWeight} 
-                              onChange={e => setQuickMaterialWeight(e.target.value)} 
-                              onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), handleAddMaterial())}
-                              className="w-full p-2 border border-blue-200 rounded-md focus:ring-2 focus:ring-blue-500 bg-white shadow-sm" 
-                              placeholder="0.00" 
-                            />
-                          </div>
-                          <button 
-                            type="button" 
-                            onClick={handleAddMaterial}
-                            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors shadow-sm whitespace-nowrap"
-                          >
-                            {t("+ Add")}
-                          </button>
+
+                          {/* Dynamic Feedback UI based on matched batch */}
+                          {quickMaterialBatch && (
+                            <div className={`px-3 py-2 rounded-md border text-xs flex items-center gap-2 transition-colors ${quickMaterialName ? 'bg-emerald-50 border-emerald-200 text-emerald-700' : 'bg-slate-100 border-slate-300 text-slate-500'}`}>
+                              {quickMaterialName ? (
+                                <><CheckCircle size={14} className="text-emerald-500"/> Matched: <strong className="ml-1">{quickMaterialName}</strong></>
+                              ) : (
+                                <><Search size={14} className="text-slate-400"/> Searching records... Proceeding as unverified material.</>
+                              )}
+                            </div>
+                          )}
                         </div>
                         
                         {formData.extrusionMaterials?.length > 0 && (
                           <div className="space-y-2 mt-4 max-h-40 overflow-y-auto pr-2 custom-scrollbar">
                             {formData.extrusionMaterials.map((mat) => (
-                              <div key={mat.id} className="flex justify-between items-center bg-white p-2.5 rounded border border-blue-100 text-sm shadow-sm">
-                                <span className="text-slate-500 font-medium">{t("Batch No.")}: {mat.batchNo} <span className="text-xs font-normal ml-1">({mat.time})</span></span>
+                              <div key={mat.id} className="flex justify-between items-center bg-white p-2.5 rounded border border-blue-100 text-sm shadow-sm flex-wrap gap-2">
+                                <div className="flex flex-col">
+                                  <span className="text-slate-800 font-bold">{mat.materialId !== 'N/A' && mat.materialId ? mat.materialId : (mat.materialName !== 'N/A' ? mat.materialName : 'Unknown Material')}</span>
+                                  <span className="text-slate-500 font-medium text-xs mt-0.5">
+                                    {mat.materialName !== 'N/A' && mat.materialId !== 'N/A' ? `${mat.materialName} | ` : ''}{t("Batch No.")}: <span className="font-semibold">{mat.batchNo}</span> <span className="text-xs font-normal ml-1">({mat.time})</span>
+                                  </span>
+                                </div>
                                 <div className="flex items-center gap-3">
-                                  <span className="font-bold text-slate-700">{mat.quantity} kg</span>
-                                  <button type="button" onClick={() => handleRemoveMaterial(mat.id)} className="text-slate-400 hover:text-red-500 bg-slate-50 hover:bg-red-50 p-1.5 rounded transition-colors"><Trash2 size={14}/></button>
+                                  <div className="text-right">
+                                    <span className="font-bold text-slate-700 block text-base">{mat.quantity} kg</span>
+                                    {mat.uom === 'bag' && <span className="text-xs font-medium text-slate-400 block">{mat.originalQuantity} {t("bag")}(s)</span>}
+                                  </div>
+                                  <button type="button" onClick={() => handleRemoveMaterial(mat.id)} className="text-slate-400 hover:text-red-500 bg-slate-50 hover:bg-red-50 p-2 rounded transition-colors"><Trash2 size={16}/></button>
                                 </div>
                               </div>
                             ))}
