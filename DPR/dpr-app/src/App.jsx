@@ -22,7 +22,10 @@ import {
   X,
   Search,
   PackageCheck,
-  Layers
+  Layers,
+  Lock,
+  LogOut,
+  UserCircle
 } from 'lucide-react';
 
 // Reusable component for the new QC Data + Status rows
@@ -55,10 +58,11 @@ const QCField = ({ label, name, statusName, formData, onChange, placeholder }) =
   </div>
 );
 
-const getInitialFormData = () => ({
+// We now pass the user profile to getInitialFormData so it can auto-fill
+const getInitialFormData = (userProfile = null) => ({
   date: new Date().toISOString().split('T')[0],
-  shift: 'AM', 
-  supervisor: '',
+  shift: userProfile ? userProfile.shift : 'AM', 
+  supervisor: userProfile ? userProfile.name : '',
   machineId: '',
   jobOrder: '',
   inputRollWeight: '',
@@ -99,7 +103,18 @@ const getInitialFormData = () => ({
 
 const defaultStats = { daily: { output: 0, consumption: 0, wastage: 0, units: 0, pallets: 0 }, weekly: { output: 0, consumption: 0, wastage: 0, units: 0, pallets: 0 }, monthly: { output: 0, consumption: 0, wastage: 0, units: 0, pallets: 0 }, yearly: { output: 0, consumption: 0, wastage: 0, units: 0, pallets: 0 } };
 
+// YOUR GOOGLE SCRIPT URL HERE
+const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyZqi7szXVvj-KGkn4yqWwW41L34h2LwL-uT1KPlNe_ebGt_fn9RY9a9sHYBw7vmrA/exec';
+
 const App = () => {
+  // --- AUTHENTICATION STATE ---
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [currentUser, setCurrentUser] = useState(null);
+  const [pinInput, setPinInput] = useState('');
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
+  const [loginError, setLoginError] = useState('');
+
+  // --- APP STATE ---
   const [department, setDepartment] = useState('Dashboard'); 
   const [qcStage, setQcStage] = useState('Extrusion'); 
   const [formData, setFormData] = useState(getInitialFormData());
@@ -131,8 +146,59 @@ const App = () => {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // YOUR GOOGLE SCRIPT URL HERE
-  const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwc4QY-3QGoXUEqmz-xY5M1TDw8Dma15SLFQUoWo4I0xXOC2Ykm4iyFbHxCYUs9Hey0/exec';
+  // --- LOGIN LOGIC ---
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    if (!pinInput || pinInput.length < 4) {
+      setLoginError("Please enter a valid PIN (minimum 4 digits).");
+      return;
+    }
+    
+    setIsLoggingIn(true);
+    setLoginError('');
+
+    try {
+      // Note: We use cors here so we can read the JSON response containing the user data
+      const response = await fetch(GOOGLE_SCRIPT_URL, {
+        method: 'POST',
+        // mode: 'cors' allows us to read the response if the server supports it, 
+        // but for GAS, standard text/plain without mode is safest for two-way comms.
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify({ action: 'login', pin: pinInput }),
+      });
+      
+      const result = await response.json();
+      
+      if (result.status === 'success') {
+        const user = result.user;
+        setCurrentUser(user);
+        setIsLoggedIn(true);
+        setPinInput(''); // Clear PIN for security
+        
+        // Route user based on their default department
+        setDepartment(user.department);
+        setFormData(getInitialFormData(user)); // Auto-fill form with their details
+        
+        if (user.department === 'Quality Control') {
+           setQcStage('Extrusion'); // Default QC tab
+        }
+      } else {
+        setLoginError(result.message || "Invalid PIN. Please try again.");
+      }
+    } catch (error) {
+      console.error("Login failed:", error);
+      setLoginError("Network error. Please check your connection and ensure the server is configured correctly.");
+    } finally {
+      setIsLoggingIn(false);
+    }
+  };
+
+  const handleLogout = () => {
+    setIsLoggedIn(false);
+    setCurrentUser(null);
+    setDepartment('Dashboard');
+    setFormData(getInitialFormData()); // Clear to default
+  };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -176,9 +242,7 @@ const App = () => {
     setIsFetchingDashboard(true);
     setDashboardError(null);
     try {
-      // Added a timestamp cache-buster to prevent the browser from serving a blocked cached CORS response
       const urlWithCacheBuster = `${GOOGLE_SCRIPT_URL}?t=${new Date().getTime()}`;
-      
       const response = await fetch(urlWithCacheBuster);
       
       if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
@@ -198,8 +262,11 @@ const App = () => {
   };
 
   useEffect(() => {
-    if (department === 'Dashboard') fetchDashboardData();
-  }, [department]);
+    // We only fetch dashboard data if they are logged in and looking at the dashboard
+    if (isLoggedIn && department === 'Dashboard') {
+      fetchDashboardData();
+    }
+  }, [department, isLoggedIn]);
 
   // --- Flag Logic ---
   const openFlagModal = (dept, date, jobOrder) => {
@@ -245,7 +312,8 @@ const App = () => {
         method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(payload),
       });
       alert(`Report saved successfully! [Department: ${department}]`);
-      setFormData(getInitialFormData());
+      // Reset form but KEEP the current user's auto-fill data
+      setFormData(getInitialFormData(currentUser)); 
     } catch (error) {
       alert("Network error: Could not connect to the database.");
     } finally {
@@ -253,17 +321,61 @@ const App = () => {
     }
   };
 
-  // Safe fallback to prevent crashes if data structure isn't ready
   const currentAnalytics = dashboardData.analytics?.[analyticsDept]?.[analyticsPeriod] || { output: 0, consumption: 0, wastage: 0, units: 0, pallets: 0 };
   
-  // Filter customer orders based on search term
   const filteredOrders = customerSearchTerm 
     ? (dashboardData.masterOrders || []).filter(o => 
         o.customer.toLowerCase().includes(customerSearchTerm.toLowerCase()) ||
         o.jo.toLowerCase().includes(customerSearchTerm.toLowerCase())
-      ).slice(0, 5) // Show top 5 matches
+      ).slice(0, 5) 
     : [];
 
+  // ================= RENDER LOGIN SCREEN =================
+  if (!isLoggedIn) {
+    return (
+      <div className="min-h-screen bg-slate-900 flex items-center justify-center p-4">
+        <div className="max-w-md w-full bg-white rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-300">
+          <div className="bg-slate-800 p-8 text-center border-b border-slate-700">
+            <div className="w-16 h-16 bg-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-blue-500/30">
+              <Lock size={32} className="text-white" />
+            </div>
+            <h1 className="text-2xl font-bold text-white mb-1">Production Hub</h1>
+            <p className="text-slate-400 text-sm">Secure Operator Access</p>
+          </div>
+          
+          <form onSubmit={handleLogin} className="p-8 space-y-6">
+            <div>
+              <label className="block text-sm font-semibold text-slate-700 mb-2">Enter Operator PIN</label>
+              <input 
+                type="password" 
+                pattern="[0-9]*" 
+                inputMode="numeric"
+                value={pinInput}
+                onChange={(e) => setPinInput(e.target.value)}
+                placeholder="••••"
+                className="w-full text-center text-3xl tracking-widest p-4 border-2 border-slate-200 rounded-xl focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20 outline-none transition-all"
+                autoFocus
+              />
+              {loginError && <p className="text-red-500 text-sm mt-3 font-medium text-center flex items-center justify-center gap-1"><AlertTriangle size={14}/>{loginError}</p>}
+            </div>
+            
+            <button 
+              type="submit" 
+              disabled={isLoggingIn}
+              className={`w-full py-4 rounded-xl font-bold text-white transition-all shadow-md ${isLoggingIn ? 'bg-slate-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700 hover:shadow-lg hover:-translate-y-0.5'}`}
+            >
+              {isLoggingIn ? 'Verifying Credentials...' : 'Secure Login'}
+            </button>
+          </form>
+          <div className="bg-slate-50 p-4 text-center text-xs text-slate-500 border-t border-slate-100">
+            Version 2.1 (Beta) | Authorised Personnel Only
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ================= RENDER MAIN APP =================
   return (
     <div className="min-h-screen bg-slate-100 p-4 md:p-8 font-sans text-slate-800">
       
@@ -311,25 +423,37 @@ const App = () => {
         
         {/* Header & Department Toggle */}
         <div className="bg-slate-800 text-white p-6 print:bg-white print:text-slate-800 print:border-b">
-          <div className="flex flex-col md:flex-row justify-between items-center mb-6">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
             <div>
               <h1 className="text-2xl md:text-3xl font-bold">Daily Production Report</h1>
               <p className="text-slate-300 print:text-slate-500 mt-1">Operational Log & Analytics</p>
             </div>
-            <div className="flex gap-3 print:hidden mt-4 md:mt-0">
-              <button type="button" onClick={handlePrint} className="flex items-center gap-2 bg-slate-700 hover:bg-slate-600 px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+            
+            {/* User Profile Bug & Controls */}
+            <div className="flex flex-wrap items-center gap-3 print:hidden w-full md:w-auto">
+              <div className="flex items-center gap-3 bg-slate-900/50 px-4 py-2 rounded-lg border border-slate-700 flex-grow md:flex-grow-0">
+                <UserCircle className="text-blue-400" size={24} />
+                <div className="text-sm">
+                  <p className="font-bold leading-tight">{currentUser.name}</p>
+                  <p className="text-xs text-slate-400 leading-tight">{currentUser.role} • {currentUser.shift}</p>
+                </div>
+              </div>
+              <button type="button" onClick={handlePrint} className="flex-1 md:flex-none flex items-center justify-center gap-2 bg-slate-700 hover:bg-slate-600 px-4 py-3 md:py-2.5 rounded-lg text-sm font-medium transition-colors">
                 <Printer size={16} /> Print
+              </button>
+              <button type="button" onClick={handleLogout} className="flex-1 md:flex-none flex items-center justify-center gap-2 bg-red-500/20 hover:bg-red-500 hover:text-white text-red-400 px-4 py-3 md:py-2.5 rounded-lg text-sm font-medium transition-colors border border-red-500/30">
+                <LogOut size={16} /> Exit
               </button>
             </div>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-2 bg-slate-900 rounded-lg p-1 print:hidden w-full">
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-2 bg-slate-900 rounded-lg p-1 print:hidden w-full overflow-x-auto">
             {['Dashboard', 'Extrusion', 'Cutting', 'Packing', 'Dispatch', 'Quality Control', 'Incoming Goods'].map((dept) => (
               <button 
                 key={dept}
                 type="button"
                 onClick={() => setDepartment(dept)}
-                className={`py-2 px-1 text-sm font-medium rounded-md transition-all flex items-center justify-center gap-1 ${department === dept ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-400 hover:text-white hover:bg-slate-800'}`}
+                className={`py-2 px-1 text-sm font-medium rounded-md transition-all flex items-center justify-center gap-1 min-w-[100px] ${department === dept ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-400 hover:text-white hover:bg-slate-800'}`}
               >
                 {dept === 'Dashboard' && <BarChart3 size={14} />}
                 {dept}
