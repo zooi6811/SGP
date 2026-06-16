@@ -337,7 +337,7 @@ const dict = {
     "Operational Log & Analytics": "Log Operasi & Analitis",
     "Draft Auto-Saved": "Draf Disimpan Secara Auto",
     "Log bags incrementally as they are packed onto the pallet.": "Log beg secara berperingkat semasa ia dibungkus ke atas pallet.",
-    "Load hoppers incrementally. Click '+ Add Another Material' when a new batch is added during the shift.": "Muatkan corong secara berperingkat. Klik '+ Tambah Bahan Lain' apabila kumpulan baru ditambah semasa syif.",
+    "Load hoppers incrementally. Click '+ Add Another Material' when a new batch is added semasa syif.": "Muatkan corong secara berperingkat. Klik '+ Tambah Bahan Lain' apabila kumpulan baru ditambah semasa syif.",
     "Optional": "Pilihan"
   }
 };
@@ -381,9 +381,9 @@ const getInitialFormData = (userProfile = null) => ({
   machineId: '',
   jobOrder: '',
   inputRollWeight: '',
-  extrusionMaterials: [], // Accumulator array for extrusion materials tracking
-  extrusionRolls: [], // Accumulator array for extrusion rolls tracking
-  scrapEntries: [], // Accumulator array for scrap tracking
+  extrusionMaterials: [], 
+  extrusionRolls: [], 
+  scrapEntries: [], 
   actualOutput: '',
   uom: 'kg',
   setupScrap: '',
@@ -421,7 +421,7 @@ const getInitialFormData = (userProfile = null) => ({
 const defaultStats = { daily: { output: 0, consumption: 0, wastage: 0, units: 0, pallets: 0 }, weekly: { output: 0, consumption: 0, wastage: 0, units: 0, pallets: 0 }, monthly: { output: 0, consumption: 0, wastage: 0, units: 0, pallets: 0 }, yearly: { output: 0, consumption: 0, wastage: 0, units: 0, pallets: 0 } };
 
 // YOUR GOOGLE SCRIPT URL HERE
-const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyZqi7szXVvj-KGkn4yqWwW41L34h2LwL-uT1KPlNe_ebGt_fn9RY9a9sHYBw7vmrA/exec';
+const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxgjPLdlnTmAbNu0jtoNTh5l8_FUkdhAppdvMok1c6ZoSAzwtwEseI3MVWv7ZmlNkEyqw/exec';
 
 const App = () => {
   // --- LANGUAGE STATE ---
@@ -435,11 +435,11 @@ const App = () => {
   const [isLoggingIn, setIsLoggingIn] = useState(false);
   const [loginError, setLoginError] = useState('');
 
-  // --- APP STATE (WITH LOCAL STORAGE DRAFTING) ---
+  // --- APP STATE ---
   const [department, setDepartment] = useState('Dashboard'); 
   const [qcStage, setQcStage] = useState('Extrusion'); 
   
-  // Load draft from local storage on first render to prevent data loss on accidental refresh
+  // Load draft from local storage
   const [formData, setFormData] = useState(() => {
     const saved = localStorage.getItem(STORAGE_KEY);
     if (saved) {
@@ -455,7 +455,7 @@ const App = () => {
   const [quickScrapType, setQuickScrapType] = useState('setupScrap');
   const [quickScrapWeight, setQuickScrapWeight] = useState('');
 
-  // Auto-save form data to local storage whenever it changes
+  // Auto-save form data
   useEffect(() => {
     if (isLoggedIn) {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(formData));
@@ -470,11 +470,7 @@ const App = () => {
   const [dashboardData, setDashboardData] = useState({ 
     extrusion: [], cutting: [], packing: [], dispatch: [], incoming: [], qc: [],
     masterOrders: [], joTotals: {},
-    analytics: { 
-      Extrusion: defaultStats,
-      Cutting: defaultStats,
-      Packing: defaultStats
-    }
+    analytics: { Extrusion: defaultStats, Cutting: defaultStats, Packing: defaultStats }
   });
   const [isFetchingDashboard, setIsFetchingDashboard] = useState(false);
   const [dashboardError, setDashboardError] = useState(null);
@@ -484,9 +480,7 @@ const App = () => {
   const [isSubmittingFlag, setIsSubmittingFlag] = useState(false);
   const [flagData, setFlagData] = useState({ department: '', date: '', jobOrder: '', reason: '' });
 
-  const [massBalance, setMassBalance] = useState({
-    totalInput: 0, totalAccounted: 0, discrepancyKg: 0, discrepancyPercent: 0, isFailed: false
-  });
+  const [massBalance, setMassBalance] = useState({ totalInput: 0, totalAccounted: 0, discrepancyKg: 0, discrepancyPercent: 0, isFailed: false });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // --- LOGIN LOGIC ---
@@ -506,23 +500,16 @@ const App = () => {
         headers: { 'Content-Type': 'text/plain;charset=utf-8' },
         body: JSON.stringify({ action: 'login', pin: pinInput }),
       });
-      
       const result = await response.json();
-      
       if (result.status === 'success') {
         const user = result.user;
         setCurrentUser(user);
         setIsLoggedIn(true);
         setPinInput(''); 
-        
         setDepartment(user.department);
         
-        // If they have no saved draft, set them up with their profile defaults
         const saved = localStorage.getItem(STORAGE_KEY);
-        if (!saved) {
-          setFormData(getInitialFormData(user)); 
-        }
-        
+        if (!saved) setFormData(getInitialFormData(user)); 
         if (user.department === 'Quality Control') setQcStage('Extrusion');
       } else {
         setLoginError(result.message || "Invalid PIN. Please try again.");
@@ -536,7 +523,6 @@ const App = () => {
   };
 
   const handleLogout = () => {
-    // Warn user before clearing their shift accumulator
     if (formData.actualOutput || formData.jobOrder || formData.extrusionRolls?.length > 0 || formData.extrusionMaterials?.length > 0) {
       if (!window.confirm("WARNING: You have unsaved data in your shift draft. Logging out will delete it permanently. Are you sure you want to exit?")) {
         return;
@@ -555,18 +541,14 @@ const App = () => {
   };
 
   // --- Bag Handlers ---
-  const handleBagWeightChange = (id, value) => {
-    setFormData(prev => ({ ...prev, bagWeights: prev.bagWeights.map(bag => bag.id === id ? { ...bag, weight: value } : bag) }));
-  };
+  const handleBagWeightChange = (id, value) => setFormData(prev => ({ ...prev, bagWeights: prev.bagWeights.map(bag => bag.id === id ? { ...bag, weight: value } : bag) }));
   const addBagWeightRow = () => setFormData(prev => ({ ...prev, bagWeights: [...prev.bagWeights, { id: Date.now(), weight: '' }] }));
   const removeBagWeightRow = (id) => setFormData(prev => ({ ...prev, bagWeights: prev.bagWeights.filter(bag => bag.id !== id) }));
 
   // --- Extrusion Accumulator Handlers ---
   const handleAddRoll = () => {
     if (!quickRollWeight || isNaN(quickRollWeight)) return;
-    const newRolls = [...(formData.extrusionRolls || []), { 
-      id: Date.now(), weight: Number(quickRollWeight), time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) 
-    }];
+    const newRolls = [...(formData.extrusionRolls || []), { id: Date.now(), weight: Number(quickRollWeight), time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) }];
     const newTotal = newRolls.reduce((sum, r) => sum + r.weight, 0);
     setFormData(prev => ({ ...prev, extrusionRolls: newRolls, actualOutput: newTotal.toFixed(2) }));
     setQuickRollWeight('');
@@ -580,29 +562,20 @@ const App = () => {
 
   const handleAddMaterial = () => {
     if (!quickMaterialWeight || isNaN(quickMaterialWeight)) return;
-    const newMats = [...(formData.extrusionMaterials || []), {
-      id: Date.now(), batchNo: quickMaterialBatch || 'N/A', quantity: Number(quickMaterialWeight), time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
-    }];
+    const newMats = [...(formData.extrusionMaterials || []), { id: Date.now(), batchNo: quickMaterialBatch || 'N/A', quantity: Number(quickMaterialWeight), time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) }];
     setFormData(prev => ({ ...prev, extrusionMaterials: newMats }));
     setQuickMaterialBatch('');
     setQuickMaterialWeight('');
   };
 
-  const handleRemoveMaterial = (id) => {
-    setFormData(prev => ({ ...prev, extrusionMaterials: (prev.extrusionMaterials || []).filter(m => m.id !== id) }));
-  };
+  const handleRemoveMaterial = (id) => setFormData(prev => ({ ...prev, extrusionMaterials: (prev.extrusionMaterials || []).filter(m => m.id !== id) }));
 
   const handleAddScrap = () => {
     if (!quickScrapWeight || isNaN(quickScrapWeight)) return;
-    const newScrap = [...(formData.scrapEntries || []), {
-      id: Date.now(), type: quickScrapType, weight: Number(quickScrapWeight), time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
-    }];
+    const newScrap = [...(formData.scrapEntries || []), { id: Date.now(), type: quickScrapType, weight: Number(quickScrapWeight), time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) }];
     const newSetup = newScrap.filter(s => s.type === 'setupScrap').reduce((sum, s) => sum + s.weight, 0);
     const newProcess = newScrap.filter(s => s.type === 'processScrap').reduce((sum, s) => sum + s.weight, 0);
-    
-    setFormData(prev => ({ 
-      ...prev, scrapEntries: newScrap, setupScrap: newSetup > 0 ? newSetup.toFixed(2) : '', processScrap: newProcess > 0 ? newProcess.toFixed(2) : '' 
-    }));
+    setFormData(prev => ({ ...prev, scrapEntries: newScrap, setupScrap: newSetup > 0 ? newSetup.toFixed(2) : '', processScrap: newProcess > 0 ? newProcess.toFixed(2) : '' }));
     setQuickScrapWeight('');
   };
 
@@ -610,10 +583,7 @@ const App = () => {
     const newScrap = (formData.scrapEntries || []).filter(s => s.id !== id);
     const newSetup = newScrap.filter(s => s.type === 'setupScrap').reduce((sum, s) => sum + s.weight, 0);
     const newProcess = newScrap.filter(s => s.type === 'processScrap').reduce((sum, s) => sum + s.weight, 0);
-    
-    setFormData(prev => ({ 
-      ...prev, scrapEntries: newScrap, setupScrap: newSetup > 0 ? newSetup.toFixed(2) : '', processScrap: newProcess > 0 ? newProcess.toFixed(2) : '' 
-    }));
+    setFormData(prev => ({ ...prev, scrapEntries: newScrap, setupScrap: newSetup > 0 ? newSetup.toFixed(2) : '', processScrap: newProcess > 0 ? newProcess.toFixed(2) : '' }));
   };
 
   // --- Mass Balance ---
@@ -632,7 +602,6 @@ const App = () => {
     const discrepancyKg = totalInput - totalAccounted;
     const discrepancyPercent = totalInput > 0 ? (Math.abs(discrepancyKg) / totalInput) * 100 : 0;
 
-    // Both cutting and full shift summaries now face the strict 2% check.
     const isFailed = discrepancyPercent > 2.0;
 
     setMassBalance({ totalInput, totalAccounted, discrepancyKg, discrepancyPercent, isFailed });
@@ -645,10 +614,8 @@ const App = () => {
     try {
       const urlWithCacheBuster = `${GOOGLE_SCRIPT_URL}?t=${new Date().getTime()}`;
       const response = await fetch(urlWithCacheBuster);
-      
       if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
       const result = await response.json();
-      
       if (result.status === 'success') {
         setDashboardData(result.data);
       } else {
@@ -663,9 +630,7 @@ const App = () => {
   };
 
   useEffect(() => {
-    if (isLoggedIn && department === 'Dashboard') {
-      fetchDashboardData();
-    }
+    if (isLoggedIn && department === 'Dashboard') fetchDashboardData();
   }, [department, isLoggedIn]);
 
   // --- Flag Logic ---
@@ -678,16 +643,8 @@ const App = () => {
     if (!flagData.reason) return alert("Please provide a reason for flagging this record.");
     setIsSubmittingFlag(true);
     try {
-      const payload = {
-        action: 'flag',
-        flagDepartment: flagData.department,
-        flagDate: flagData.date,
-        flagJobOrder: flagData.jobOrder,
-        flagReason: flagData.reason
-      };
-      await fetch(GOOGLE_SCRIPT_URL, {
-        method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(payload),
-      });
+      const payload = { action: 'flag', flagDepartment: flagData.department, flagDate: flagData.date, flagJobOrder: flagData.jobOrder, flagReason: flagData.reason };
+      await fetch(GOOGLE_SCRIPT_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(payload) });
       alert("Flag successfully raised to management.");
       setIsFlagModalOpen(false);
     } catch (error) {
@@ -725,12 +682,21 @@ const App = () => {
 
   const currentAnalytics = dashboardData.analytics?.[analyticsDept]?.[analyticsPeriod] || { output: 0, consumption: 0, wastage: 0, units: 0, pallets: 0 };
   
+  // Calculate a "lastUpdated" timestamp for every order, and sort newest first
+  const activeOrders = (dashboardData.masterOrders || [])
+    .map(order => ({
+      ...order,
+      lastUpdated: dashboardData.joTotals[order.jo]?.lastUpdated || 0
+    }))
+    .sort((a, b) => b.lastUpdated - a.lastUpdated);
+
+  // If searching, filter all orders. If not searching, just show the top 3 most recent active.
   const filteredOrders = customerSearchTerm 
-    ? (dashboardData.masterOrders || []).filter(o => 
-        o.customer.toLowerCase().includes(customerSearchTerm.toLowerCase()) ||
-        o.jo.toLowerCase().includes(customerSearchTerm.toLowerCase())
-      ).slice(0, 5) 
-    : [];
+    ? activeOrders.filter(o => 
+        (o.customer && o.customer.toLowerCase().includes(customerSearchTerm.toLowerCase())) ||
+        (o.jo && o.jo.toLowerCase().includes(customerSearchTerm.toLowerCase()))
+      )
+    : activeOrders.filter(o => o.lastUpdated > 0).slice(0, 3); 
 
   // ================= RENDER LOGIN SCREEN =================
   if (!isLoggedIn) {
@@ -779,7 +745,7 @@ const App = () => {
             </button>
           </form>
           <div className="bg-slate-50 p-4 text-center text-xs text-slate-500 border-t border-slate-100">
-            Version 2.3 (Beta) | Authorised Personnel Only
+            Version 2.4 (Beta) | Authorised Personnel Only
           </div>
         </div>
       </div>
@@ -1011,9 +977,10 @@ const App = () => {
                 </div>
               </div>
               
-              <div className="space-y-4">
-                {customerSearchTerm && filteredOrders.length > 0 ? (
-                  filteredOrders.map(order => {
+              {/* Max-height and overflow enable scrolling if there are >3 items */}
+              <div className="max-h-[480px] overflow-y-auto pr-2 space-y-4">
+                {filteredOrders.length > 0 ? (
+                  filteredOrders.map((order, index) => {
                     const totals = dashboardData.joTotals[order.jo] || { extrusion: 0, cutting: 0, packing: 0 };
                     const target = order.targetQty || 1; 
                     
@@ -1022,7 +989,8 @@ const App = () => {
                     const packPct = Math.min(100, (totals.packing / target) * 100);
 
                     return (
-                      <div key={order.jo} className="bg-slate-50 border border-slate-200 rounded-lg p-5">
+                      // Including index in the key forcefully eliminates the "stuck tile" bug
+                      <div key={`${order.jo}-${index}`} className="bg-slate-50 border border-slate-200 rounded-lg p-5">
                         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-5 gap-2">
                           <div>
                             <h4 className="font-bold text-slate-800 text-lg">{order.customer} <span className="text-slate-400 text-sm font-normal">| JO: {order.jo}</span></h4>
@@ -1076,7 +1044,7 @@ const App = () => {
                 ) : customerSearchTerm ? (
                   <p className="text-sm text-slate-500 text-center py-8 bg-slate-50 rounded-lg border border-slate-200 border-dashed">No matching active orders found for "{customerSearchTerm}".</p>
                 ) : (
-                  <p className="text-sm text-slate-500 text-center py-8 bg-slate-50 rounded-lg border border-slate-200 border-dashed">Use the search bar above to look up a customer or JO and track production progress.</p>
+                  <p className="text-sm text-slate-500 text-center py-8 bg-slate-50 rounded-lg border border-slate-200 border-dashed">No recently active orders found. Use search to find historical orders.</p>
                 )}
               </div>
             </div>
@@ -1281,7 +1249,7 @@ const App = () => {
 
                   {department === 'Extrusion' ? (
                     <div className="space-y-4 flex-1">
-                      {/* --- NEW: MATERIAL ACCUMULATOR --- */}
+                      {/* --- MATERIAL ACCUMULATOR --- */}
                       <div className="mb-2 bg-blue-50/50 p-4 rounded-lg border border-blue-100">
                         <div className="flex items-center justify-between mb-3">
                           <h3 className="text-sm font-semibold text-blue-800 flex items-center gap-1.5"><Clock size={16}/> {t("Shift Accumulator (Materials)")}</h3>
