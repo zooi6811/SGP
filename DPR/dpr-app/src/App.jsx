@@ -25,11 +25,325 @@ import {
   Layers,
   Lock,
   LogOut,
-  UserCircle
+  UserCircle,
+  Globe
 } from 'lucide-react';
 
+// --- TRANSLATION DICTIONARY ---
+const dict = {
+  en: {
+    "Production Hub": "Production Hub",
+    "Secure Operator Access": "Secure Operator Access",
+    "Enter Operator PIN": "Enter Operator PIN",
+    "Secure Login": "Secure Login",
+    "Verifying Credentials...": "Verifying Credentials...",
+    "Session Parameters": "Session Parameters",
+    "Date": "Date",
+    "Shift": "Shift",
+    "Morning (AM)": "Morning (AM)",
+    "Night (PM)": "Night (PM)",
+    "Operator / Supervisor": "Operator / Supervisor",
+    "Receiver / Admin Name": "Receiver / Admin Name",
+    "QC Inspector": "QC Inspector",
+    "Machine No.": "Machine No.",
+    "Material Inputs": "Material Inputs",
+    "Job Order No.": "Job Order No.",
+    "Shift Accumulator (Materials)": "Shift Accumulator (Materials)",
+    "Batch No.": "Batch No.",
+    "Quantity (kg)": "Quantity (kg)",
+    "+ Add": "+ Add",
+    "Total Input Material:": "Total Input Material:",
+    "Add Another Material": "Add Another Material",
+    "Input Roll Weight (kg)": "Input Roll Weight (kg)",
+    "Production Output & Scrap": "Production Output & Scrap",
+    "Shift Accumulator (Rolls)": "Shift Accumulator (Rolls)",
+    "New Roll Weight (kg)": "New Roll Weight (kg)",
+    "+ Add Roll": "+ Add Roll",
+    "Accumulated Good Output": "Accumulated Good Output",
+    "Actual Good Output": "Actual Good Output",
+    "UoM": "UoM",
+    "Shift Accumulator (Scrap)": "Shift Accumulator (Scrap)",
+    "Type": "Type",
+    "Weight (kg)": "Weight (kg)",
+    "Setup Scrap": "Setup Scrap",
+    "Process Scrap": "Process Scrap",
+    "Setup Scrap (kg) - Purging/Colour Change": "Setup Scrap (kg) - Purging/Colour Change",
+    "Process Scrap (kg) - Trims/Tears": "Process Scrap (kg) - Trims/Tears",
+    "Machine Downtime": "Machine Downtime",
+    "Planned (mins)": "Planned (mins)",
+    "Unplanned (mins)": "Unplanned (mins)",
+    "Primary Downtime Reason": "Primary Downtime Reason",
+    "Finished Goods Packing": "Finished Goods Packing",
+    "Packing Size": "Packing Size",
+    "Quantity Packed": "Quantity Packed",
+    "Standardised Total:": "Standardised Total:",
+    "Palletisation Details": "Palletisation Details",
+    "Pallet Weight (kg) [Tare/Gross]": "Pallet Weight (kg) [Tare/Gross]",
+    "Individual Bag/Carton Accumulator": "Individual Bag/Carton Accumulator",
+    "Bag": "Bag",
+    "Add Another Bag": "Add Another Bag",
+    "Actual Bag Weight submitted:": "Actual Bag Weight submitted:",
+    "Dispatch / Shipping": "Dispatch / Shipping",
+    "Shipped Quantity (kg)": "Shipped Quantity (kg)",
+    "Delivery Order (DO) / Invoice No.": "Delivery Order (DO) / Invoice No.",
+    "Raw Material Inwards": "Raw Material Inwards",
+    "Material Name / ID": "Material Name / ID",
+    "Incoming / Received Amount (kg)": "Incoming / Received Amount (kg)",
+    "Supplier Name": "Supplier Name",
+    "Purchase Order (PO) No.": "Purchase Order (PO) No.",
+    "Storage Location / Zone": "Storage Location / Zone",
+    "Quality / Condition Check": "Quality / Condition Check",
+    "Quality Control Assessment": "Quality Control Assessment",
+    "Job Order No. (Under Inspection)": "Job Order No. (Under Inspection)",
+    "Thickness Check (Microns)": "Thickness Check (Microns)",
+    "Width Check (mm)": "Width Check (mm)",
+    "Seal Integrity Assessment": "Seal Integrity Assessment",
+    "Length Check (mm)": "Length Check (mm)",
+    "Packing Size (Bag Weight - kg)": "Packing Size (Bag Weight - kg)",
+    "Quantity Check (Bags per Pallet)": "Quantity Check (Bags per Pallet)",
+    "Total Bags Verified": "Total Bags Verified",
+    "Total Pallets Counted": "Total Pallets Counted",
+    "Overall QC Remarks / Issues Noted": "Overall QC Remarks / Issues Noted",
+    "Status": "Status",
+    "Pass": "Pass",
+    "Fail": "Fail",
+    "N/A": "N/A",
+    "Submit Full Shift Log": "Submit Full Shift Log",
+    "Saving Data...": "Saving Data...",
+    "Discrepancy Must Be Resolved": "Discrepancy Must Be Resolved",
+    "Mass Balance Verified": "Mass Balance Verified",
+    "Mass Balance Failed (Discrepancy > 2%)": "Mass Balance Failed (Discrepancy > 2%)",
+    "Total Input": "Total Input",
+    "Total Output + Scrap": "Total Output + Scrap",
+    "Variance": "Variance",
+    "Error Margin": "Error Margin",
+    "Reason for Discrepancy (Required for Override)": "Reason for Discrepancy (Required for Override)",
+    "Dashboard": "Dashboard",
+    "Extrusion": "Extrusion",
+    "Cutting": "Cutting",
+    "Packing": "Packing",
+    "Dispatch": "Dispatch",
+    "Quality Control": "Quality Control",
+    "Incoming Goods": "Incoming Goods",
+    "Print": "Print",
+    "Exit": "Exit",
+    "Daily Production Report": "Daily Production Report",
+    "Operational Log & Analytics": "Operational Log & Analytics",
+    "Draft Auto-Saved": "Draft Auto-Saved",
+    "Log bags incrementally as they are packed onto the pallet.": "Log bags incrementally as they are packed onto the pallet.",
+    "Load hoppers incrementally. Click '+ Add Another Material' when a new batch is added during the shift.": "Load hoppers incrementally. Click '+ Add Another Material' when a new batch is added during the shift.",
+    "Optional": "Optional"
+  },
+  bn: {
+    "Production Hub": "উৎপাদন হাব",
+    "Secure Operator Access": "নিরাপদ অপারেটর অ্যাক্সেস",
+    "Enter Operator PIN": "অপারেটর পিন লিখুন",
+    "Secure Login": "লগইন করুন",
+    "Verifying Credentials...": "যাচাই করা হচ্ছে...",
+    "Session Parameters": "সেশন প্যারামিটার",
+    "Date": "তারিখ",
+    "Shift": "শিফট",
+    "Morning (AM)": "সকাল (AM)",
+    "Night (PM)": "রাত (PM)",
+    "Operator / Supervisor": "অপারেটর / সুপারভাইজার",
+    "Receiver / Admin Name": "রিসিভার / অ্যাডমিন নাম",
+    "QC Inspector": "কিউসি ইন্সপেক্টর",
+    "Machine No.": "মেশিন নম্বর",
+    "Material Inputs": "কাঁচামাল ইনপুট",
+    "Job Order No.": "জব অর্ডার নম্বর (JO)",
+    "Shift Accumulator (Materials)": "শিফট অ্যাকুমুলেটর (কাঁচামাল)",
+    "Batch No.": "ব্যাচ নম্বর",
+    "Quantity (kg)": "পরিমাণ (কেজি)",
+    "+ Add": "+ যোগ করুন",
+    "Total Input Material:": "মোট ইনপুট কাঁচামাল:",
+    "Add Another Material": "আরও কাঁচামাল যোগ করুন",
+    "Input Roll Weight (kg)": "ইনপুট রোল ওজন (কেজি)",
+    "Production Output & Scrap": "উৎপাদন আউটপুট এবং স্ক্র্যাপ",
+    "Shift Accumulator (Rolls)": "শিফট অ্যাকুমুলেটর (রোল)",
+    "New Roll Weight (kg)": "নতুন রোলের ওজন (কেজি)",
+    "+ Add Roll": "+ রোল যোগ করুন",
+    "Accumulated Good Output": "জমে থাকা ভালো আউটপুট",
+    "Actual Good Output": "প্রকৃত ভালো আউটপুট",
+    "UoM": "একক (UoM)",
+    "Shift Accumulator (Scrap)": "শিফট অ্যাকুমুলেটর (স্ক্র্যাপ)",
+    "Type": "ধরন",
+    "Weight (kg)": "ওজন (কেজি)",
+    "Setup Scrap": "সেটআপ স্ক্র্যাপ",
+    "Process Scrap": "প্রসেস স্ক্র্যাপ",
+    "Setup Scrap (kg) - Purging/Colour Change": "সেটআপ স্ক্র্যাপ (কেজি) - পার্জিং/রঙ পরিবর্তন",
+    "Process Scrap (kg) - Trims/Tears": "প্রসেস স্ক্র্যাপ (কেজি) - ট্রিমস/টিয়ারস",
+    "Machine Downtime": "মেশিন ডাউনটাইম",
+    "Planned (mins)": "পরিকল্পিত (মিনিট)",
+    "Unplanned (mins)": "অপরিকল্পিত (মিনিট)",
+    "Primary Downtime Reason": "ডাউনটাইমের প্রধান কারণ",
+    "Finished Goods Packing": "প্যাকিং (ফিনিশড গুডস)",
+    "Packing Size": "প্যাকিং সাইজ",
+    "Quantity Packed": "প্যাক করা পরিমাণ",
+    "Standardised Total:": "মোট পরিমাণ:",
+    "Palletisation Details": "প্যালেট বিবরণ",
+    "Pallet Weight (kg) [Tare/Gross]": "প্যালেটের ওজন (কেজি)",
+    "Individual Bag/Carton Accumulator": "ব্যাগ/কার্টন অ্যাকুমুলেটর",
+    "Bag": "ব্যাগ",
+    "Add Another Bag": "আরও ব্যাগ যোগ করুন",
+    "Actual Bag Weight submitted:": "মোট ব্যাগের ওজন:",
+    "Dispatch / Shipping": "ডিসপ্যাচ / শিপিং",
+    "Shipped Quantity (kg)": "শিপ করা পরিমাণ (কেজি)",
+    "Delivery Order (DO) / Invoice No.": "ডেলিভারি অর্ডার (DO) নম্বর",
+    "Raw Material Inwards": "কাঁচামাল গ্রহণ",
+    "Material Name / ID": "কাঁচামালের নাম / আইডি",
+    "Incoming / Received Amount (kg)": "গৃহীত পরিমাণ (কেজি)",
+    "Supplier Name": "সরবরাহকারীর নাম",
+    "Purchase Order (PO) No.": "পারচেজ অর্ডার (PO) নম্বর",
+    "Storage Location / Zone": "স্টোরেজ লোকেশন",
+    "Quality / Condition Check": "কোয়ালিটি চেক",
+    "Quality Control Assessment": "কোয়ালিটি কন্ট্রোল (QC)",
+    "Job Order No. (Under Inspection)": "জব অর্ডার নম্বর (তদন্তাধীন)",
+    "Thickness Check (Microns)": "পুরুত্ব চেক (মাইক্রন)",
+    "Width Check (mm)": "প্রস্থ চেক (মিমি)",
+    "Seal Integrity Assessment": "সিল ইন্টিগ্রিটি চেক",
+    "Length Check (mm)": "দৈর্ঘ্য চেক (মিমি)",
+    "Packing Size (Bag Weight - kg)": "প্যাকিং সাইজ (ব্যাগের ওজন - কেজি)",
+    "Quantity Check (Bags per Pallet)": "পরিমাণ চেক (ব্যাগ প্রতি প্যালেট)",
+    "Total Bags Verified": "মোট যাচাইকৃত ব্যাগ",
+    "Total Pallets Counted": "মোট গোনা প্যালেট",
+    "Overall QC Remarks / Issues Noted": "সার্বিক কিউসি মন্তব্য",
+    "Status": "স্ট্যাটাস",
+    "Pass": "পাস",
+    "Fail": "ফেইল",
+    "N/A": "প্রযোজ্য নয়",
+    "Submit Full Shift Log": "সম্পূর্ণ শিফট লগ জমা দিন",
+    "Saving Data...": "ডেটা সেভ হচ্ছে...",
+    "Discrepancy Must Be Resolved": "অসঙ্গতি সমাধান করতে হবে",
+    "Mass Balance Verified": "ম্যাস ব্যালেন্স যাচাই করা হয়েছে",
+    "Mass Balance Failed (Discrepancy > 2%)": "ম্যাস ব্যালেন্স ফেইল (পার্থক্য > ২%)",
+    "Total Input": "মোট ইনপুট",
+    "Total Output + Scrap": "মোট আউটপুট + স্ক্র্যাপ",
+    "Variance": "পার্থক্য",
+    "Error Margin": "ভুলের মার্জিন",
+    "Reason for Discrepancy (Required for Override)": "অসঙ্গতির কারণ (অপরিহার্য)",
+    "Dashboard": "ড্যাশবোর্ড",
+    "Extrusion": "এক্সট্রুশন",
+    "Cutting": "কাটিং",
+    "Packing": "প্যাকিং",
+    "Dispatch": "ডিসপ্যাচ",
+    "Quality Control": "কিউসি (QC)",
+    "Incoming Goods": "ইনকামিং গুডস",
+    "Print": "প্রিন্ট",
+    "Exit": "প্রস্থান",
+    "Daily Production Report": "দৈনিক উৎপাদন প্রতিবেদন",
+    "Operational Log & Analytics": "অপারেশনাল লগ এবং অ্যানালিটিক্স",
+    "Draft Auto-Saved": "খসড়া অটো-সেভ হয়েছে",
+    "Log bags incrementally as they are packed onto the pallet.": "প্যালেটে প্যাক করার সাথে সাথে ব্যাগের ওজন ক্রমান্বয়ে লগ করুন।",
+    "Load hoppers incrementally. Click '+ Add Another Material' when a new batch is added during the shift.": "হপারে মাল যোগ করার সাথে সাথে লগ করুন। শিফটে নতুন ব্যাচ যোগ হলে '+ আরও কাঁচামাল যোগ করুন'-এ ক্লিক করুন।",
+    "Optional": "ঐচ্ছিক"
+  },
+  ms: {
+    "Production Hub": "Pusat Pengeluaran",
+    "Secure Operator Access": "Akses Operator Selamat",
+    "Enter Operator PIN": "Masukkan PIN Operator",
+    "Secure Login": "Log Masuk Selamat",
+    "Verifying Credentials...": "Mengesahkan Kelayakan...",
+    "Session Parameters": "Parameter Sesi",
+    "Date": "Tarikh",
+    "Shift": "Syif",
+    "Morning (AM)": "Pagi (AM)",
+    "Night (PM)": "Malam (PM)",
+    "Operator / Supervisor": "Operator / Penyelia",
+    "Receiver / Admin Name": "Penerima / Nama Admin",
+    "QC Inspector": "Pemeriksa QC",
+    "Machine No.": "No. Mesin",
+    "Material Inputs": "Input Bahan",
+    "Job Order No.": "No. Pesanan Kerja (JO)",
+    "Shift Accumulator (Materials)": "Pengumpul Syif (Bahan)",
+    "Batch No.": "No. Kumpulan",
+    "Quantity (kg)": "Kuantiti (kg)",
+    "+ Add": "+ Tambah",
+    "Total Input Material:": "Jumlah Bahan Input:",
+    "Add Another Material": "Tambah Bahan Lain",
+    "Input Roll Weight (kg)": "Berat Gulungan Input (kg)",
+    "Production Output & Scrap": "Keluaran Pengeluaran & Sisa",
+    "Shift Accumulator (Rolls)": "Pengumpul Syif (Gulungan)",
+    "New Roll Weight (kg)": "Berat Gulungan Baru (kg)",
+    "+ Add Roll": "+ Tambah Gulungan",
+    "Accumulated Good Output": "Terkumpul Keluaran Baik",
+    "Actual Good Output": "Keluaran Baik Sebenar",
+    "UoM": "Unit",
+    "Shift Accumulator (Scrap)": "Pengumpul Syif (Sisa)",
+    "Type": "Jenis",
+    "Weight (kg)": "Berat (kg)",
+    "Setup Scrap": "Sisa Persediaan",
+    "Process Scrap": "Sisa Proses",
+    "Setup Scrap (kg) - Purging/Colour Change": "Sisa Persediaan (kg) - Purging/Tukar Warna",
+    "Process Scrap (kg) - Trims/Tears": "Sisa Proses (kg) - Potongan/Koyak",
+    "Machine Downtime": "Masa Henti Mesin",
+    "Planned (mins)": "Dirancang (minit)",
+    "Unplanned (mins)": "Tidak Dirancang (minit)",
+    "Primary Downtime Reason": "Sebab Utama Masa Henti",
+    "Finished Goods Packing": "Pembungkusan Barang Siap",
+    "Packing Size": "Saiz Pembungkusan",
+    "Quantity Packed": "Kuantiti Dibungkus",
+    "Standardised Total:": "Jumlah Standard:",
+    "Palletisation Details": "Butiran Pempaletan",
+    "Pallet Weight (kg) [Tare/Gross]": "Berat Pallet (kg) [Bersih/Kasar]",
+    "Individual Bag/Carton Accumulator": "Pengumpul Beg/Kadbod Individu",
+    "Bag": "Beg",
+    "Add Another Bag": "Tambah Beg Lain",
+    "Actual Bag Weight submitted:": "Berat Beg Sebenar dihantar:",
+    "Dispatch / Shipping": "Penghantaran",
+    "Shipped Quantity (kg)": "Kuantiti Dihantar (kg)",
+    "Delivery Order (DO) / Invoice No.": "No. Pesanan Penghantaran (DO) / Invois",
+    "Raw Material Inwards": "Bahan Mentah Masuk",
+    "Material Name / ID": "Nama/ID Bahan",
+    "Incoming / Received Amount (kg)": "Jumlah Masuk / Diterima (kg)",
+    "Supplier Name": "Nama Pembekal",
+    "Purchase Order (PO) No.": "No. Pesanan Belian (PO)",
+    "Storage Location / Zone": "Lokasi/Zon Simpanan",
+    "Quality / Condition Check": "Pemeriksaan Kualiti / Keadaan",
+    "Quality Control Assessment": "Penilaian Kawalan Kualiti",
+    "Job Order No. (Under Inspection)": "No. Pesanan Kerja (Di Bawah Pemeriksaan)",
+    "Thickness Check (Microns)": "Pemeriksaan Ketebalan (Mikron)",
+    "Width Check (mm)": "Pemeriksaan Lebar (mm)",
+    "Seal Integrity Assessment": "Penilaian Integriti Kedap",
+    "Length Check (mm)": "Pemeriksaan Panjang (mm)",
+    "Packing Size (Bag Weight - kg)": "Saiz Pembungkusan (Berat Beg - kg)",
+    "Quantity Check (Bags per Pallet)": "Pemeriksaan Kuantiti (Beg setiap Pallet)",
+    "Total Bags Verified": "Jumlah Beg Disahkan",
+    "Total Pallets Counted": "Jumlah Pallet Dikira",
+    "Overall QC Remarks / Issues Noted": "Ulasan QC Keseluruhan / Isu Dicatat",
+    "Status": "Status",
+    "Pass": "Lulus",
+    "Fail": "Gagal",
+    "N/A": "N/A",
+    "Submit Full Shift Log": "Hantar Log Syif Penuh",
+    "Saving Data...": "Menyimpan Data...",
+    "Discrepancy Must Be Resolved": "Percanggahan Mesti Diselesaikan",
+    "Mass Balance Verified": "Imbangan Jisim Disahkan",
+    "Mass Balance Failed (Discrepancy > 2%)": "Imbangan Jisim Gagal (Percanggahan > 2%)",
+    "Total Input": "Jumlah Input",
+    "Total Output + Scrap": "Jumlah Keluaran + Sisa",
+    "Variance": "Varians",
+    "Error Margin": "Margin Ralat",
+    "Reason for Discrepancy (Required for Override)": "Sebab Percanggahan (Wajib untuk Override)",
+    "Dashboard": "Papan Pemuka",
+    "Extrusion": "Penyemperitan (Extrusion)",
+    "Cutting": "Pemotongan",
+    "Packing": "Pembungkusan",
+    "Dispatch": "Penghantaran",
+    "Quality Control": "Kawalan Kualiti (QC)",
+    "Incoming Goods": "Barang Masuk",
+    "Print": "Cetak",
+    "Exit": "Keluar",
+    "Daily Production Report": "Laporan Pengeluaran Harian",
+    "Operational Log & Analytics": "Log Operasi & Analitis",
+    "Draft Auto-Saved": "Draf Disimpan Secara Auto",
+    "Log bags incrementally as they are packed onto the pallet.": "Log beg secara berperingkat semasa ia dibungkus ke atas pallet.",
+    "Load hoppers incrementally. Click '+ Add Another Material' when a new batch is added during the shift.": "Muatkan corong secara berperingkat. Klik '+ Tambah Bahan Lain' apabila kumpulan baru ditambah semasa syif.",
+    "Optional": "Pilihan"
+  }
+};
+
 // Reusable component for the new QC Data + Status rows
-const QCField = ({ label, name, statusName, formData, onChange, placeholder }) => (
+const QCField = ({ label, name, statusName, formData, onChange, placeholder, t }) => (
   <div className="flex flex-col sm:flex-row sm:items-end gap-3 p-3 bg-white rounded-md border border-slate-200">
     <div className="flex-1">
       <label className="block text-sm font-medium text-slate-700 mb-1">{label}</label>
@@ -43,22 +357,23 @@ const QCField = ({ label, name, statusName, formData, onChange, placeholder }) =
       />
     </div>
     <div className="w-full sm:w-32">
-      <label className="block text-sm font-medium text-slate-700 mb-1 sm:hidden">Status</label>
+      <label className="block text-sm font-medium text-slate-700 mb-1 sm:hidden">{t("Status")}</label>
       <select
         name={statusName}
         value={formData[statusName]}
         onChange={onChange}
         className="w-full p-2 border border-slate-300 rounded text-sm focus:outline-none font-medium"
       >
-        <option className="text-green-600" value="Pass">Pass</option>
-        <option className="text-red-600" value="Fail">Fail</option>
-        <option className="text-slate-400" value="N/A">N/A</option>
+        <option className="text-green-600" value="Pass">{t("Pass")}</option>
+        <option className="text-red-600" value="Fail">{t("Fail")}</option>
+        <option className="text-slate-400" value="N/A">{t("N/A")}</option>
       </select>
     </div>
   </div>
 );
 
-// We now pass the user profile to getInitialFormData so it can auto-fill
+const STORAGE_KEY = 'dpr_draft_session';
+
 const getInitialFormData = (userProfile = null) => ({
   date: new Date().toISOString().split('T')[0],
   shift: userProfile ? userProfile.shift : 'AM', 
@@ -66,7 +381,9 @@ const getInitialFormData = (userProfile = null) => ({
   machineId: '',
   jobOrder: '',
   inputRollWeight: '',
-  extrusionMaterials: [{ id: Date.now(), batchNo: '', quantity: '' }],
+  extrusionMaterials: [], // Accumulator array for extrusion materials tracking
+  extrusionRolls: [], // Accumulator array for extrusion rolls tracking
+  scrapEntries: [], // Accumulator array for scrap tracking
   actualOutput: '',
   uom: 'kg',
   setupScrap: '',
@@ -107,6 +424,10 @@ const defaultStats = { daily: { output: 0, consumption: 0, wastage: 0, units: 0,
 const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyZqi7szXVvj-KGkn4yqWwW41L34h2LwL-uT1KPlNe_ebGt_fn9RY9a9sHYBw7vmrA/exec';
 
 const App = () => {
+  // --- LANGUAGE STATE ---
+  const [language, setLanguage] = useState('en');
+  const t = (text) => dict[language][text] || text;
+
   // --- AUTHENTICATION STATE ---
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
@@ -114,10 +435,32 @@ const App = () => {
   const [isLoggingIn, setIsLoggingIn] = useState(false);
   const [loginError, setLoginError] = useState('');
 
-  // --- APP STATE ---
+  // --- APP STATE (WITH LOCAL STORAGE DRAFTING) ---
   const [department, setDepartment] = useState('Dashboard'); 
   const [qcStage, setQcStage] = useState('Extrusion'); 
-  const [formData, setFormData] = useState(getInitialFormData());
+  
+  // Load draft from local storage on first render to prevent data loss on accidental refresh
+  const [formData, setFormData] = useState(() => {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) {
+      try { return JSON.parse(saved); } catch(e) { console.error('Corrupted draft'); }
+    }
+    return getInitialFormData();
+  });
+
+  // Accumulator Quick Add States
+  const [quickRollWeight, setQuickRollWeight] = useState('');
+  const [quickMaterialBatch, setQuickMaterialBatch] = useState('');
+  const [quickMaterialWeight, setQuickMaterialWeight] = useState('');
+  const [quickScrapType, setQuickScrapType] = useState('setupScrap');
+  const [quickScrapWeight, setQuickScrapWeight] = useState('');
+
+  // Auto-save form data to local storage whenever it changes
+  useEffect(() => {
+    if (isLoggedIn) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(formData));
+    }
+  }, [formData, isLoggedIn]);
 
   // Dashboard & Analytics State
   const [analyticsPeriod, setAnalyticsPeriod] = useState('daily');
@@ -158,11 +501,8 @@ const App = () => {
     setLoginError('');
 
     try {
-      // Note: We use cors here so we can read the JSON response containing the user data
       const response = await fetch(GOOGLE_SCRIPT_URL, {
         method: 'POST',
-        // mode: 'cors' allows us to read the response if the server supports it, 
-        // but for GAS, standard text/plain without mode is safest for two-way comms.
         headers: { 'Content-Type': 'text/plain;charset=utf-8' },
         body: JSON.stringify({ action: 'login', pin: pinInput }),
       });
@@ -173,31 +513,40 @@ const App = () => {
         const user = result.user;
         setCurrentUser(user);
         setIsLoggedIn(true);
-        setPinInput(''); // Clear PIN for security
+        setPinInput(''); 
         
-        // Route user based on their default department
         setDepartment(user.department);
-        setFormData(getInitialFormData(user)); // Auto-fill form with their details
         
-        if (user.department === 'Quality Control') {
-           setQcStage('Extrusion'); // Default QC tab
+        // If they have no saved draft, set them up with their profile defaults
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (!saved) {
+          setFormData(getInitialFormData(user)); 
         }
+        
+        if (user.department === 'Quality Control') setQcStage('Extrusion');
       } else {
         setLoginError(result.message || "Invalid PIN. Please try again.");
       }
     } catch (error) {
       console.error("Login failed:", error);
-      setLoginError("Network error. Please check your connection and ensure the server is configured correctly.");
+      setLoginError("Network error. Please check your connection.");
     } finally {
       setIsLoggingIn(false);
     }
   };
 
   const handleLogout = () => {
+    // Warn user before clearing their shift accumulator
+    if (formData.actualOutput || formData.jobOrder || formData.extrusionRolls?.length > 0 || formData.extrusionMaterials?.length > 0) {
+      if (!window.confirm("WARNING: You have unsaved data in your shift draft. Logging out will delete it permanently. Are you sure you want to exit?")) {
+        return;
+      }
+    }
     setIsLoggedIn(false);
     setCurrentUser(null);
     setDepartment('Dashboard');
-    setFormData(getInitialFormData()); // Clear to default
+    localStorage.removeItem(STORAGE_KEY);
+    setFormData(getInitialFormData()); 
   };
 
   const handleInputChange = (e) => {
@@ -205,18 +554,67 @@ const App = () => {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  // --- Dynamic Array Handlers ---
-  const handleMaterialChange = (id, field, value) => {
-    setFormData(prev => ({ ...prev, extrusionMaterials: prev.extrusionMaterials.map(mat => mat.id === id ? { ...mat, [field]: value } : mat) }));
-  };
-  const addMaterialRow = () => setFormData(prev => ({ ...prev, extrusionMaterials: [...prev.extrusionMaterials, { id: Date.now(), batchNo: '', quantity: '' }] }));
-  const removeMaterialRow = (id) => setFormData(prev => ({ ...prev, extrusionMaterials: prev.extrusionMaterials.filter(mat => mat.id !== id) }));
-  
+  // --- Bag Handlers ---
   const handleBagWeightChange = (id, value) => {
     setFormData(prev => ({ ...prev, bagWeights: prev.bagWeights.map(bag => bag.id === id ? { ...bag, weight: value } : bag) }));
   };
   const addBagWeightRow = () => setFormData(prev => ({ ...prev, bagWeights: [...prev.bagWeights, { id: Date.now(), weight: '' }] }));
   const removeBagWeightRow = (id) => setFormData(prev => ({ ...prev, bagWeights: prev.bagWeights.filter(bag => bag.id !== id) }));
+
+  // --- Extrusion Accumulator Handlers ---
+  const handleAddRoll = () => {
+    if (!quickRollWeight || isNaN(quickRollWeight)) return;
+    const newRolls = [...(formData.extrusionRolls || []), { 
+      id: Date.now(), weight: Number(quickRollWeight), time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) 
+    }];
+    const newTotal = newRolls.reduce((sum, r) => sum + r.weight, 0);
+    setFormData(prev => ({ ...prev, extrusionRolls: newRolls, actualOutput: newTotal.toFixed(2) }));
+    setQuickRollWeight('');
+  };
+
+  const handleRemoveRoll = (id) => {
+    const newRolls = (formData.extrusionRolls || []).filter(r => r.id !== id);
+    const newTotal = newRolls.reduce((sum, r) => sum + r.weight, 0);
+    setFormData(prev => ({ ...prev, extrusionRolls: newRolls, actualOutput: newTotal > 0 ? newTotal.toFixed(2) : '' }));
+  };
+
+  const handleAddMaterial = () => {
+    if (!quickMaterialWeight || isNaN(quickMaterialWeight)) return;
+    const newMats = [...(formData.extrusionMaterials || []), {
+      id: Date.now(), batchNo: quickMaterialBatch || 'N/A', quantity: Number(quickMaterialWeight), time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
+    }];
+    setFormData(prev => ({ ...prev, extrusionMaterials: newMats }));
+    setQuickMaterialBatch('');
+    setQuickMaterialWeight('');
+  };
+
+  const handleRemoveMaterial = (id) => {
+    setFormData(prev => ({ ...prev, extrusionMaterials: (prev.extrusionMaterials || []).filter(m => m.id !== id) }));
+  };
+
+  const handleAddScrap = () => {
+    if (!quickScrapWeight || isNaN(quickScrapWeight)) return;
+    const newScrap = [...(formData.scrapEntries || []), {
+      id: Date.now(), type: quickScrapType, weight: Number(quickScrapWeight), time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
+    }];
+    const newSetup = newScrap.filter(s => s.type === 'setupScrap').reduce((sum, s) => sum + s.weight, 0);
+    const newProcess = newScrap.filter(s => s.type === 'processScrap').reduce((sum, s) => sum + s.weight, 0);
+    
+    setFormData(prev => ({ 
+      ...prev, scrapEntries: newScrap, setupScrap: newSetup > 0 ? newSetup.toFixed(2) : '', processScrap: newProcess > 0 ? newProcess.toFixed(2) : '' 
+    }));
+    setQuickScrapWeight('');
+  };
+
+  const handleRemoveScrap = (id) => {
+    const newScrap = (formData.scrapEntries || []).filter(s => s.id !== id);
+    const newSetup = newScrap.filter(s => s.type === 'setupScrap').reduce((sum, s) => sum + s.weight, 0);
+    const newProcess = newScrap.filter(s => s.type === 'processScrap').reduce((sum, s) => sum + s.weight, 0);
+    
+    setFormData(prev => ({ 
+      ...prev, scrapEntries: newScrap, setupScrap: newSetup > 0 ? newSetup.toFixed(2) : '', processScrap: newProcess > 0 ? newProcess.toFixed(2) : '' 
+    }));
+  };
 
   // --- Mass Balance ---
   useEffect(() => {
@@ -225,7 +623,7 @@ const App = () => {
       return;
     }
     let totalInput = department === 'Extrusion' 
-      ? formData.extrusionMaterials.reduce((sum, mat) => sum + Number(mat.quantity || 0), 0)
+      ? (formData.extrusionMaterials || []).reduce((sum, mat) => sum + Number(mat.quantity || 0), 0)
       : Number(formData.inputRollWeight || 0);
 
     const outputWeight = formData.uom === 'kg' ? Number(formData.actualOutput || 0) : 0;
@@ -234,7 +632,10 @@ const App = () => {
     const discrepancyKg = totalInput - totalAccounted;
     const discrepancyPercent = totalInput > 0 ? (Math.abs(discrepancyKg) / totalInput) * 100 : 0;
 
-    setMassBalance({ totalInput, totalAccounted, discrepancyKg, discrepancyPercent, isFailed: discrepancyPercent > 2.0 });
+    // Both cutting and full shift summaries now face the strict 2% check.
+    const isFailed = discrepancyPercent > 2.0;
+
+    setMassBalance({ totalInput, totalAccounted, discrepancyKg, discrepancyPercent, isFailed });
   }, [formData.extrusionMaterials, formData.inputRollWeight, formData.actualOutput, formData.setupScrap, formData.processScrap, formData.rejections, formData.uom, department]);
 
   // --- Dashboard Fetch Logic ---
@@ -262,7 +663,6 @@ const App = () => {
   };
 
   useEffect(() => {
-    // We only fetch dashboard data if they are logged in and looking at the dashboard
     if (isLoggedIn && department === 'Dashboard') {
       fetchDashboardData();
     }
@@ -302,7 +702,7 @@ const App = () => {
   const handleSave = async (e) => {
     e.preventDefault();
     if ((department === 'Extrusion' || department === 'Cutting') && massBalance.isFailed && !formData.discrepancyReason) {
-      alert("Mass balance failed. You must provide a reason for the discrepancy before saving.");
+      alert(t("Discrepancy Must Be Resolved"));
       return;
     }
     setIsSubmitting(true);
@@ -311,8 +711,10 @@ const App = () => {
       await fetch(GOOGLE_SCRIPT_URL, {
         method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(payload),
       });
-      alert(`Report saved successfully! [Department: ${department}]`);
-      // Reset form but KEEP the current user's auto-fill data
+      alert(`Report saved successfully! [Department: ${t(department)}]`);
+      
+      // Wipe the local draft and reset the form, keeping the user's base info
+      localStorage.removeItem(STORAGE_KEY);
       setFormData(getInitialFormData(currentUser)); 
     } catch (error) {
       alert("Network error: Could not connect to the database.");
@@ -333,19 +735,28 @@ const App = () => {
   // ================= RENDER LOGIN SCREEN =================
   if (!isLoggedIn) {
     return (
-      <div className="min-h-screen bg-slate-900 flex items-center justify-center p-4">
+      <div className="min-h-screen bg-slate-900 flex items-center justify-center p-4 relative">
+        <div className="absolute top-4 right-4">
+          <button 
+            onClick={() => setLanguage(l => l === 'en' ? 'bn' : l === 'bn' ? 'ms' : 'en')} 
+            className="flex items-center gap-2 text-slate-300 hover:text-white bg-slate-800 px-4 py-2 rounded-full text-sm font-medium transition-colors border border-slate-700"
+          >
+            <Globe size={16} /> {language === 'en' ? 'বাংলা' : language === 'bn' ? 'Bahasa Melayu' : 'English'}
+          </button>
+        </div>
+
         <div className="max-w-md w-full bg-white rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-300">
           <div className="bg-slate-800 p-8 text-center border-b border-slate-700">
             <div className="w-16 h-16 bg-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-blue-500/30">
               <Lock size={32} className="text-white" />
             </div>
-            <h1 className="text-2xl font-bold text-white mb-1">Production Hub</h1>
-            <p className="text-slate-400 text-sm">Secure Operator Access</p>
+            <h1 className="text-2xl font-bold text-white mb-1">{t("Production Hub")}</h1>
+            <p className="text-slate-400 text-sm">{t("Secure Operator Access")}</p>
           </div>
           
           <form onSubmit={handleLogin} className="p-8 space-y-6">
             <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-2">Enter Operator PIN</label>
+              <label className="block text-sm font-semibold text-slate-700 mb-2">{t("Enter Operator PIN")}</label>
               <input 
                 type="password" 
                 pattern="[0-9]*" 
@@ -364,11 +775,11 @@ const App = () => {
               disabled={isLoggingIn}
               className={`w-full py-4 rounded-xl font-bold text-white transition-all shadow-md ${isLoggingIn ? 'bg-slate-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700 hover:shadow-lg hover:-translate-y-0.5'}`}
             >
-              {isLoggingIn ? 'Verifying Credentials...' : 'Secure Login'}
+              {isLoggingIn ? t("Verifying Credentials...") : t("Secure Login")}
             </button>
           </form>
           <div className="bg-slate-50 p-4 text-center text-xs text-slate-500 border-t border-slate-100">
-            Version 2.1 (Beta) | Authorised Personnel Only
+            Version 2.3 (Beta) | Authorised Personnel Only
           </div>
         </div>
       </div>
@@ -393,7 +804,7 @@ const App = () => {
             <div className="p-6 space-y-4">
               <p className="text-sm text-slate-600">You are flagging a potential error in a recorded log. Management will review this record.</p>
               <div className="bg-slate-100 p-3 rounded-md text-sm text-slate-700 grid grid-cols-2 gap-2">
-                <div><span className="font-semibold block text-xs uppercase opacity-70">Department</span> {flagData.department}</div>
+                <div><span className="font-semibold block text-xs uppercase opacity-70">Department</span> {t(flagData.department)}</div>
                 <div><span className="font-semibold block text-xs uppercase opacity-70">Date</span> {flagData.date}</div>
                 <div className="col-span-2"><span className="font-semibold block text-xs uppercase opacity-70">Job Order</span> {flagData.jobOrder}</div>
               </div>
@@ -425,24 +836,30 @@ const App = () => {
         <div className="bg-slate-800 text-white p-6 print:bg-white print:text-slate-800 print:border-b">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
             <div>
-              <h1 className="text-2xl md:text-3xl font-bold">Daily Production Report</h1>
-              <p className="text-slate-300 print:text-slate-500 mt-1">Operational Log & Analytics</p>
+              <h1 className="text-2xl md:text-3xl font-bold">{t("Daily Production Report")}</h1>
+              <p className="text-slate-300 print:text-slate-500 mt-1">{t("Operational Log & Analytics")}</p>
             </div>
             
-            {/* User Profile Bug & Controls */}
             <div className="flex flex-wrap items-center gap-3 print:hidden w-full md:w-auto">
+              <button 
+                onClick={() => setLanguage(l => l === 'en' ? 'bn' : l === 'bn' ? 'ms' : 'en')} 
+                className="flex items-center gap-2 text-slate-300 hover:text-white bg-slate-700 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors border border-slate-600"
+              >
+                <Globe size={16} /> {language === 'en' ? 'BN' : language === 'bn' ? 'BM' : 'EN'}
+              </button>
+              
               <div className="flex items-center gap-3 bg-slate-900/50 px-4 py-2 rounded-lg border border-slate-700 flex-grow md:flex-grow-0">
                 <UserCircle className="text-blue-400" size={24} />
                 <div className="text-sm">
                   <p className="font-bold leading-tight">{currentUser.name}</p>
-                  <p className="text-xs text-slate-400 leading-tight">{currentUser.role} • {currentUser.shift}</p>
+                  <p className="text-xs text-slate-400 leading-tight">{t(currentUser.role)} • {currentUser.shift === 'AM' ? t('Morning (AM)') : t('Night (PM)')}</p>
                 </div>
               </div>
               <button type="button" onClick={handlePrint} className="flex-1 md:flex-none flex items-center justify-center gap-2 bg-slate-700 hover:bg-slate-600 px-4 py-3 md:py-2.5 rounded-lg text-sm font-medium transition-colors">
-                <Printer size={16} /> Print
+                <Printer size={16} /> {t("Print")}
               </button>
               <button type="button" onClick={handleLogout} className="flex-1 md:flex-none flex items-center justify-center gap-2 bg-red-500/20 hover:bg-red-500 hover:text-white text-red-400 px-4 py-3 md:py-2.5 rounded-lg text-sm font-medium transition-colors border border-red-500/30">
-                <LogOut size={16} /> Exit
+                <LogOut size={16} /> {t("Exit")}
               </button>
             </div>
           </div>
@@ -456,7 +873,7 @@ const App = () => {
                 className={`py-2 px-1 text-sm font-medium rounded-md transition-all flex items-center justify-center gap-1 min-w-[100px] ${department === dept ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-400 hover:text-white hover:bg-slate-800'}`}
               >
                 {dept === 'Dashboard' && <BarChart3 size={14} />}
-                {dept}
+                {t(dept)}
               </button>
             ))}
           </div>
@@ -506,7 +923,7 @@ const App = () => {
                         onClick={() => setAnalyticsDept(dept)}
                         className={`px-4 py-1.5 text-sm font-medium rounded-md transition-all ${analyticsDept === dept ? 'bg-white shadow-sm text-slate-800' : 'text-slate-500 hover:text-slate-700'}`}
                       >
-                        {dept}
+                        {t(dept)}
                       </button>
                     ))}
                   </div>
@@ -598,7 +1015,7 @@ const App = () => {
                 {customerSearchTerm && filteredOrders.length > 0 ? (
                   filteredOrders.map(order => {
                     const totals = dashboardData.joTotals[order.jo] || { extrusion: 0, cutting: 0, packing: 0 };
-                    const target = order.targetQty || 1; // Prevent division by zero
+                    const target = order.targetQty || 1; 
                     
                     const extPct = Math.min(100, (totals.extrusion / target) * 100);
                     const cutPct = Math.min(100, (totals.cutting / target) * 100);
@@ -803,38 +1220,43 @@ const App = () => {
             
             {/* Section 1: Session Details */}
             <section className="bg-slate-50 p-6 rounded-xl border border-slate-200 shadow-sm">
-              <div className="flex items-center gap-2 mb-4 text-slate-700">
-                <ClipboardList className="text-blue-600" />
-                <h2 className="text-lg font-semibold">Session Parameters</h2>
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-2 text-slate-700">
+                  <ClipboardList className="text-blue-600" />
+                  <h2 className="text-lg font-semibold">{t("Session Parameters")}</h2>
+                </div>
+                <div className="flex items-center gap-2 text-emerald-600 text-xs font-medium bg-emerald-50 px-3 py-1 rounded-full border border-emerald-100">
+                  <CheckCircle size={14} /> {t("Draft Auto-Saved")}
+                </div>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-slate-600 mb-1">Date</label>
+                  <label className="block text-sm font-medium text-slate-600 mb-1">{t("Date")}</label>
                   <input type="date" name="date" value={formData.date} onChange={handleInputChange} required className="w-full h-[42px] px-3 py-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white" />
                 </div>
                 
                 {department !== 'Incoming Goods' && (
                   <div>
-                    <label className="block text-sm font-medium text-slate-600 mb-1">Shift</label>
+                    <label className="block text-sm font-medium text-slate-600 mb-1">{t("Shift")}</label>
                     <select name="shift" value={formData.shift} onChange={handleInputChange} className="w-full h-[42px] px-3 py-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white">
-                      <option value="AM">Morning (AM)</option>
-                      <option value="PM">Night (PM)</option>
+                      <option value="AM">{t("Morning (AM)")}</option>
+                      <option value="PM">{t("Night (PM)")}</option>
                     </select>
                   </div>
                 )}
 
                 <div className={department === 'Incoming Goods' ? 'md:col-span-3' : ''}>
                   <label className="block text-sm font-medium text-slate-600 mb-1">
-                    {department === 'Incoming Goods' ? 'Receiver / Admin Name' : 
-                     department === 'Quality Control' ? 'QC Inspector' : 
-                     'Operator / Supervisor'}
+                    {department === 'Incoming Goods' ? t('Receiver / Admin Name') : 
+                     department === 'Quality Control' ? t('QC Inspector') : 
+                     t('Operator / Supervisor')}
                   </label>
                   <input type="text" name="supervisor" value={formData.supervisor} onChange={handleInputChange} required placeholder="e.g. John Doe" className="w-full h-[42px] px-3 py-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white" />
                 </div>
 
                 {(department === 'Extrusion' || department === 'Cutting' || department === 'Quality Control') && (
                   <div>
-                    <label className="block text-sm font-medium text-slate-600 mb-1">Machine No. (Optional for QC)</label>
+                    <label className="block text-sm font-medium text-slate-600 mb-1">{t("Machine No.")}</label>
                     <input type="text" name="machineId" value={formData.machineId} onChange={handleInputChange} required={department !== 'Quality Control'} placeholder={department === 'Extrusion' ? "EXT-01" : department === 'Cutting' ? "CUT-01" : "e.g. EXT-01"} className="w-full h-[42px] px-3 py-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white" />
                   </div>
                 )}
@@ -844,68 +1266,82 @@ const App = () => {
             {/* MANUFACTURING DEPARTMENTS (Extrusion & Cutting) */}
             {(department === 'Extrusion' || department === 'Cutting') && (
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                
                 {/* Material Inputs */}
-                <section className="bg-slate-50 p-6 rounded-xl border border-slate-200 shadow-sm">
+                <section className="bg-slate-50 p-6 rounded-xl border border-slate-200 shadow-sm flex flex-col">
                   <div className="flex items-center gap-2 mb-4 text-slate-700">
                     <Box className="text-blue-600" />
-                    <h2 className="text-lg font-semibold">Material Inputs</h2>
+                    <h2 className="text-lg font-semibold">{t("Material Inputs")}</h2>
                   </div>
                   
                   <div className="mb-4">
-                    <label className="block text-sm font-medium text-slate-600 mb-1">Job Order No.</label>
+                    <label className="block text-sm font-medium text-slate-600 mb-1">{t("Job Order No.")}</label>
                     <input type="text" name="jobOrder" value={formData.jobOrder} onChange={handleInputChange} required placeholder="WO-12345" className="w-full p-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white" />
                   </div>
 
                   {department === 'Extrusion' ? (
-                    <div className="space-y-4">
-                      {formData.extrusionMaterials.map((mat, index) => (
-                        <div key={mat.id} className="flex gap-4 items-end relative">
+                    <div className="space-y-4 flex-1">
+                      {/* --- NEW: MATERIAL ACCUMULATOR --- */}
+                      <div className="mb-2 bg-blue-50/50 p-4 rounded-lg border border-blue-100">
+                        <div className="flex items-center justify-between mb-3">
+                          <h3 className="text-sm font-semibold text-blue-800 flex items-center gap-1.5"><Clock size={16}/> {t("Shift Accumulator (Materials)")}</h3>
+                        </div>
+                        <p className="text-xs text-slate-500 mb-3">{t("Load hoppers incrementally. Click '+ Add Another Material' when a new batch is added during the shift.")}</p>
+                        <div className="flex gap-2 items-end mb-3">
                           <div className="flex-1">
-                            <label className="block text-sm font-medium text-slate-600 mb-1">Batch No. {index + 1}</label>
+                            <label className="block text-xs font-medium text-blue-700 mb-1">{t("Batch No.")}</label>
                             <input 
                               type="text" 
-                              value={mat.batchNo} 
-                              onChange={(e) => handleMaterialChange(mat.id, 'batchNo', e.target.value)} 
-                              placeholder="e.g. B-1029" 
-                              className="w-full p-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white" 
+                              value={quickMaterialBatch} 
+                              onChange={e => setQuickMaterialBatch(e.target.value)} 
+                              className="w-full p-2 border border-blue-200 rounded-md focus:ring-2 focus:ring-blue-500 bg-white shadow-sm" 
+                              placeholder={t("Optional")} 
                             />
                           </div>
                           <div className="flex-1">
-                            <label className="block text-sm font-medium text-slate-600 mb-1">Quantity (kg)</label>
+                            <label className="block text-xs font-medium text-blue-700 mb-1">{t("Quantity (kg)")}</label>
                             <input 
                               type="number" 
                               step="0.01" 
-                              value={mat.quantity} 
-                              onChange={(e) => handleMaterialChange(mat.id, 'quantity', e.target.value)} 
+                              value={quickMaterialWeight} 
+                              onChange={e => setQuickMaterialWeight(e.target.value)} 
+                              onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), handleAddMaterial())}
+                              className="w-full p-2 border border-blue-200 rounded-md focus:ring-2 focus:ring-blue-500 bg-white shadow-sm" 
                               placeholder="0.00" 
-                              className="w-full p-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white" 
                             />
                           </div>
-                          {formData.extrusionMaterials.length > 1 && (
-                            <button 
-                              type="button" 
-                              onClick={() => removeMaterialRow(mat.id)} 
-                              className="p-2 mb-0.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors"
-                              title="Remove Material"
-                            >
-                              <Trash2 size={20} />
-                            </button>
-                          )}
+                          <button 
+                            type="button" 
+                            onClick={handleAddMaterial}
+                            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors shadow-sm whitespace-nowrap"
+                          >
+                            {t("+ Add")}
+                          </button>
                         </div>
-                      ))}
-                      
-                      <button 
-                        type="button" 
-                        onClick={addMaterialRow} 
-                        className="mt-2 flex items-center gap-2 text-sm text-blue-600 font-medium hover:text-blue-800 transition-colors"
-                      >
-                        <PlusCircle size={18} /> Add Another Material
-                      </button>
+                        
+                        {formData.extrusionMaterials?.length > 0 && (
+                          <div className="space-y-2 mt-4 max-h-40 overflow-y-auto pr-2 custom-scrollbar">
+                            {formData.extrusionMaterials.map((mat) => (
+                              <div key={mat.id} className="flex justify-between items-center bg-white p-2.5 rounded border border-blue-100 text-sm shadow-sm">
+                                <span className="text-slate-500 font-medium">{t("Batch No.")}: {mat.batchNo} <span className="text-xs font-normal ml-1">({mat.time})</span></span>
+                                <div className="flex items-center gap-3">
+                                  <span className="font-bold text-slate-700">{mat.quantity} kg</span>
+                                  <button type="button" onClick={() => handleRemoveMaterial(mat.id)} className="text-slate-400 hover:text-red-500 bg-slate-50 hover:bg-red-50 p-1.5 rounded transition-colors"><Trash2 size={14}/></button>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                        <div className="mt-3 pt-3 border-t border-blue-200 flex justify-between items-center text-sm">
+                          <span className="font-semibold text-blue-800">{t("Total Input Material:")}</span>
+                          <span className="font-bold text-blue-900">{formData.extrusionMaterials?.reduce((sum, m) => sum + Number(m.quantity || 0), 0).toFixed(2)} kg</span>
+                        </div>
+                      </div>
                     </div>
                   ) : (
                     <div className="space-y-4">
                       <div>
-                        <label className="block text-sm font-medium text-slate-600 mb-1">Input Roll Weight (kg)</label>
+                        <label className="block text-sm font-medium text-slate-600 mb-1">{t("Input Roll Weight (kg)")}</label>
                         <input type="number" step="0.01" name="inputRollWeight" value={formData.inputRollWeight} onChange={handleInputChange} placeholder="0.00" className="w-full p-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white" />
                       </div>
                     </div>
@@ -916,16 +1352,73 @@ const App = () => {
                 <section className="bg-slate-50 p-6 rounded-xl border border-slate-200 shadow-sm flex flex-col">
                   <div className="flex items-center gap-2 mb-4 text-slate-700">
                     <Settings className="text-blue-600" />
-                    <h2 className="text-lg font-semibold">Production Output & Scrap</h2>
+                    <h2 className="text-lg font-semibold">{t("Production Output & Scrap")}</h2>
                   </div>
+
+                  {/* --- EXTRUSION ROLL TRACKER --- */}
+                  {department === 'Extrusion' && (
+                    <div className="mb-6 bg-blue-50/50 p-4 rounded-lg border border-blue-100">
+                      <div className="flex items-center justify-between mb-3">
+                        <h3 className="text-sm font-semibold text-blue-800 flex items-center gap-1.5"><Clock size={16}/> {t("Shift Accumulator (Rolls)")}</h3>
+                      </div>
+                      
+                      <div className="flex gap-2 items-end mb-3">
+                        <div className="flex-1">
+                          <label className="block text-xs font-medium text-blue-700 mb-1">{t("New Roll Weight (kg)")}</label>
+                          <input 
+                            type="number" 
+                            step="0.01" 
+                            value={quickRollWeight} 
+                            onChange={e => setQuickRollWeight(e.target.value)} 
+                            onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), handleAddRoll())}
+                            className="w-full p-2 border border-blue-200 rounded-md focus:ring-2 focus:ring-blue-500 bg-white shadow-sm" 
+                            placeholder="e.g. 45.5" 
+                          />
+                        </div>
+                        <button 
+                          type="button" 
+                          onClick={handleAddRoll}
+                          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors shadow-sm whitespace-nowrap"
+                        >
+                          {t("+ Add Roll")}
+                        </button>
+                      </div>
+                      
+                      {formData.extrusionRolls?.length > 0 && (
+                        <div className="space-y-2 mt-4 max-h-40 overflow-y-auto pr-2 custom-scrollbar">
+                          {formData.extrusionRolls.map((roll, i) => (
+                            <div key={roll.id} className="flex justify-between items-center bg-white p-2.5 rounded border border-blue-100 text-sm shadow-sm">
+                              <span className="text-slate-500 font-medium">Roll {i + 1} <span className="text-xs font-normal ml-1">({roll.time})</span></span>
+                              <div className="flex items-center gap-3">
+                                <span className="font-bold text-slate-700">{roll.weight} kg</span>
+                                <button type="button" onClick={() => handleRemoveRoll(roll.id)} className="text-slate-400 hover:text-red-500 bg-slate-50 hover:bg-red-50 p-1.5 rounded transition-colors"><Trash2 size={14}/></button>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
                   
                   <div className="flex gap-4 mb-4">
                     <div className="flex-1">
-                      <label className="block text-sm font-medium text-slate-600 mb-1">Actual Good Output</label>
-                      <input type="number" step="0.01" name="actualOutput" value={formData.actualOutput} onChange={handleInputChange} required placeholder="0.00" className="w-full p-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white text-lg font-bold text-green-700" />
+                      <label className="block text-sm font-medium text-slate-600 mb-1">
+                        {department === 'Extrusion' ? t('Accumulated Good Output') : t('Actual Good Output')}
+                      </label>
+                      <input 
+                        type="number" 
+                        step="0.01" 
+                        name="actualOutput" 
+                        value={formData.actualOutput} 
+                        onChange={handleInputChange} 
+                        required
+                        placeholder="0.00" 
+                        readOnly={department === 'Extrusion' && formData.extrusionRolls?.length > 0}
+                        className={`w-full p-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none text-lg font-bold text-green-700 ${department === 'Extrusion' && formData.extrusionRolls?.length > 0 ? 'bg-slate-100 text-slate-500 border-slate-200' : 'bg-white'}`} 
+                      />
                     </div>
                     <div className="w-24">
-                      <label className="block text-sm font-medium text-slate-600 mb-1">UoM</label>
+                      <label className="block text-sm font-medium text-slate-600 mb-1">{t("UoM")}</label>
                       <select name="uom" value={formData.uom} onChange={handleInputChange} className="w-full p-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white">
                         <option value="kg">kg</option>
                         <option value="pcs">pcs</option>
@@ -933,14 +1426,85 @@ const App = () => {
                     </div>
                   </div>
 
+                  {/* --- SCRAP ACCUMULATOR --- */}
+                  <div className={`mb-6 bg-rose-50/50 p-4 rounded-lg border border-rose-100 mt-4`}>
+                    <div className="flex items-center justify-between mb-3">
+                      <h3 className="text-sm font-semibold text-rose-800 flex items-center gap-1.5"><Clock size={16}/> {t("Shift Accumulator (Scrap)")}</h3>
+                    </div>
+                    <div className="flex gap-2 items-end mb-3">
+                      <div className="flex-1">
+                        <label className="block text-xs font-medium text-rose-700 mb-1">{t("Type")}</label>
+                        <select 
+                          value={quickScrapType} 
+                          onChange={e => setQuickScrapType(e.target.value)} 
+                          className="w-full p-2 border border-rose-200 rounded-md focus:ring-2 focus:ring-rose-500 bg-white shadow-sm"
+                        >
+                          <option value="setupScrap">{t("Setup Scrap")}</option>
+                          <option value="processScrap">{t("Process Scrap")}</option>
+                        </select>
+                      </div>
+                      <div className="flex-1">
+                        <label className="block text-xs font-medium text-rose-700 mb-1">{t("Weight (kg)")}</label>
+                        <input 
+                          type="number" 
+                          step="0.01" 
+                          value={quickScrapWeight} 
+                          onChange={e => setQuickScrapWeight(e.target.value)} 
+                          onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), handleAddScrap())}
+                          className="w-full p-2 border border-rose-200 rounded-md focus:ring-2 focus:ring-rose-500 bg-white shadow-sm" 
+                          placeholder="0.00" 
+                        />
+                      </div>
+                      <button 
+                        type="button" 
+                        onClick={handleAddScrap}
+                        className="bg-rose-600 hover:bg-rose-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors shadow-sm whitespace-nowrap"
+                      >
+                        {t("+ Add")}
+                      </button>
+                    </div>
+                    
+                    {formData.scrapEntries?.length > 0 && (
+                      <div className="space-y-2 mt-4 max-h-40 overflow-y-auto pr-2 custom-scrollbar">
+                        {formData.scrapEntries.map((scrap) => (
+                          <div key={scrap.id} className="flex justify-between items-center bg-white p-2.5 rounded border border-rose-100 text-sm shadow-sm">
+                            <span className="text-slate-500 font-medium">{scrap.type === 'setupScrap' ? t('Setup Scrap') : t('Process Scrap')} <span className="text-xs font-normal ml-1">({scrap.time})</span></span>
+                            <div className="flex items-center gap-3">
+                              <span className="font-bold text-slate-700">{scrap.weight} kg</span>
+                              <button type="button" onClick={() => handleRemoveScrap(scrap.id)} className="text-slate-400 hover:text-red-500 bg-slate-50 hover:bg-red-50 p-1.5 rounded transition-colors"><Trash2 size={14}/></button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
                   <div className="space-y-4 pt-2 border-t border-slate-200">
                     <div>
-                      <label className="block text-sm font-medium text-slate-600 mb-1">Setup Scrap (kg) - Purging/Colour Change</label>
-                      <input type="number" step="0.01" name="setupScrap" value={formData.setupScrap} onChange={handleInputChange} placeholder="0.00" className="w-full p-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white" />
+                      <label className="block text-sm font-medium text-slate-600 mb-1">{t("Setup Scrap (kg) - Purging/Colour Change")}</label>
+                      <input 
+                        type="number" 
+                        step="0.01" 
+                        name="setupScrap" 
+                        value={formData.setupScrap} 
+                        onChange={handleInputChange} 
+                        readOnly={formData.scrapEntries?.some(s => s.type === 'setupScrap')}
+                        className={`w-full p-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none ${formData.scrapEntries?.some(s => s.type === 'setupScrap') ? 'bg-slate-100 text-slate-500 border-slate-200' : 'bg-white'}`} 
+                        placeholder="0.00" 
+                      />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-slate-600 mb-1">Process Scrap (kg) - Trims/Tears</label>
-                      <input type="number" step="0.01" name="processScrap" value={formData.processScrap} onChange={handleInputChange} placeholder="0.00" className="w-full p-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white" />
+                      <label className="block text-sm font-medium text-slate-600 mb-1">{t("Process Scrap (kg) - Trims/Tears")}</label>
+                      <input 
+                        type="number" 
+                        step="0.01" 
+                        name="processScrap" 
+                        value={formData.processScrap} 
+                        onChange={handleInputChange} 
+                        readOnly={formData.scrapEntries?.some(s => s.type === 'processScrap')}
+                        className={`w-full p-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none ${formData.scrapEntries?.some(s => s.type === 'processScrap') ? 'bg-slate-100 text-slate-500 border-slate-200' : 'bg-white'}`} 
+                        placeholder="0.00" 
+                      />
                     </div>
                   </div>
                 </section>
@@ -953,20 +1517,20 @@ const App = () => {
                 <section className="bg-slate-50 p-6 rounded-xl border border-slate-200 shadow-sm">
                   <div className="flex items-center gap-2 mb-4 text-slate-700">
                     <Package className="text-blue-600" />
-                    <h2 className="text-lg font-semibold">Finished Goods Packing</h2>
+                    <h2 className="text-lg font-semibold">{t("Finished Goods Packing")}</h2>
                   </div>
                   <div className="space-y-4">
                     <div className="md:col-span-2">
-                      <label className="block text-sm font-medium text-slate-600 mb-1">Job Order No.</label>
+                      <label className="block text-sm font-medium text-slate-600 mb-1">{t("Job Order No.")}</label>
                       <input type="text" name="jobOrder" value={formData.jobOrder} onChange={handleInputChange} required placeholder="WO-12345" className="w-full p-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white" />
                     </div>
                     <div className="flex gap-2">
                       <div className="flex-1">
-                        <label className="block text-sm font-medium text-slate-600 mb-1">Packing Size</label>
+                        <label className="block text-sm font-medium text-slate-600 mb-1">{t("Packing Size")}</label>
                         <input type="number" step="0.01" name="packingSize" value={formData.packingSize} onChange={handleInputChange} placeholder="e.g. 25.00" className="w-full p-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white" />
                       </div>
                       <div className="w-28">
-                        <label className="block text-sm font-medium text-slate-600 mb-1">UoM</label>
+                        <label className="block text-sm font-medium text-slate-600 mb-1">{t("UoM")}</label>
                         <select name="packingUom" value={formData.packingUom} onChange={handleInputChange} className="w-full p-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white">
                           <option value="kg/bag">kg/bag</option>
                           <option value="pcs/bag">pcs/bag</option>
@@ -976,71 +1540,75 @@ const App = () => {
                       </div>
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-slate-600 mb-1">Quantity Packed</label>
+                      <label className="block text-sm font-medium text-slate-600 mb-1">{t("Quantity Packed")}</label>
                       <input type="number" name="quantityPacked" value={formData.quantityPacked} onChange={handleInputChange} placeholder="e.g. 10" className="w-full p-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white" />
                     </div>
                   </div>
                   
                   {(formData.packingSize && formData.quantityPacked) ? (
                     <div className="pt-3 border-t border-slate-200 mt-4">
-                      <p className="text-sm text-slate-500">Standardised Total: <strong className="text-slate-800">{(Number(formData.packingSize) * Number(formData.quantityPacked)).toFixed(2)} {formData.packingUom.split('/')[0]}</strong></p>
+                      <p className="text-sm text-slate-500">{t("Standardised Total:")} <strong className="text-slate-800">{(Number(formData.packingSize) * Number(formData.quantityPacked)).toFixed(2)} {formData.packingUom.split('/')[0]}</strong></p>
                     </div>
                   ) : null}
                 </section>
 
-                <section className="bg-slate-50 p-6 rounded-xl border border-slate-200 shadow-sm">
+                <section className="bg-slate-50 p-6 rounded-xl border border-slate-200 shadow-sm flex flex-col">
                   <div className="flex items-center gap-2 mb-4 text-slate-700">
                     <Scale className="text-blue-600" />
-                    <h2 className="text-lg font-semibold">Palletisation Details</h2>
+                    <h2 className="text-lg font-semibold">{t("Palletisation Details")}</h2>
                   </div>
-                  <div className="space-y-4">
-                    <div className="mb-4">
-                      <label className="block text-sm font-medium text-slate-600 mb-1">Pallet Weight (kg) [Tare/Gross]</label>
-                      <input type="number" step="0.01" name="palletWeight" value={formData.palletWeight} onChange={handleInputChange} placeholder="e.g. 15.00" className="w-full md:w-1/2 p-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white" />
-                    </div>
+                  
+                  <div className="mb-4">
+                    <label className="block text-sm font-medium text-slate-600 mb-1">{t("Pallet Weight (kg) [Tare/Gross]")}</label>
+                    <input type="number" step="0.01" name="palletWeight" value={formData.palletWeight} onChange={handleInputChange} placeholder="e.g. 15.00" className="w-full md:w-1/2 p-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white" />
+                  </div>
 
-                    <div className="pt-4 border-t border-slate-200">
-                      <h3 className="text-sm font-semibold text-slate-600 mb-3">Individual Bag/Carton Weights (kg)</h3>
-                      {formData.bagWeights.map((bag, index) => (
-                        <div key={bag.id} className="flex gap-4 items-end mb-3">
-                          <div className="flex-1">
-                            <label className="block text-xs font-medium text-slate-500 mb-1">Bag {index + 1}</label>
-                            <input 
-                              type="number" 
-                              step="0.01" 
-                              value={bag.weight} 
-                              onChange={(e) => handleBagWeightChange(bag.id, e.target.value)} 
-                              placeholder="e.g. 25.00" 
-                              className="w-full p-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white" 
-                            />
-                          </div>
-                          {formData.bagWeights.length > 1 && (
-                            <button 
-                              type="button" 
-                              onClick={() => removeBagWeightRow(bag.id)} 
-                              className="p-2 mb-0.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors"
-                              title="Remove Bag"
-                            >
-                              <Trash2 size={20} />
-                            </button>
-                          )}
+                  <div className="pt-4 border-t border-slate-200 flex-1">
+                    <div className="flex items-center justify-between mb-3">
+                      <h3 className="text-sm font-semibold text-slate-800 flex items-center gap-1.5"><Clock size={16} className="text-slate-500"/> {t("Individual Bag/Carton Accumulator")}</h3>
+                    </div>
+                    
+                    <p className="text-xs text-slate-500 mb-3">{t("Log bags incrementally as they are packed onto the pallet.")}</p>
+                    
+                    {formData.bagWeights.map((bag, index) => (
+                      <div key={bag.id} className="flex gap-4 items-end mb-2">
+                        <div className="flex-1">
+                          <label className="block text-xs font-medium text-slate-500 mb-1">{t("Bag")} {index + 1}</label>
+                          <input 
+                            type="number" 
+                            step="0.01" 
+                            value={bag.weight} 
+                            onChange={(e) => handleBagWeightChange(bag.id, e.target.value)} 
+                            placeholder="e.g. 25.00" 
+                            className="w-full p-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white" 
+                          />
                         </div>
-                      ))}
-                      
-                      <button 
-                        type="button" 
-                        onClick={addBagWeightRow} 
-                        className="mt-1 flex items-center gap-2 text-sm text-blue-600 font-medium hover:text-blue-800 transition-colors"
-                      >
-                        <PlusCircle size={18} /> Add Another Bag
-                      </button>
-                    </div>
+                        {formData.bagWeights.length > 1 && (
+                          <button 
+                            type="button" 
+                            onClick={() => removeBagWeightRow(bag.id)} 
+                            className="p-2 mb-0.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors"
+                            title="Remove Bag"
+                          >
+                            <Trash2 size={20} />
+                          </button>
+                        )}
+                      </div>
+                    ))}
+                    
+                    <button 
+                      type="button" 
+                      onClick={addBagWeightRow} 
+                      className="mt-2 flex items-center gap-2 text-sm text-blue-600 font-medium hover:text-blue-800 transition-colors"
+                    >
+                      <PlusCircle size={18} /> {t("Add Another Bag")}
+                    </button>
+                  </div>
 
-                    <div className="pt-4 mt-2">
-                      <p className="text-sm text-slate-500">Actual Bag Weight submitted: <strong className="text-slate-800">
-                        {formData.bagWeights.reduce((sum, bag) => sum + Number(bag.weight || 0), 0).toFixed(2)} kg
-                      </strong></p>
-                    </div>
+                  <div className="pt-4 mt-4 border-t border-slate-200">
+                    <p className="text-sm text-slate-500">{t("Actual Bag Weight submitted:")} <strong className="text-slate-800">
+                      {formData.bagWeights.reduce((sum, bag) => sum + Number(bag.weight || 0), 0).toFixed(2)} kg
+                    </strong></p>
                   </div>
                 </section>
               </div>
@@ -1051,20 +1619,20 @@ const App = () => {
               <section className="bg-slate-50 p-6 rounded-xl border border-slate-200 shadow-sm max-w-2xl mx-auto">
                 <div className="flex items-center gap-2 mb-4 text-slate-700">
                   <Truck className="text-blue-600" />
-                  <h2 className="text-lg font-semibold">Dispatch / Shipping</h2>
+                  <h2 className="text-lg font-semibold">{t("Dispatch / Shipping")}</h2>
                 </div>
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium text-slate-600 mb-1">Job Order No.</label>
+                    <label className="block text-sm font-medium text-slate-600 mb-1">{t("Job Order No.")}</label>
                     <input type="text" name="jobOrder" value={formData.jobOrder} onChange={handleInputChange} required placeholder="WO-12345" className="w-full p-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white" />
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-slate-600 mb-1">Shipped Quantity (kg)</label>
+                      <label className="block text-sm font-medium text-slate-600 mb-1">{t("Shipped Quantity (kg)")}</label>
                       <input type="number" step="0.01" name="dispatchQty" value={formData.dispatchQty} onChange={handleInputChange} placeholder="0.00" className="w-full p-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white" />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-slate-600 mb-1">Delivery Order (DO) / Invoice No.</label>
+                      <label className="block text-sm font-medium text-slate-600 mb-1">{t("Delivery Order (DO) / Invoice No.")}</label>
                       <input type="text" name="deliveryOrderNo" value={formData.deliveryOrderNo} onChange={handleInputChange} placeholder="e.g. DO-99812" className="w-full p-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white" />
                     </div>
                   </div>
@@ -1077,43 +1645,43 @@ const App = () => {
               <section className="bg-slate-50 p-6 rounded-xl border border-slate-200 shadow-sm max-w-2xl mx-auto">
                 <div className="flex items-center gap-2 mb-4 text-slate-700">
                   <ArrowDownToLine className="text-blue-600" />
-                  <h2 className="text-lg font-semibold">Raw Material Inwards</h2>
+                  <h2 className="text-lg font-semibold">{t("Raw Material Inwards")}</h2>
                 </div>
                 
                 <div className="space-y-4">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-slate-600 mb-1">Material Name / ID</label>
+                      <label className="block text-sm font-medium text-slate-600 mb-1">{t("Material Name / ID")}</label>
                       <input type="text" name="restockMaterial" value={formData.restockMaterial} onChange={handleInputChange} required placeholder="e.g. LLDPE-1002" className="w-full p-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white" />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-slate-600 mb-1">Incoming / Received Amount (kg)</label>
+                      <label className="block text-sm font-medium text-slate-600 mb-1">{t("Incoming / Received Amount (kg)")}</label>
                       <input type="number" step="0.01" name="restockAmount" value={formData.restockAmount} onChange={handleInputChange} required placeholder="0.00" className="w-full p-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white text-lg font-bold text-blue-700" />
                     </div>
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-slate-600 mb-1">Supplier Name</label>
-                      <input type="text" name="supplier" value={formData.supplier} onChange={handleInputChange} placeholder="Optional" className="w-full p-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white" />
+                      <label className="block text-sm font-medium text-slate-600 mb-1">{t("Supplier Name")}</label>
+                      <input type="text" name="supplier" value={formData.supplier} onChange={handleInputChange} placeholder={t("Optional")} className="w-full p-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white" />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-slate-600 mb-1">Purchase Order (PO) No.</label>
-                      <input type="text" name="poNumber" value={formData.poNumber} onChange={handleInputChange} placeholder="Optional" className="w-full p-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white" />
+                      <label className="block text-sm font-medium text-slate-600 mb-1">{t("Purchase Order (PO) No.")}</label>
+                      <input type="text" name="poNumber" value={formData.poNumber} onChange={handleInputChange} placeholder={t("Optional")} className="w-full p-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white" />
                     </div>
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4 border-t border-slate-200 mt-4">
                     <div>
-                      <label className="block text-sm font-medium text-slate-600 mb-1">Batch / Lot Number</label>
+                      <label className="block text-sm font-medium text-slate-600 mb-1">{t("Batch No.")}</label>
                       <input type="text" name="batchNumber" value={formData.batchNumber} onChange={handleInputChange} placeholder="e.g. B-202311" className="w-full p-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white" />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-slate-600 mb-1">Storage Location / Zone</label>
+                      <label className="block text-sm font-medium text-slate-600 mb-1">{t("Storage Location / Zone")}</label>
                       <input type="text" name="location" value={formData.location} onChange={handleInputChange} placeholder="e.g. Aisle 4, Rack B" className="w-full p-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white" />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-slate-600 mb-1">Quality / Condition Check</label>
+                      <label className="block text-sm font-medium text-slate-600 mb-1">{t("Quality / Condition Check")}</label>
                       <select name="incomingQualityCheck" value={formData.incomingQualityCheck} onChange={handleInputChange} className="w-full p-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white">
                         <option value="Pass">Pass - Packaging Intact</option>
                         <option value="Damaged">Warning - Damaged Packaging</option>
@@ -1130,7 +1698,7 @@ const App = () => {
               <section className="bg-slate-50 p-6 rounded-xl border border-slate-200 shadow-sm max-w-3xl mx-auto">
                 <div className="flex items-center gap-2 mb-6 text-slate-700">
                   <CheckCircle className="text-blue-600" />
-                  <h2 className="text-lg font-semibold">Quality Control Assessment</h2>
+                  <h2 className="text-lg font-semibold">{t("Quality Control Assessment")}</h2>
                 </div>
                 
                 {/* QC Stage Toggle */}
@@ -1142,44 +1710,44 @@ const App = () => {
                       onClick={() => setQcStage(stage)}
                       className={`flex-1 py-2 px-2 text-sm font-medium rounded-md transition-all ${qcStage === stage ? 'bg-white text-blue-700 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
                     >
-                      {stage} QC
+                      {t(stage)} QC
                     </button>
                   ))}
                 </div>
 
                 <div className="space-y-6">
                   <div>
-                    <label className="block text-sm font-medium text-slate-600 mb-1">Job Order No. (Under Inspection)</label>
+                    <label className="block text-sm font-medium text-slate-600 mb-1">{t("Job Order No. (Under Inspection)")}</label>
                     <input type="text" name="jobOrder" value={formData.jobOrder} onChange={handleInputChange} required placeholder="WO-12345" className="w-full p-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white" />
                   </div>
 
                   <div className="space-y-3 pt-2">
                     {qcStage === 'Extrusion' && (
                       <>
-                        <QCField label="Thickness Check (Microns)" name="qcExtThickness" statusName="qcExtThicknessStatus" formData={formData} onChange={handleInputChange} placeholder="e.g. 50" />
-                        <QCField label="Width Check (mm)" name="qcExtWidth" statusName="qcExtWidthStatus" formData={formData} onChange={handleInputChange} placeholder="e.g. 1200" />
+                        <QCField label={t("Thickness Check (Microns)")} name="qcExtThickness" statusName="qcExtThicknessStatus" formData={formData} onChange={handleInputChange} placeholder="e.g. 50" t={t} />
+                        <QCField label={t("Width Check (mm)")} name="qcExtWidth" statusName="qcExtWidthStatus" formData={formData} onChange={handleInputChange} placeholder="e.g. 1200" t={t} />
                       </>
                     )}
 
                     {qcStage === 'Cutting' && (
                       <>
-                        <QCField label="Seal Integrity Assessment" name="qcCutSeal" statusName="qcCutSealStatus" formData={formData} onChange={handleInputChange} placeholder="Visual / Drop Test notes..." />
-                        <QCField label="Length Check (mm)" name="qcCutLength" statusName="qcCutLengthStatus" formData={formData} onChange={handleInputChange} placeholder="e.g. 800" />
+                        <QCField label={t("Seal Integrity Assessment")} name="qcCutSeal" statusName="qcCutSealStatus" formData={formData} onChange={handleInputChange} placeholder="Visual / Drop Test notes..." t={t} />
+                        <QCField label={t("Length Check (mm)")} name="qcCutLength" statusName="qcCutLengthStatus" formData={formData} onChange={handleInputChange} placeholder="e.g. 800" t={t} />
                       </>
                     )}
 
                     {qcStage === 'Packing' && (
                       <>
-                        <QCField label="Packing Size (Bag Weight - kg)" name="qcPackBagWeight" statusName="qcPackBagWeightStatus" formData={formData} onChange={handleInputChange} placeholder="e.g. 25.0" />
-                        <QCField label="Quantity Check (Bags per Pallet)" name="qcPackBagsPerPallet" statusName="qcPackBagsPerPalletStatus" formData={formData} onChange={handleInputChange} placeholder="e.g. 40" />
-                        <QCField label="Total Bags Verified" name="qcPackTotalBags" statusName="qcPackTotalBagsStatus" formData={formData} onChange={handleInputChange} placeholder="e.g. 400" />
-                        <QCField label="Total Pallets Counted" name="qcPackTotalPallets" statusName="qcPackTotalPalletsStatus" formData={formData} onChange={handleInputChange} placeholder="e.g. 10" />
+                        <QCField label={t("Packing Size (Bag Weight - kg)")} name="qcPackBagWeight" statusName="qcPackBagWeightStatus" formData={formData} onChange={handleInputChange} placeholder="e.g. 25.0" t={t} />
+                        <QCField label={t("Quantity Check (Bags per Pallet)")} name="qcPackBagsPerPallet" statusName="qcPackBagsPerPalletStatus" formData={formData} onChange={handleInputChange} placeholder="e.g. 40" t={t} />
+                        <QCField label={t("Total Bags Verified")} name="qcPackTotalBags" statusName="qcPackTotalBagsStatus" formData={formData} onChange={handleInputChange} placeholder="e.g. 400" t={t} />
+                        <QCField label={t("Total Pallets Counted")} name="qcPackTotalPallets" statusName="qcPackTotalPalletsStatus" formData={formData} onChange={handleInputChange} placeholder="e.g. 10" t={t} />
                       </>
                     )}
                   </div>
 
                   <div className="pt-4 border-t border-slate-200">
-                    <label className="block text-sm font-medium text-slate-600 mb-1">Overall QC Remarks / Issues Noted</label>
+                    <label className="block text-sm font-medium text-slate-600 mb-1">{t("Overall QC Remarks / Issues Noted")}</label>
                     <textarea 
                       name="qcNotes" 
                       value={formData.qcNotes} 
@@ -1202,19 +1770,19 @@ const App = () => {
                   </div>
                   <div className="flex-1">
                     <h3 className={`font-bold ${massBalance.isFailed ? 'text-red-800' : 'text-emerald-800'}`}>
-                      {massBalance.isFailed ? 'Mass Balance Failed (Discrepancy > 2%)' : 'Mass Balance Verified'}
+                      {massBalance.isFailed ? t('Mass Balance Failed (Discrepancy > 2%)') : t('Mass Balance Verified')}
                     </h3>
                     <div className="mt-2 text-sm grid grid-cols-2 md:grid-cols-4 gap-4 text-slate-700">
-                      <div><span className="block text-xs uppercase opacity-70">Total Input</span><span className="font-semibold">{massBalance.totalInput.toFixed(2)} kg</span></div>
-                      <div><span className="block text-xs uppercase opacity-70">Total Output + Scrap</span><span className="font-semibold">{massBalance.totalAccounted.toFixed(2)} kg</span></div>
+                      <div><span className="block text-xs uppercase opacity-70">{t("Total Input")}</span><span className="font-semibold">{massBalance.totalInput.toFixed(2)} kg</span></div>
+                      <div><span className="block text-xs uppercase opacity-70">{t("Total Output + Scrap")}</span><span className="font-semibold">{massBalance.totalAccounted.toFixed(2)} kg</span></div>
                       <div>
-                        <span className="block text-xs uppercase opacity-70">Variance</span>
+                        <span className="block text-xs uppercase opacity-70">{t("Variance")}</span>
                         <span className={`font-semibold ${massBalance.isFailed ? 'text-red-600' : 'text-emerald-600'}`}>
                           {massBalance.discrepancyKg > 0 ? '-' : '+'}{Math.abs(massBalance.discrepancyKg).toFixed(2)} kg
                         </span>
                       </div>
                       <div>
-                        <span className="block text-xs uppercase opacity-70">Error Margin</span>
+                        <span className="block text-xs uppercase opacity-70">{t("Error Margin")}</span>
                         <span className={`font-semibold ${massBalance.isFailed ? 'text-red-600' : 'text-emerald-600'}`}>
                           {massBalance.discrepancyPercent.toFixed(2)}%
                         </span>
@@ -1223,7 +1791,7 @@ const App = () => {
                     
                     {massBalance.isFailed && (
                       <div className="mt-4 pt-4 border-t border-red-200">
-                        <label className="block text-sm font-medium text-red-800 mb-1">Reason for Discrepancy (Required for Override)</label>
+                        <label className="block text-sm font-medium text-red-800 mb-1">{t("Reason for Discrepancy (Required for Override)")}</label>
                         <input 
                           type="text" 
                           name="discrepancyReason" 
@@ -1240,25 +1808,25 @@ const App = () => {
             )}
 
             {/* Section 4: Downtime (Only for Manufacturing) */}
-            {(department === 'Extrusion' || department === 'Cutting') && (
+            {(department === 'Cutting' || department === 'Extrusion') && (
               <section className="bg-slate-50 p-6 rounded-xl border border-slate-200 shadow-sm">
                 <div className="flex items-center gap-2 mb-4 text-slate-700">
                   <Clock className="text-blue-600" />
-                  <h2 className="text-lg font-semibold">Machine Downtime</h2>
+                  <h2 className="text-lg font-semibold">{t("Machine Downtime")}</h2>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   <div className="grid grid-cols-2 gap-4 col-span-1">
                     <div>
-                      <label className="block text-sm font-medium text-slate-600 mb-1">Planned (mins)</label>
+                      <label className="block text-sm font-medium text-slate-600 mb-1">{t("Planned (mins)")}</label>
                       <input type="number" name="plannedDowntime" value={formData.plannedDowntime} onChange={handleInputChange} placeholder="0" className="w-full p-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white" />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-slate-600 mb-1">Unplanned (mins)</label>
+                      <label className="block text-sm font-medium text-slate-600 mb-1">{t("Unplanned (mins)")}</label>
                       <input type="number" name="unplannedDowntime" value={formData.unplannedDowntime} onChange={handleInputChange} placeholder="0" className="w-full p-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white" />
                     </div>
                   </div>
                   <div className="col-span-2">
-                    <label className="block text-sm font-medium text-slate-600 mb-1">Primary Downtime Reason</label>
+                    <label className="block text-sm font-medium text-slate-600 mb-1">{t("Primary Downtime Reason")}</label>
                     <input 
                       type="text"
                       name="downtimeReason" 
@@ -1287,10 +1855,10 @@ const App = () => {
               >
                 <Save size={24} /> 
                 {isSubmitting 
-                  ? 'Saving Data...' 
+                  ? t('Saving Data...') 
                   : ((department === 'Extrusion' || department === 'Cutting') && massBalance.isFailed && !formData.discrepancyReason) 
-                    ? 'Discrepancy Must Be Resolved' 
-                    : `Submit ${department === 'Quality Control' ? qcStage + ' QC' : department} Log`
+                    ? t('Discrepancy Must Be Resolved') 
+                    : t('Submit Full Shift Log')
                 }
               </button>
             </div>
