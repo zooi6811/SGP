@@ -539,7 +539,7 @@ const defaultStats = { output: 0, prevOutput: 0, consumption: 0, prevConsumption
 const defaultAnalytics = { daily: defaultStats, weekly: defaultStats, monthly: defaultStats, yearly: defaultStats };
 
 // YOUR GOOGLE SCRIPT URL HERE
-const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxRH0FyaRfo3R8iPpAty6_DTRBvmh1FS3ZC45ShXPCtQ9NxvJAZ0h0OOZbfezsr1HzMSQ/exec';
+const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxdiwJZSnsQ8pIKrP28uC1VKbJmYIrOPq4e63SXgyKdQiTd6p_uVP0CiOBGdqHKiCu9-g/exec';
 
 const App = () => {
   const [language, setLanguage] = useState('en');
@@ -642,6 +642,8 @@ const App = () => {
       return {
         jo: order.jo,
         customer: order.customer,
+        description: order.description,
+        dimension: order.dimension,
         target: `${order.targetQty} ${order.targetUom}`,
         issueDateMs: parsedDate,
         issueDateDisplay: displayDate,
@@ -1061,7 +1063,13 @@ const App = () => {
                   columns={[
                     { label: 'Issue Date', dataIndex: 'issueDateMs', type: 'number', render: (_, row) => <span className="text-slate-500 font-medium whitespace-nowrap">{row.issueDateDisplay}</span> },
                     { label: 'J/O No.', dataIndex: 'jo', type: 'string', render: v => <span className="font-bold text-slate-900 whitespace-nowrap">{v}</span> },
-                    { label: 'Customer', dataIndex: 'customer', type: 'string', render: v => <span className="text-slate-700 truncate max-w-[120px] sm:max-w-[160px] block font-semibold">{v}</span> },
+                    { label: 'Order Details', dataIndex: 'customer', type: 'string', render: (v, row) => (
+                      <div className="flex flex-col min-w-[140px] max-w-[200px]">
+                        <span className="text-slate-900 font-bold truncate" title={v}>{v}</span>
+                        {(row.description && row.description !== '-') && <span className="text-slate-600 text-xs font-semibold truncate mt-0.5" title={row.description}>{row.description}</span>}
+                        {(row.dimension && row.dimension !== '-') && <span className="text-slate-400 text-[10px] tracking-wide truncate mt-0.5" title={row.dimension}>{row.dimension}</span>}
+                      </div>
+                    )},
                     { label: 'Target', dataIndex: 'target', type: 'string', render: v => <span className="font-bold text-slate-700 whitespace-nowrap">{v}</span> },
                     { label: 'Extrusion', dataIndex: 'extProgress', type: 'number', sortable: true, render: v => (
                       <div className="w-28 sm:w-40">
