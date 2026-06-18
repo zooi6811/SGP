@@ -385,7 +385,7 @@ const InlineEdit = ({ value, onSave, suffix = "kg", className = "" }) => {
 };
 
 // 2. Sortable, Filterable & Paginated Table Component
-const SortableTable = ({ title, columns, data, onFlag }) => {
+const SortableTable = ({ title, columns, data = [], onFlag }) => {
   const [filter, setFilter] = useState('');
   const [sortCol, setSortCol] = useState(0); 
   const [sortDesc, setSortDesc] = useState(true);
@@ -393,7 +393,11 @@ const SortableTable = ({ title, columns, data, onFlag }) => {
   const rowsPerPage = 5;
 
   const filteredData = useMemo(() => {
-    return data.filter(row => row.some(cell => String(cell).toLowerCase().includes(filter.toLowerCase())));
+    return data.filter(row => {
+      // Safely handle both Google Sheet Arrays and JSON Objects
+      const valuesToSearch = Array.isArray(row) ? row : Object.values(row);
+      return valuesToSearch.some(cell => String(cell).toLowerCase().includes(filter.toLowerCase()));
+    });
   }, [data, filter]);
 
   const sortedData = useMemo(() => {
@@ -452,7 +456,7 @@ const SortableTable = ({ title, columns, data, onFlag }) => {
                   </div>
                 </th>
               ))}
-              <th className="px-4 py-2 text-center">Action</th>
+              {onFlag && <th className="px-4 py-2 text-center">Action</th>}
             </tr>
           </thead>
           <tbody>
@@ -460,14 +464,16 @@ const SortableTable = ({ title, columns, data, onFlag }) => {
               <tr key={i} className="border-b border-slate-100 last:border-0 hover:bg-blue-50/30 transition-colors">
                 {columns.map((col, j) => (
                   <td key={j} className="px-4 py-2.5 text-slate-700">
-                    {col.render ? col.render(row[col.dataIndex]) : row[col.dataIndex]}
+                    {col.render ? col.render(row[col.dataIndex], row) : row[col.dataIndex]}
                   </td>
                 ))}
-                <td className="px-4 py-2.5 text-center">
-                  <button onClick={() => onFlag(row)} className="text-slate-400 hover:text-amber-600 transition-colors bg-white border border-slate-200 p-1.5 rounded-md shadow-sm active:scale-95" title="Flag Error"><Flag size={14}/></button>
-                </td>
+                {onFlag && (
+                  <td className="px-4 py-2.5 text-center">
+                    <button onClick={() => onFlag(row)} className="text-slate-400 hover:text-amber-600 transition-colors bg-white border border-slate-200 p-1.5 rounded-md shadow-sm active:scale-95" title="Flag Error"><Flag size={14}/></button>
+                  </td>
+                )}
               </tr>
-            )) : <tr><td colSpan={columns.length + 1} className="text-center py-6 text-slate-400 italic">No records found.</td></tr>}
+            )) : <tr><td colSpan={columns.length + (onFlag ? 1 : 0)} className="text-center py-6 text-slate-400 italic">No records found.</td></tr>}
           </tbody>
         </table>
       </div>
@@ -609,9 +615,43 @@ const App = () => {
   const joSuggestions = useMemo(() => {
     if (!dashboardData?.masterOrders) return [];
     const currentInput = (formData.jobOrder || '').toLowerCase();
-    const sorted = [...dashboardData.masterOrders].sort((a, b) => (dashboardData.joTotals[b.jo]?.lastUpdated || 0) - (dashboardData.joTotals[a.jo]?.lastUpdated || 0));
+    // Safely check for optional JO Totals to prevent sorting crashes on missing data
+    const sorted = [...dashboardData.masterOrders].sort((a, b) => (dashboardData.joTotals?.[b.jo]?.lastUpdated || 0) - (dashboardData.joTotals?.[a.jo]?.lastUpdated || 0));
     return Array.from(new Set(sorted.map(item => item.jo))).filter(jo => jo.toLowerCase().includes(currentInput)).slice(0, 5);
   }, [dashboardData, formData.jobOrder]);
+
+  // Derived data specifically for the Live Order Tracker
+  const activeOrdersData = useMemo(() => {
+    if (!dashboardData?.masterOrders || !dashboardData?.joTotals) return [];
+    return dashboardData.masterOrders.map(order => {
+      const totals = dashboardData.joTotals[order.jo] || { extrusion: 0, cutting: 0, packing: 0, lastUpdated: 0 };
+      const target = order.targetQty || 1; // Prevent division by zero
+      
+      let parsedDate = 0;
+      let displayDate = '-';
+      if (order.date && order.date !== '-') {
+           const d = new Date(order.date);
+           if (!isNaN(d.getTime())) {
+               parsedDate = d.getTime();
+               displayDate = d.toLocaleDateString('en-GB');
+           } else {
+               displayDate = String(order.date);
+           }
+      }
+
+      return {
+        jo: order.jo,
+        customer: order.customer,
+        target: `${order.targetQty} ${order.targetUom}`,
+        issueDateMs: parsedDate,
+        issueDateDisplay: displayDate,
+        extProgress: ((totals.extrusion || 0) / target) * 100,
+        cutProgress: ((totals.cutting || 0) / target) * 100,
+        packProgress: ((totals.packing || 0) / target) * 100,
+        lastUpdated: totals.lastUpdated || 0
+      };
+    }).sort((a, b) => b.lastUpdated - a.lastUpdated || b.issueDateMs - a.issueDateMs); // Show active and recent first
+  }, [dashboardData]);
 
   const materialSuggestions = useMemo(() => Array.from(new Set((dashboardData?.incoming || []).map(row => row[2]))), [dashboardData]);
 
@@ -999,23 +1039,69 @@ const App = () => {
                   </div>
 
                   {/* Dynamic Right Card */}
-                  <div className={`p-4 sm:p-5 rounded-2xl border relative overflow-hidden group ${analyticsDept === 'Packing' ? 'bg-gradient-to-br from-indigo-50 to-indigo-100/50 border-indigo-100' : 'bg-gradient-to-br from-rose-50 to-rose-100/50 border-rose-100'}`}>
-                    <p className={`text-[10px] sm:text-xs font-black uppercase tracking-widest mb-2 ${analyticsDept === 'Packing' ? 'text-indigo-500/80' : 'text-rose-500/80'}`}>{analyticsDept === 'Packing' ? 'Pallets Processed' : 'Scrap Generated'}</p>
-                    <div className="flex items-end gap-2 relative z-10">
-                      <p className="text-3xl sm:text-4xl font-black text-slate-800 tracking-tight">{analyticsDept === 'Packing' ? currentAnalytics.pallets : currentAnalytics.wastage.toFixed(1)} <span className="text-sm sm:text-lg font-bold text-slate-500 tracking-normal">{analyticsDept === 'Packing' ? 'plts' : 'kg'}</span></p>
+                  <div className={`p-6 rounded-2xl border relative overflow-hidden group ${analyticsDept === 'Packing' ? 'bg-gradient-to-br from-indigo-50 to-indigo-100/50 border-indigo-100' : 'bg-gradient-to-br from-rose-50 to-rose-100/50 border-rose-100'}`}>
+                    <p className={`text-xs font-black uppercase tracking-widest mb-3 ${analyticsDept === 'Packing' ? 'text-indigo-500/80' : 'text-rose-500/80'}`}>{analyticsDept === 'Packing' ? 'Pallets Processed' : 'Scrap Generated'}</p>
+                    <div className="flex items-end gap-3 relative z-10">
+                      <p className="text-5xl font-black text-slate-800 tracking-tight">{analyticsDept === 'Packing' ? currentAnalytics.pallets : currentAnalytics.wastage.toFixed(1)} <span className="text-xl font-bold text-slate-500 tracking-normal">{analyticsDept === 'Packing' ? 'plts' : 'kg'}</span></p>
                       {analyticsDept !== 'Packing' && trendWastage.dir !== 'none' && (
-                        <span className={`flex items-center text-[10px] sm:text-xs font-black mb-1 px-1.5 py-0.5 rounded ${trendWastage.dir === 'up' ? 'bg-red-100 text-red-700' : 'bg-emerald-100 text-emerald-700'}`}>
-                          {trendWastage.dir === 'up' ? <ChevronUp size={12}/> : <ChevronDown size={12}/>} {trendWastage.val}%
+                        <span className={`flex items-center text-sm font-black mb-1.5 px-2 py-0.5 rounded-md ${trendWastage.dir === 'up' ? 'bg-red-100 text-red-700' : 'bg-emerald-100 text-emerald-700'}`}>
+                          {trendWastage.dir === 'up' ? <ChevronUp size={16}/> : <ChevronDown size={16}/>} {trendWastage.val}%
                         </span>
                       )}
                     </div>
-                    {analyticsDept === 'Packing' ? <Layers className="absolute -right-4 -bottom-4 text-indigo-500/10 transition-transform group-hover:scale-110 duration-500" size={80} /> : <Trash2 className="absolute -right-4 -bottom-4 text-rose-500/10 transition-transform group-hover:scale-110 duration-500" size={80} />}
+                    {analyticsDept === 'Packing' ? <Layers className="absolute -right-6 -bottom-6 text-indigo-500/10 transition-transform group-hover:scale-110 duration-500" size={120} /> : <Trash2 className="absolute -right-6 -bottom-6 text-rose-500/10 transition-transform group-hover:scale-110 duration-500" size={120} />}
                   </div>
                 </div>
               </div>
 
+              {/* Live Order Tracker */}
+              <div className="pb-2">
+                <SortableTable 
+                  title="Master Job Order List (Live Status)" data={activeOrdersData}
+                  columns={[
+                    { label: 'Issue Date', dataIndex: 'issueDateMs', type: 'number', render: (_, row) => <span className="text-slate-500 font-medium whitespace-nowrap">{row.issueDateDisplay}</span> },
+                    { label: 'J/O No.', dataIndex: 'jo', type: 'string', render: v => <span className="font-bold text-slate-900 whitespace-nowrap">{v}</span> },
+                    { label: 'Customer', dataIndex: 'customer', type: 'string', render: v => <span className="text-slate-700 truncate max-w-[120px] sm:max-w-[160px] block font-semibold">{v}</span> },
+                    { label: 'Target', dataIndex: 'target', type: 'string', render: v => <span className="font-bold text-slate-700 whitespace-nowrap">{v}</span> },
+                    { label: 'Extrusion', dataIndex: 'extProgress', type: 'number', sortable: true, render: v => (
+                      <div className="w-28 sm:w-40">
+                        <div className="flex justify-between items-center mb-1.5">
+                          <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider hidden sm:inline">Progress</span>
+                          <span className="text-xs sm:text-sm font-black text-blue-700">{v.toFixed(1)}%</span>
+                        </div>
+                        <div className="w-full bg-slate-200 rounded-full h-2.5 overflow-hidden shadow-inner border border-slate-300/50">
+                          <div className="bg-gradient-to-r from-blue-500 to-blue-400 h-full rounded-full transition-all duration-500" style={{width: `${Math.min(v, 100)}%`}}></div>
+                        </div>
+                      </div>
+                    )},
+                    { label: 'Cutting', dataIndex: 'cutProgress', type: 'number', sortable: true, render: v => (
+                      <div className="w-28 sm:w-40">
+                        <div className="flex justify-between items-center mb-1.5">
+                          <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider hidden sm:inline">Progress</span>
+                          <span className="text-xs sm:text-sm font-black text-emerald-700">{v.toFixed(1)}%</span>
+                        </div>
+                        <div className="w-full bg-slate-200 rounded-full h-2.5 overflow-hidden shadow-inner border border-slate-300/50">
+                          <div className="bg-gradient-to-r from-emerald-500 to-emerald-400 h-full rounded-full transition-all duration-500" style={{width: `${Math.min(v, 100)}%`}}></div>
+                        </div>
+                      </div>
+                    )},
+                    { label: 'Packing', dataIndex: 'packProgress', type: 'number', sortable: true, render: v => (
+                      <div className="w-28 sm:w-40">
+                        <div className="flex justify-between items-center mb-1.5">
+                          <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider hidden sm:inline">Progress</span>
+                          <span className="text-xs sm:text-sm font-black text-purple-700">{v.toFixed(1)}%</span>
+                        </div>
+                        <div className="w-full bg-slate-200 rounded-full h-2.5 overflow-hidden shadow-inner border border-slate-300/50">
+                          <div className="bg-gradient-to-r from-purple-500 to-purple-400 h-full rounded-full transition-all duration-500" style={{width: `${Math.min(v, 100)}%`}}></div>
+                        </div>
+                      </div>
+                    )}
+                  ]}
+                />
+              </div>
+
               {/* Data Tables Grid */}
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 pb-6">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 pb-8">
                 <SortableTable 
                   title="Latest Extrusion Runs" data={dashboardData.extrusion} onFlag={(r) => {setFlagData({department: 'Extrusion', date: new Date(r[1]).toLocaleDateString('en-GB'), jobOrder: r[3], reason: ''}); setIsFlagModalOpen(true);}}
                   columns={[
