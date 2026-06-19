@@ -365,9 +365,9 @@ const InlineEdit = ({ value, onSave, suffix = "kg", className = "" }) => {
           onChange={(e) => setTempValue(e.target.value)}
           onBlur={handleBlurOrEnter}
           onKeyDown={(e) => e.key === 'Enter' && handleBlurOrEnter()}
-          className={`w-16 p-1 text-base border-2 border-blue-500 rounded outline-none font-bold text-slate-800 ${className}`}
+          className={`w-20 p-1 text-base border-2 border-blue-500 rounded outline-none font-bold text-slate-800 ${className}`}
         />
-        <span className="text-xs font-medium text-slate-500">{suffix}</span>
+        <span className="text-sm font-medium text-slate-500">{suffix}</span>
       </div>
     );
   }
@@ -378,14 +378,14 @@ const InlineEdit = ({ value, onSave, suffix = "kg", className = "" }) => {
       className={`flex items-center gap-1 cursor-pointer group hover:bg-slate-100 p-1 -ml-1 rounded transition-colors ${className}`}
       title="Tap to edit"
     >
-      <span className="font-bold text-slate-700">{value} {suffix}</span>
-      <Edit2 size={12} className="text-blue-500 opacity-0 group-hover:opacity-100 transition-opacity" />
+      <span className="font-bold text-slate-700 text-base">{value} {suffix}</span>
+      <Edit2 size={14} className="text-blue-500 opacity-0 group-hover:opacity-100 transition-opacity" />
     </div>
   );
 };
 
 // 2. Sortable, Filterable & Paginated Table Component
-const SortableTable = ({ title, columns, data = [], onFlag }) => {
+const SortableTable = ({ title, columns, data, onFlag }) => {
   const [filter, setFilter] = useState('');
   const [sortCol, setSortCol] = useState(0); 
   const [sortDesc, setSortDesc] = useState(true);
@@ -393,10 +393,11 @@ const SortableTable = ({ title, columns, data = [], onFlag }) => {
   const rowsPerPage = 5;
 
   const filteredData = useMemo(() => {
+    if (!data) return [];
     return data.filter(row => {
-      // Safely handle both Google Sheet Arrays and JSON Objects
-      const valuesToSearch = Array.isArray(row) ? row : Object.values(row);
-      return valuesToSearch.some(cell => String(cell).toLowerCase().includes(filter.toLowerCase()));
+      if (!row) return false;
+      const cells = Array.isArray(row) ? row : Object.values(row);
+      return cells.some(cell => cell != null && String(cell).toLowerCase().includes((filter || '').toLowerCase()));
     });
   }, [data, filter]);
 
@@ -407,16 +408,13 @@ const SortableTable = ({ title, columns, data = [], onFlag }) => {
       if (columns[sortCol].type === 'date') { valA = new Date(valA).getTime(); valB = new Date(valB).getTime(); }
       else if (columns[sortCol].type === 'number') { valA = parseFloat(valA) || 0; valB = parseFloat(valB) || 0; }
       
-      // Secondary sort fallback
       if (valA === valB) return 0;
-      
       if (valA < valB) return sortDesc ? 1 : -1;
       if (valA > valB) return sortDesc ? -1 : 1;
       return 0;
     });
   }, [filteredData, sortCol, sortDesc, columns]);
 
-  // Reset to first page when filtering or sorting changes
   useEffect(() => {
     setCurrentPage(1);
   }, [filter, sortCol, sortDesc]);
@@ -430,70 +428,67 @@ const SortableTable = ({ title, columns, data = [], onFlag }) => {
   };
 
   return (
-    <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden flex flex-col h-full">
-      {/* Header and Search */}
-      <div className="bg-slate-50 px-4 py-3 border-b border-slate-200 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-        <h3 className="font-semibold text-slate-700 text-base">{title}</h3>
+    <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col h-full">
+      <div className="bg-slate-50 px-5 py-4 border-b border-slate-200 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+        <h3 className="font-bold text-slate-800 text-base">{title}</h3>
         <div className="relative w-full sm:w-auto">
           <input 
             type="text" placeholder="Search records..." value={filter} onChange={e => setFilter(e.target.value)}
-            className="pl-8 pr-3 py-2 text-base md:text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none w-full sm:w-48"
+            className="pl-9 pr-3 py-2.5 text-base border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none w-full sm:w-56"
           />
-          <Search size={14} className="absolute left-2.5 top-2.5 text-slate-400" />
+          <Search size={16} className="absolute left-3 top-3 text-slate-400" />
         </div>
       </div>
       
-      {/* Table Content */}
       <div className="overflow-x-auto p-0 flex-1">
-        <table className="w-full text-sm text-left whitespace-nowrap">
-          <thead className="text-xs text-slate-500 bg-slate-100/80 uppercase border-b border-slate-200">
+        <table className="w-full text-left whitespace-nowrap">
+          <thead className="text-xs text-slate-500 bg-slate-100/80 uppercase border-b border-slate-200 font-bold">
             <tr>
               {columns.map((col, i) => (
-                <th key={i} onClick={() => col.sortable !== false && handleSort(i)} className={`px-4 py-2 cursor-pointer hover:bg-slate-200 transition-colors ${col.sortable !== false ? 'select-none' : ''}`}>
-                  <div className="flex items-center gap-1">
+                <th key={i} onClick={() => col.sortable !== false && handleSort(i)} className={`px-5 py-3 cursor-pointer hover:bg-slate-200 transition-colors ${col.sortable !== false ? 'select-none' : ''}`}>
+                  <div className="flex items-center gap-1.5">
                     {col.label}
                     {sortCol === i ? (sortDesc ? <ChevronDown size={14} className="text-blue-600"/> : <ChevronUp size={14} className="text-blue-600"/>) : <span className="w-3.5" />}
                   </div>
                 </th>
               ))}
-              {onFlag && <th className="px-4 py-2 text-center">Action</th>}
+              {onFlag && <th className="px-5 py-3 text-center">Action</th>}
             </tr>
           </thead>
           <tbody>
             {paginatedData.length > 0 ? paginatedData.map((row, i) => (
-              <tr key={i} className="border-b border-slate-100 last:border-0 hover:bg-blue-50/30 transition-colors">
+              <tr key={i} className="border-b border-slate-100 last:border-0 hover:bg-blue-50/30 transition-colors text-sm">
                 {columns.map((col, j) => (
-                  <td key={j} className="px-4 py-2.5 text-slate-700">
+                  <td key={j} className="px-5 py-3.5 text-slate-700">
                     {col.render ? col.render(row[col.dataIndex], row) : row[col.dataIndex]}
                   </td>
                 ))}
                 {onFlag && (
-                  <td className="px-4 py-2.5 text-center">
-                    <button onClick={() => onFlag(row)} className="text-slate-400 hover:text-amber-600 transition-colors bg-white border border-slate-200 p-1.5 rounded-md shadow-sm active:scale-95" title="Flag Error"><Flag size={14}/></button>
+                  <td className="px-5 py-3.5 text-center">
+                    <button onClick={() => onFlag(row)} className="text-slate-400 hover:text-amber-600 transition-colors bg-white border border-slate-200 p-2 rounded-lg shadow-sm active:scale-95" title="Flag Error"><Flag size={16}/></button>
                   </td>
                 )}
               </tr>
-            )) : <tr><td colSpan={columns.length + (onFlag ? 1 : 0)} className="text-center py-6 text-slate-400 italic">No records found.</td></tr>}
+            )) : <tr><td colSpan={columns.length + (onFlag ? 1 : 0)} className="text-center py-8 text-slate-400 italic">No records found.</td></tr>}
           </tbody>
         </table>
       </div>
 
-      {/* Pagination Controls */}
-      <div className="bg-slate-50 border-t border-slate-200 px-4 py-2 flex items-center justify-between">
-        <span className="text-xs text-slate-500 font-medium hidden sm:block">Page {currentPage} of {totalPages}</span>
-        <span className="text-xs text-slate-500 font-medium sm:hidden">{currentPage} / {totalPages}</span>
+      <div className="bg-slate-50 border-t border-slate-200 px-5 py-3 flex items-center justify-between">
+        <span className="text-sm text-slate-500 font-medium hidden sm:block">Page {currentPage} of {totalPages}</span>
+        <span className="text-sm text-slate-500 font-medium sm:hidden">{currentPage} / {totalPages}</span>
         <div className="flex items-center gap-2">
           <button 
             onClick={() => setCurrentPage(p => Math.max(1, p - 1))} 
             disabled={currentPage === 1}
-            className="px-3 py-1.5 text-xs font-semibold bg-white border border-slate-300 rounded-md hover:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors active:scale-95"
+            className="px-4 py-2 text-sm font-bold bg-white border border-slate-300 rounded-lg hover:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors active:scale-95"
           >
             Prev
           </button>
           <button 
             onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))} 
             disabled={currentPage === totalPages}
-            className="px-3 py-1.5 text-xs font-semibold bg-white border border-slate-300 rounded-md hover:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors active:scale-95"
+            className="px-4 py-2 text-sm font-bold bg-white border border-slate-300 rounded-lg hover:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors active:scale-95"
           >
             Next
           </button>
@@ -505,16 +500,16 @@ const SortableTable = ({ title, columns, data = [], onFlag }) => {
 
 // QC Field Component
 const QCField = ({ label, name, statusName, formData, onChange, placeholder, t }) => (
-  <div className="flex flex-col sm:flex-row sm:items-end gap-3 p-3 bg-white rounded-md border border-slate-200 shadow-sm">
+  <div className="flex flex-col sm:flex-row sm:items-end gap-3 p-4 bg-white rounded-xl border border-slate-200 shadow-sm">
     <div className="flex-1 min-w-0">
-      <label className="block text-sm font-medium text-slate-700 mb-1">{label}</label>
-      <input type="text" name={name} value={formData[name]} onChange={onChange} placeholder={placeholder} className="w-full p-2 border border-slate-300 rounded-lg text-base focus:ring-2 focus:ring-blue-500 outline-none" />
+      <label className="block text-sm font-bold text-slate-700 mb-2">{label}</label>
+      <input type="text" name={name} value={formData[name]} onChange={onChange} placeholder={placeholder} className="w-full p-3 border border-slate-300 rounded-lg text-base focus:ring-2 focus:ring-blue-500 outline-none font-semibold" />
     </div>
-    <div className="w-full sm:w-28 shrink-0">
-      <label className="block text-sm font-medium text-slate-700 mb-1 sm:hidden">{t("Status")}</label>
-      <select name={statusName} value={formData[statusName]} onChange={onChange} className="w-full p-2 border border-slate-300 rounded-lg text-base focus:outline-none font-medium">
-        <option className="text-emerald-600 font-semibold" value="Pass">{t("Pass")}</option>
-        <option className="text-red-600 font-semibold" value="Fail">{t("Fail")}</option>
+    <div className="w-full sm:w-32 shrink-0">
+      <label className="block text-sm font-bold text-slate-700 mb-2 sm:hidden">{t("Status")}</label>
+      <select name={statusName} value={formData[statusName]} onChange={onChange} className="w-full p-3 border border-slate-300 rounded-lg text-base focus:outline-none font-bold">
+        <option className="text-emerald-600" value="Pass">{t("Pass")}</option>
+        <option className="text-red-600" value="Fail">{t("Fail")}</option>
         <option className="text-slate-400" value="N/A">{t("N/A")}</option>
       </select>
     </div>
@@ -615,17 +610,15 @@ const App = () => {
   const joSuggestions = useMemo(() => {
     if (!dashboardData?.masterOrders) return [];
     const currentInput = (formData.jobOrder || '').toLowerCase();
-    // Safely check for optional JO Totals to prevent sorting crashes on missing data
-    const sorted = [...dashboardData.masterOrders].sort((a, b) => (dashboardData.joTotals?.[b.jo]?.lastUpdated || 0) - (dashboardData.joTotals?.[a.jo]?.lastUpdated || 0));
+    const sorted = [...dashboardData.masterOrders].sort((a, b) => (dashboardData.joTotals[b.jo]?.lastUpdated || 0) - (dashboardData.joTotals[a.jo]?.lastUpdated || 0));
     return Array.from(new Set(sorted.map(item => item.jo))).filter(jo => jo.toLowerCase().includes(currentInput)).slice(0, 5);
   }, [dashboardData, formData.jobOrder]);
 
-  // Derived data specifically for the Live Order Tracker
   const activeOrdersData = useMemo(() => {
     if (!dashboardData?.masterOrders || !dashboardData?.joTotals) return [];
     return dashboardData.masterOrders.map(order => {
       const totals = dashboardData.joTotals[order.jo] || { extrusion: 0, cutting: 0, packing: 0, lastUpdated: 0 };
-      const target = order.targetQty || 1; // Prevent division by zero
+      const target = order.targetQty || 1; 
       
       let parsedDate = 0;
       let displayDate = '-';
@@ -634,9 +627,7 @@ const App = () => {
            if (!isNaN(d.getTime())) {
                parsedDate = d.getTime();
                displayDate = d.toLocaleDateString('en-GB');
-           } else {
-               displayDate = String(order.date);
-           }
+           } else { displayDate = String(order.date); }
       }
 
       return {
@@ -652,7 +643,7 @@ const App = () => {
         packProgress: ((totals.packing || 0) / target) * 100,
         lastUpdated: totals.lastUpdated || 0
       };
-    }).sort((a, b) => b.lastUpdated - a.lastUpdated || b.issueDateMs - a.issueDateMs); // Show active and recent first
+    }).sort((a, b) => b.lastUpdated - a.lastUpdated || b.issueDateMs - a.issueDateMs);
   }, [dashboardData]);
 
   const materialSuggestions = useMemo(() => Array.from(new Set((dashboardData?.incoming || []).map(row => row[2]))), [dashboardData]);
@@ -676,8 +667,8 @@ const App = () => {
     if (!['Extrusion', 'Cutting'].includes(department)) return;
     let totalInput = department === 'Extrusion' ? (formData.extrusionMaterials || []).reduce((sum, mat) => sum + Number(mat.quantity || 0), 0) : Number(formData.inputRollWeight || 0);
     const outputWeight = formData.uom === 'kg' ? Number(formData.actualOutput || 0) : 0;
-    const totalScrap = Number(formData.setupScrap || 0) + Number(formData.processScrap || 0) + Number(formData.rejections || 0);
-    const totalAccounted = outputWeight + totalScrap;
+    const totalWastage = Number(formData.setupScrap || 0) + Number(formData.processScrap || 0) + Number(formData.rejections || 0);
+    const totalAccounted = outputWeight + totalWastage;
     const discrepancyKg = totalInput - totalAccounted;
     const discrepancyPercent = totalInput > 0 ? (Math.abs(discrepancyKg) / totalInput) * 100 : 0;
     setMassBalance({ totalInput, totalAccounted, discrepancyKg, discrepancyPercent, isFailed: discrepancyPercent > 2.0 });
@@ -704,14 +695,14 @@ const App = () => {
   const handleLogout = () => {
     toast((t) => (
       <div className="flex flex-col gap-3">
-        <p className="text-sm font-semibold text-slate-800">Exit Application?</p>
-        <p className="text-xs text-slate-500">Any un-submitted draft data will be wiped entirely. Ensure you have submitted your report.</p>
-        <div className="flex gap-2 justify-end mt-2">
-          <button onClick={() => toast.dismiss(t.id)} className="px-3 py-1.5 text-xs font-semibold bg-slate-100 rounded-lg hover:bg-slate-200 transition-colors">Cancel</button>
+        <p className="text-sm font-bold text-slate-800">Exit Application?</p>
+        <p className="text-sm text-slate-600">Any un-submitted draft data will be wiped entirely. Ensure you have submitted your report.</p>
+        <div className="flex gap-3 justify-end mt-2">
+          <button onClick={() => toast.dismiss(t.id)} className="px-4 py-2 text-sm font-bold bg-slate-100 rounded-lg hover:bg-slate-200 transition-colors">Cancel</button>
           <button onClick={() => {
             setIsLoggedIn(false); setCurrentUser(null); setDepartment('Dashboard'); localStorage.removeItem(STORAGE_KEY); setFormData(getInitialFormData());
             toast.dismiss(t.id);
-          }} className="px-3 py-1.5 text-xs font-semibold bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors shadow-sm">Confirm Exit</button>
+          }} className="px-4 py-2 text-sm font-bold bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors shadow-sm">Confirm Exit</button>
         </div>
       </div>
     ), { duration: Infinity });
@@ -842,7 +833,6 @@ const App = () => {
     finally { setIsSubmitting(false); }
   };
 
-  // Sparkline calculation logic
   const calculateTrend = (current, previous) => {
     if (!previous || previous === 0) return { val: 0, dir: 'none' };
     const pct = ((current - previous) / previous) * 100;
@@ -856,21 +846,21 @@ const App = () => {
 
   if (!isLoggedIn) {
     return (
-      <div className="min-h-screen bg-slate-900 flex items-center justify-center p-4 relative">
+      <div className="min-h-screen bg-slate-900 flex items-center justify-center p-5 relative">
         <Toaster />
-        <div className="absolute top-4 right-4"><button onClick={() => setLanguage(l => l === 'en' ? 'bn' : l === 'bn' ? 'ms' : 'en')} className="flex items-center gap-2 text-slate-300 hover:text-white bg-slate-800 px-4 py-2 rounded-full text-sm font-medium transition-colors border border-slate-700 shadow-sm"><Globe size={16} /> {language === 'en' ? 'বাংলা' : language === 'bn' ? 'Bahasa Melayu' : 'English'}</button></div>
+        <div className="absolute top-5 right-5"><button onClick={() => setLanguage(l => l === 'en' ? 'bn' : l === 'bn' ? 'ms' : 'en')} className="flex items-center gap-2 text-slate-300 hover:text-white bg-slate-800 px-5 py-2.5 rounded-full text-base font-bold transition-colors border border-slate-700 shadow-sm"><Globe size={18} /> {language === 'en' ? 'বাংলা' : language === 'bn' ? 'Bahasa Melayu' : 'English'}</button></div>
         <div className="max-w-md w-full bg-white rounded-3xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-300">
-          <div className="bg-slate-800 p-8 text-center border-b border-slate-700">
-            <div className="w-16 h-16 bg-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-[0_0_20px_rgba(37,99,235,0.4)]"><Lock size={32} className="text-white" /></div>
-            <h1 className="text-2xl font-extrabold text-white mb-2">{t("Production Hub")}</h1>
-            <p className="text-slate-400 text-xs font-medium tracking-wide">{t("Secure Operator Access")}</p>
+          <div className="bg-slate-800 p-10 text-center border-b border-slate-700">
+            <div className="w-20 h-20 bg-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-5 shadow-[0_0_20px_rgba(37,99,235,0.4)]"><Lock size={40} className="text-white" /></div>
+            <h1 className="text-3xl font-black text-white mb-2">{t("Production Hub")}</h1>
+            <p className="text-slate-400 text-sm font-bold tracking-wide">{t("Secure Operator Access")}</p>
           </div>
-          <form onSubmit={handleLogin} className="p-6 space-y-6">
+          <form onSubmit={handleLogin} className="p-8 space-y-8">
             <div>
-              <label className="block text-sm font-bold text-slate-700 mb-2">{t("Enter Operator PIN")}</label>
-              <input type="password" pattern="[0-9]*" inputMode="numeric" value={pinInput} onChange={(e) => setPinInput(e.target.value)} placeholder="••••" className="w-full text-center text-3xl tracking-widest p-4 border-2 border-slate-200 rounded-xl focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20 outline-none transition-all" autoFocus />
+              <label className="block text-base font-bold text-slate-700 mb-3">{t("Enter Operator PIN")}</label>
+              <input type="password" pattern="[0-9]*" inputMode="numeric" value={pinInput} onChange={(e) => setPinInput(e.target.value)} placeholder="••••" className="w-full text-center text-4xl tracking-widest p-5 border-2 border-slate-200 rounded-2xl focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20 outline-none transition-all" autoFocus />
             </div>
-            <button type="submit" disabled={isLoggingIn} className={`w-full py-3.5 rounded-xl text-base font-bold text-white transition-all shadow-md active:scale-95 ${isLoggingIn ? 'bg-slate-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700 hover:shadow-lg hover:-translate-y-0.5'}`}>{isLoggingIn ? t("Verifying Credentials...") : t("Secure Login")}</button>
+            <button type="submit" disabled={isLoggingIn} className={`w-full py-4 rounded-2xl text-lg font-bold text-white transition-all shadow-md active:scale-95 ${isLoggingIn ? 'bg-slate-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700 hover:shadow-lg hover:-translate-y-0.5'}`}>{isLoggingIn ? t("Verifying Credentials...") : t("Secure Login")}</button>
           </form>
         </div>
       </div>
@@ -883,24 +873,24 @@ const App = () => {
 
       {/* --- FLAG MODAL --- */}
       {isFlagModalOpen && (
-        <div className="fixed inset-0 bg-black/60 z-[60] flex items-center justify-center p-4 backdrop-blur-sm">
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in duration-200">
-            <div className="flex justify-between items-center p-4 border-b border-slate-200 bg-slate-50">
-              <div className="flex items-center gap-2 text-amber-600"><Flag size={18} className="fill-amber-600" /><h3 className="font-bold text-base">Flag Record Error</h3></div>
-              <button onClick={() => setIsFlagModalOpen(false)} className="text-slate-400 hover:text-slate-700 bg-white border border-slate-200 p-1.5 rounded-lg transition-colors"><X size={18} /></button>
+        <div className="fixed inset-0 bg-slate-900/60 z-[60] flex items-center justify-center p-5 backdrop-blur-sm">
+          <div className="bg-white rounded-3xl shadow-xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in duration-200">
+            <div className="flex justify-between items-center p-6 border-b border-slate-200 bg-slate-50">
+              <div className="flex items-center gap-2 text-amber-600"><Flag size={24} className="fill-amber-600" /><h3 className="font-black text-lg">Flag Record Error</h3></div>
+              <button onClick={() => setIsFlagModalOpen(false)} className="text-slate-400 hover:text-slate-700 bg-white border border-slate-200 p-2 rounded-xl transition-colors"><X size={20} /></button>
             </div>
-            <div className="p-5 space-y-4">
-              <p className="text-xs text-slate-600 leading-relaxed">You are flagging a potential error in a recorded log. Management will review this record securely.</p>
-              <div className="bg-slate-100 p-3 rounded-xl text-xs text-slate-700 grid grid-cols-2 gap-3 border border-slate-200">
-                <div><span className="font-bold block text-[10px] uppercase text-slate-500 tracking-wider">Department</span> {t(flagData.department)}</div>
-                <div><span className="font-bold block text-[10px] uppercase text-slate-500 tracking-wider">Date</span> {flagData.date}</div>
-                <div className="col-span-2"><span className="font-bold block text-[10px] uppercase text-slate-500 tracking-wider">Job Order</span> <span className="font-semibold text-slate-900">{flagData.jobOrder}</span></div>
+            <div className="p-6 space-y-5">
+              <p className="text-base text-slate-600 leading-relaxed">You are flagging a potential error in a recorded log. Management will review this record securely.</p>
+              <div className="bg-slate-100 p-4 rounded-xl text-base text-slate-700 grid grid-cols-2 gap-4 border border-slate-200">
+                <div><span className="font-black block text-[11px] uppercase text-slate-500 tracking-wider">Department</span> {t(flagData.department)}</div>
+                <div><span className="font-black block text-[11px] uppercase text-slate-500 tracking-wider">Date</span> {flagData.date}</div>
+                <div className="col-span-2"><span className="font-black block text-[11px] uppercase text-slate-500 tracking-wider">Job Order</span> <span className="font-bold text-slate-900">{flagData.jobOrder}</span></div>
               </div>
               <div>
-                <label className="block text-sm font-bold text-slate-700 mb-1.5">Reason for Flagging</label>
-                <textarea className="w-full p-2.5 text-base border border-slate-300 rounded-xl focus:ring-2 focus:ring-amber-500 outline-none transition-shadow" rows="3" placeholder="E.g., Incorrect weight entered..." value={flagData.reason} onChange={(e) => setFlagData({...flagData, reason: e.target.value})}></textarea>
+                <label className="block text-base font-bold text-slate-700 mb-2">Reason for Flagging</label>
+                <textarea className="w-full p-4 text-base border border-slate-300 rounded-xl focus:ring-2 focus:ring-amber-500 outline-none transition-shadow" rows="3" placeholder="E.g., Incorrect weight entered..." value={flagData.reason} onChange={(e) => setFlagData({...flagData, reason: e.target.value})}></textarea>
               </div>
-              <button onClick={handleFlagSubmit} className="w-full bg-amber-600 hover:bg-amber-700 text-white text-base font-bold py-3 rounded-xl transition-all shadow-sm hover:shadow active:scale-95">Submit Error Flag</button>
+              <button onClick={handleFlagSubmit} className="w-full bg-amber-600 hover:bg-amber-700 text-white text-lg font-bold py-4 rounded-xl transition-all shadow-sm hover:shadow active:scale-95">Submit Error Flag</button>
             </div>
           </div>
         </div>
@@ -909,54 +899,54 @@ const App = () => {
       {/* --- COLLAPSIBLE SIDEBAR --- */}
       <div className={`fixed inset-0 bg-slate-900/60 z-40 transition-opacity backdrop-blur-sm md:hidden ${isSidebarOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`} onClick={() => setIsSidebarOpen(false)} />
       
-      <aside className={`fixed md:sticky top-0 left-0 z-50 h-screen bg-slate-900 text-white w-64 flex flex-col transition-transform duration-300 shrink-0 shadow-2xl md:shadow-none ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0 print:hidden`}>
-        <div className="p-5 border-b border-slate-800 flex justify-between items-center">
-          <div><h1 className="text-xl font-black tracking-tight text-white">DPR Hub</h1><p className="text-[10px] font-semibold text-blue-400 tracking-wider uppercase mt-0.5">Operational Logbook</p></div>
-          <button className="md:hidden text-slate-400 hover:text-white bg-slate-800 p-1.5 rounded-lg" onClick={() => setIsSidebarOpen(false)}><X size={18}/></button>
+      <aside className={`fixed md:sticky top-0 left-0 z-50 h-screen bg-slate-900 text-white w-72 flex flex-col transition-transform duration-300 shrink-0 shadow-2xl md:shadow-none ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0 print:hidden`}>
+        <div className="p-6 border-b border-slate-800 flex justify-between items-center">
+          <div><h1 className="text-2xl font-black tracking-tight text-white">DPR Hub</h1><p className="text-[11px] font-bold text-blue-400 tracking-wider uppercase mt-1">Operational Logbook</p></div>
+          <button className="md:hidden text-slate-400 hover:text-white bg-slate-800 p-2 rounded-xl" onClick={() => setIsSidebarOpen(false)}><X size={20}/></button>
         </div>
         
-        <div className="p-4 border-b border-slate-800 bg-slate-950/40">
-          <div className="flex items-center gap-3">
-            <UserCircle className="text-blue-500" size={32} />
-            <div className="text-sm min-w-0">
-              <p className="font-bold leading-tight text-sm truncate">{currentUser.name}</p>
-              <p className="text-[11px] font-medium text-slate-400 mt-0.5 truncate">{t(currentUser.role)} • {currentUser.shift}</p>
+        <div className="p-5 border-b border-slate-800 bg-slate-950/40">
+          <div className="flex items-center gap-4">
+            <UserCircle className="text-blue-500" size={36} />
+            <div className="text-base min-w-0">
+              <p className="font-black leading-tight truncate">{currentUser.name}</p>
+              <p className="text-xs font-bold text-slate-400 mt-1 truncate">{t(currentUser.role)} • {currentUser.shift}</p>
             </div>
           </div>
         </div>
 
-        <nav className="flex-1 overflow-y-auto p-3 space-y-1 custom-scrollbar">
+        <nav className="flex-1 overflow-y-auto p-4 space-y-2 custom-scrollbar">
           {['Dashboard', 'Extrusion', 'Cutting', 'Packing', 'Dispatch', 'Quality Control', 'Incoming Goods'].map((dept) => (
-            <button key={dept} onClick={() => { setDepartment(dept); setIsSidebarOpen(false); }} className={`w-full flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-semibold transition-all ${department === dept ? 'bg-blue-600 text-white shadow-md' : 'text-slate-400 hover:bg-slate-800 hover:text-white'}`}>
-              {dept === 'Dashboard' && <BarChart3 size={18} />}
-              {dept === 'Extrusion' && <Activity size={18} />}
-              {dept === 'Packing' && <Package size={18} />}
-              {dept === 'Quality Control' && <CheckCircle size={18} />}
-              {!['Dashboard', 'Extrusion', 'Packing', 'Quality Control'].includes(dept) && <ClipboardList size={18} />}
+            <button key={dept} onClick={() => { setDepartment(dept); setIsSidebarOpen(false); }} className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-xl text-base font-bold transition-all ${department === dept ? 'bg-blue-600 text-white shadow-md' : 'text-slate-400 hover:bg-slate-800 hover:text-white'}`}>
+              {dept === 'Dashboard' && <BarChart3 size={20} />}
+              {dept === 'Extrusion' && <Activity size={20} />}
+              {dept === 'Packing' && <Package size={20} />}
+              {dept === 'Quality Control' && <CheckCircle size={20} />}
+              {!['Dashboard', 'Extrusion', 'Packing', 'Quality Control'].includes(dept) && <ClipboardList size={20} />}
               <span className="truncate">{t(dept)}</span>
             </button>
           ))}
         </nav>
 
-        <div className="p-4 border-t border-slate-800 space-y-2">
-          <button onClick={() => setLanguage(l => l === 'en' ? 'bn' : l === 'bn' ? 'ms' : 'en')} className="w-full flex items-center justify-center gap-2 bg-slate-800 hover:bg-slate-700 py-2.5 rounded-xl text-xs font-bold transition-colors"><Globe size={16} /> {language.toUpperCase()}</button>
-          <button onClick={handleLogout} className="w-full flex items-center justify-center gap-2 bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white py-2.5 rounded-xl text-xs font-bold transition-colors border border-red-500/20"><LogOut size={16} /> {t("Exit")}</button>
+        <div className="p-5 border-t border-slate-800 space-y-3">
+          <button onClick={() => setLanguage(l => l === 'en' ? 'bn' : l === 'bn' ? 'ms' : 'en')} className="w-full flex items-center justify-center gap-2 bg-slate-800 hover:bg-slate-700 py-3 rounded-xl text-sm font-black transition-colors"><Globe size={18} /> {language.toUpperCase()}</button>
+          <button onClick={handleLogout} className="w-full flex items-center justify-center gap-2 bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white py-3 rounded-xl text-sm font-black transition-colors border border-red-500/20"><LogOut size={18} /> {t("Exit")}</button>
         </div>
       </aside>
 
       {/* --- PERSISTENT MASS BALANCE HUD --- */}
       {(department === 'Extrusion' || department === 'Cutting') && massBalance.totalInput > 0 && formData.uom === 'kg' && (
-        <div className={`fixed bottom-24 right-4 z-[35] bg-white/95 backdrop-blur shadow-[0_8px_30px_rgb(0,0,0,0.12)] rounded-xl p-4 border-l-4 w-64 transition-all duration-300 animate-in slide-in-from-right hidden md:block ${massBalance.isFailed ? 'border-red-500' : 'border-emerald-500'}`}>
-          <div className="flex justify-between items-center mb-2">
-            <h4 className="font-bold text-[10px] uppercase tracking-wider text-slate-500">Live Balance Check</h4>
-            {massBalance.isFailed ? <AlertTriangle size={16} className="text-red-500 animate-pulse" /> : <Scale size={16} className="text-emerald-500" />}
+        <div className={`fixed bottom-24 right-5 z-[35] bg-white/95 backdrop-blur shadow-[0_8px_30px_rgb(0,0,0,0.12)] rounded-2xl p-5 border-l-4 w-72 transition-all duration-300 animate-in slide-in-from-right hidden md:block ${massBalance.isFailed ? 'border-red-500' : 'border-emerald-500'}`}>
+          <div className="flex justify-between items-center mb-3">
+            <h4 className="font-black text-[11px] uppercase tracking-wider text-slate-500">Live Balance Check</h4>
+            {massBalance.isFailed ? <AlertTriangle size={20} className="text-red-500 animate-pulse" /> : <Scale size={20} className="text-emerald-500" />}
           </div>
-          <div className="space-y-1.5 text-xs">
-            <div className="flex justify-between"><span className="text-slate-500 font-medium">Total Input:</span><span className="font-bold text-slate-700">{massBalance.totalInput.toFixed(1)} kg</span></div>
-            <div className="flex justify-between"><span className="text-slate-500 font-medium">Output + Scrap:</span><span className="font-bold text-slate-700">{massBalance.totalAccounted.toFixed(1)} kg</span></div>
-            <div className="pt-1.5 mt-1 border-t border-slate-100 flex justify-between items-center">
-              <span className="font-bold text-slate-800">Variance:</span>
-              <span className={`font-black text-sm ${massBalance.isFailed ? 'text-red-600' : 'text-emerald-600'}`}>{massBalance.discrepancyPercent.toFixed(1)}%</span>
+          <div className="space-y-2 text-sm">
+            <div className="flex justify-between"><span className="text-slate-500 font-bold">Total Input:</span><span className="font-black text-slate-700">{massBalance.totalInput.toFixed(1)} kg</span></div>
+            <div className="flex justify-between"><span className="text-slate-500 font-bold">Output+Wastage:</span><span className="font-black text-slate-700">{massBalance.totalAccounted.toFixed(1)} kg</span></div>
+            <div className="pt-2 mt-2 border-t border-slate-100 flex justify-between items-center">
+              <span className="font-black text-slate-800">Variance:</span>
+              <span className={`font-black text-base ${massBalance.isFailed ? 'text-red-600' : 'text-emerald-600'}`}>{massBalance.discrepancyPercent.toFixed(1)}%</span>
             </div>
           </div>
         </div>
@@ -966,14 +956,14 @@ const App = () => {
       <main className="flex-1 flex flex-col min-w-0 h-screen overflow-y-auto bg-slate-100/50 relative pb-32 md:pb-24">
         
         {/* Mobile Header */}
-        <header className="md:hidden bg-white border-b border-slate-200 p-3 sticky top-0 z-30 flex justify-between items-center shadow-sm">
-          <div className="flex items-center gap-3">
-            <button onClick={() => setIsSidebarOpen(true)} className="text-slate-600 p-1.5 hover:bg-slate-100 rounded-lg transition-colors border border-slate-200"><Menu size={18}/></button>
-            <h2 className="font-black text-slate-800 text-base tracking-tight truncate">{t(department)}</h2>
+        <header className="md:hidden bg-white border-b border-slate-200 p-4 sticky top-0 z-30 flex justify-between items-center shadow-sm">
+          <div className="flex items-center gap-4">
+            <button onClick={() => setIsSidebarOpen(true)} className="text-slate-600 p-2 hover:bg-slate-100 rounded-xl transition-colors border border-slate-200"><Menu size={20}/></button>
+            <h2 className="font-black text-slate-800 text-lg tracking-tight truncate">{t(department)}</h2>
           </div>
         </header>
 
-        <div className="p-3 sm:p-5 md:p-8 max-w-7xl mx-auto w-full flex-1">
+        <div className="p-4 sm:p-6 md:p-8 max-w-[1400px] mx-auto w-full flex-1">
           <datalist id="jo-suggestions">{joSuggestions.map(jo => <option key={jo} value={jo} />)}</datalist>
           <datalist id="material-suggestions">{materialSuggestions.map(mat => <option key={mat} value={mat} />)}</datalist>
           <datalist id="machine-suggestions">{localHistory.machineIds.map(m => <option key={m} value={m} />)}</datalist>
@@ -982,72 +972,72 @@ const App = () => {
           <datalist id="downtime-suggestions">{localHistory.downtimeReasons.map(d => <option key={d} value={d} />)}</datalist>
 
           {department === 'Dashboard' ? (
-            <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+            <div className="space-y-6 md:space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
                   <h2 className="text-2xl sm:text-3xl font-black text-slate-800 tracking-tight">Operational Overview</h2>
-                  <p className="text-xs sm:text-sm font-medium text-slate-500 mt-1">Real-time factory metrics and history</p>
+                  <p className="text-sm font-bold text-slate-500 mt-1">Real-time factory metrics and history</p>
                 </div>
-                <button onClick={fetchDashboardData} disabled={isFetchingDashboard} className="flex items-center justify-center gap-2 text-xs sm:text-sm font-bold bg-white border border-slate-300 px-4 py-2 rounded-xl hover:bg-slate-50 transition-colors shadow-sm w-full sm:w-auto active:scale-95 text-slate-700">
-                  <RefreshCw size={14} className={isFetchingDashboard ? 'animate-spin text-blue-500' : 'text-slate-400'} /> Refresh Sync
+                <button onClick={fetchDashboardData} disabled={isFetchingDashboard} className="flex items-center justify-center gap-2 text-base font-black bg-white border border-slate-300 px-5 py-3 rounded-xl hover:bg-slate-50 transition-colors shadow-sm w-full sm:w-auto active:scale-95 text-slate-700">
+                  <RefreshCw size={18} className={isFetchingDashboard ? 'animate-spin text-blue-500' : 'text-slate-400'} /> Refresh Sync
                 </button>
               </div>
 
               {/* Analytics Section */}
-              <div className="bg-white p-4 sm:p-6 rounded-2xl border border-slate-200 shadow-sm">
-                <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-6 gap-4 border-b border-slate-100 pb-4">
-                  <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 w-full lg:w-auto">
-                    <h3 className="font-bold text-slate-800 flex items-center gap-2 text-base sm:text-lg"><TrendingUp size={18} className="text-blue-600"/> Analytics</h3>
-                    <div className="flex bg-slate-100 p-1 rounded-xl w-full sm:w-auto">
+              <div className="bg-white p-5 md:p-8 rounded-3xl border border-slate-200 shadow-sm">
+                <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center mb-6 md:mb-8 gap-5 border-b border-slate-100 pb-5 md:pb-6">
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 w-full xl:w-auto">
+                    <h3 className="font-black text-slate-800 flex items-center gap-2 text-lg"><TrendingUp size={22} className="text-blue-600"/> Analytics</h3>
+                    <div className="flex bg-slate-100 p-1.5 rounded-xl w-full sm:w-auto">
                       {['Extrusion', 'Cutting', 'Packing'].map(dept => (
-                        <button key={dept} onClick={() => setAnalyticsDept(dept)} className={`flex-1 sm:flex-none px-3 py-1.5 text-xs sm:text-sm font-bold rounded-lg transition-all ${analyticsDept === dept ? 'bg-white shadow text-blue-700' : 'text-slate-500 hover:text-slate-700'}`}>{t(dept)}</button>
+                        <button key={dept} onClick={() => setAnalyticsDept(dept)} className={`flex-1 sm:flex-none px-4 md:px-6 py-2 md:py-2.5 text-sm font-black rounded-lg transition-all ${analyticsDept === dept ? 'bg-white shadow text-blue-700' : 'text-slate-500 hover:text-slate-700'}`}>{t(dept)}</button>
                       ))}
                     </div>
                   </div>
-                  <div className="flex bg-slate-100 p-1 rounded-xl w-full lg:w-auto">
+                  <div className="flex bg-slate-100 p-1.5 rounded-xl w-full xl:w-auto">
                     {['daily', 'weekly', 'monthly', 'yearly'].map(period => (
-                      <button key={period} onClick={() => setAnalyticsPeriod(period)} className={`flex-1 sm:flex-none px-3 py-1.5 text-xs sm:text-sm font-bold rounded-lg capitalize transition-all ${analyticsPeriod === period ? 'bg-slate-800 shadow text-white' : 'text-slate-500 hover:text-slate-700'}`}>{period}</button>
+                      <button key={period} onClick={() => setAnalyticsPeriod(period)} className={`flex-1 sm:flex-none px-4 md:px-6 py-2 md:py-2.5 text-sm font-black rounded-lg capitalize transition-all ${analyticsPeriod === period ? 'bg-slate-800 shadow text-white' : 'text-slate-500 hover:text-slate-700'}`}>{period}</button>
                     ))}
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-5 md:gap-6">
                   {/* Output Card */}
-                  <div className="bg-gradient-to-br from-blue-50 to-blue-100/50 p-4 sm:p-5 rounded-2xl border border-blue-100 relative overflow-hidden group">
-                    <p className="text-[10px] sm:text-xs font-black text-blue-500/80 uppercase tracking-widest mb-2">Total Output</p>
-                    <div className="flex items-end gap-2 relative z-10">
-                      <p className="text-3xl sm:text-4xl font-black text-slate-800 tracking-tight">{currentAnalytics.output.toFixed(0)} <span className="text-sm sm:text-lg font-bold text-slate-500 tracking-normal">kg</span></p>
+                  <div className="bg-gradient-to-br from-blue-50 to-blue-100/50 p-6 md:p-8 rounded-2xl border border-blue-100 relative overflow-hidden group">
+                    <p className="text-[11px] md:text-xs font-black text-blue-500/80 uppercase tracking-widest mb-3">Total Output</p>
+                    <div className="flex items-end gap-3 relative z-10">
+                      <p className="text-4xl md:text-5xl font-black text-slate-800 tracking-tight">{currentAnalytics.output.toFixed(0)} <span className="text-lg md:text-xl font-bold text-slate-500 tracking-normal">kg</span></p>
                       {trendOutput.dir !== 'none' && (
-                        <span className={`flex items-center text-[10px] sm:text-xs font-black mb-1 px-1.5 py-0.5 rounded ${trendOutput.dir === 'up' ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'}`}>
-                          {trendOutput.dir === 'up' ? <ChevronUp size={12}/> : <ChevronDown size={12}/>} {trendOutput.val}%
+                        <span className={`flex items-center text-xs font-black mb-1.5 px-2 py-1 rounded-md ${trendOutput.dir === 'up' ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'}`}>
+                          {trendOutput.dir === 'up' ? <ChevronUp size={14}/> : <ChevronDown size={14}/>} {trendOutput.val}%
                         </span>
                       )}
                     </div>
-                    <Package className="absolute -right-4 -bottom-4 text-blue-500/10 transition-transform group-hover:scale-110 duration-500" size={80} />
+                    <Package className="absolute -right-6 -bottom-6 text-blue-500/10 transition-transform group-hover:scale-110 duration-500" size={120} />
                   </div>
 
                   {/* Dynamic Middle Card */}
-                  <div className={`p-4 sm:p-5 rounded-2xl border relative overflow-hidden group ${analyticsDept === 'Packing' ? 'bg-gradient-to-br from-purple-50 to-purple-100/50 border-purple-100' : 'bg-gradient-to-br from-emerald-50 to-emerald-100/50 border-emerald-100'}`}>
-                    <p className={`text-[10px] sm:text-xs font-black uppercase tracking-widest mb-2 ${analyticsDept === 'Packing' ? 'text-purple-500/80' : 'text-emerald-500/80'}`}>{analyticsDept === 'Packing' ? 'Units Packed' : 'Consumption'}</p>
-                    <div className="flex items-end gap-2 relative z-10">
-                      <p className="text-3xl sm:text-4xl font-black text-slate-800 tracking-tight">{analyticsDept === 'Packing' ? currentAnalytics.units : currentAnalytics.consumption.toFixed(0)} <span className="text-sm sm:text-lg font-bold text-slate-500 tracking-normal">{analyticsDept === 'Packing' ? 'units' : 'kg'}</span></p>
+                  <div className={`p-6 md:p-8 rounded-2xl border relative overflow-hidden group ${analyticsDept === 'Packing' ? 'bg-gradient-to-br from-purple-50 to-purple-100/50 border-purple-100' : 'bg-gradient-to-br from-emerald-50 to-emerald-100/50 border-emerald-100'}`}>
+                    <p className={`text-[11px] md:text-xs font-black uppercase tracking-widest mb-3 ${analyticsDept === 'Packing' ? 'text-purple-500/80' : 'text-emerald-500/80'}`}>{analyticsDept === 'Packing' ? 'Units Packed' : 'Consumption'}</p>
+                    <div className="flex items-end gap-3 relative z-10">
+                      <p className="text-4xl md:text-5xl font-black text-slate-800 tracking-tight">{analyticsDept === 'Packing' ? currentAnalytics.units : currentAnalytics.consumption.toFixed(0)} <span className="text-lg md:text-xl font-bold text-slate-500 tracking-normal">{analyticsDept === 'Packing' ? 'units' : 'kg'}</span></p>
                       {analyticsDept !== 'Packing' && trendConsumption.dir !== 'none' && (
-                        <span className={`flex items-center text-[10px] sm:text-xs font-black mb-1 px-1.5 py-0.5 rounded ${trendConsumption.dir === 'up' ? 'bg-amber-100 text-amber-700' : 'bg-emerald-100 text-emerald-700'}`}>
-                          {trendConsumption.dir === 'up' ? <ChevronUp size={12}/> : <ChevronDown size={12}/>} {trendConsumption.val}%
+                        <span className={`flex items-center text-xs font-black mb-1.5 px-2 py-1 rounded-md ${trendConsumption.dir === 'up' ? 'bg-amber-100 text-amber-700' : 'bg-emerald-100 text-emerald-700'}`}>
+                          {trendConsumption.dir === 'up' ? <ChevronUp size={14}/> : <ChevronDown size={14}/>} {trendConsumption.val}%
                         </span>
                       )}
                     </div>
-                    {analyticsDept === 'Packing' ? <PackageCheck className="absolute -right-4 -bottom-4 text-purple-500/10 transition-transform group-hover:scale-110 duration-500" size={80} /> : <Box className="absolute -right-4 -bottom-4 text-emerald-500/10 transition-transform group-hover:scale-110 duration-500" size={80} />}
+                    {analyticsDept === 'Packing' ? <PackageCheck className="absolute -right-6 -bottom-6 text-purple-500/10 transition-transform group-hover:scale-110 duration-500" size={120} /> : <Box className="absolute -right-6 -bottom-6 text-emerald-500/10 transition-transform group-hover:scale-110 duration-500" size={120} />}
                   </div>
 
-                  {/* Dynamic Right Card */}
-                  <div className={`p-6 rounded-2xl border relative overflow-hidden group ${analyticsDept === 'Packing' ? 'bg-gradient-to-br from-indigo-50 to-indigo-100/50 border-indigo-100' : 'bg-gradient-to-br from-rose-50 to-rose-100/50 border-rose-100'}`}>
-                    <p className={`text-xs font-black uppercase tracking-widest mb-3 ${analyticsDept === 'Packing' ? 'text-indigo-500/80' : 'text-rose-500/80'}`}>{analyticsDept === 'Packing' ? 'Pallets Processed' : 'Scrap Generated'}</p>
+                  {/* Dynamic Right Card (Wastage) */}
+                  <div className={`p-6 md:p-8 rounded-2xl border relative overflow-hidden group ${analyticsDept === 'Packing' ? 'bg-gradient-to-br from-indigo-50 to-indigo-100/50 border-indigo-100' : 'bg-gradient-to-br from-rose-50 to-rose-100/50 border-rose-100'}`}>
+                    <p className={`text-[11px] md:text-xs font-black uppercase tracking-widest mb-3 ${analyticsDept === 'Packing' ? 'text-indigo-500/80' : 'text-rose-500/80'}`}>{analyticsDept === 'Packing' ? 'Pallets Processed' : 'Wastage Generated'}</p>
                     <div className="flex items-end gap-3 relative z-10">
-                      <p className="text-5xl font-black text-slate-800 tracking-tight">{analyticsDept === 'Packing' ? currentAnalytics.pallets : currentAnalytics.wastage.toFixed(1)} <span className="text-xl font-bold text-slate-500 tracking-normal">{analyticsDept === 'Packing' ? 'plts' : 'kg'}</span></p>
+                      <p className="text-4xl md:text-5xl font-black text-slate-800 tracking-tight">{analyticsDept === 'Packing' ? currentAnalytics.pallets : currentAnalytics.wastage.toFixed(1)} <span className="text-lg md:text-xl font-bold text-slate-500 tracking-normal">{analyticsDept === 'Packing' ? 'plts' : 'kg'}</span></p>
                       {analyticsDept !== 'Packing' && trendWastage.dir !== 'none' && (
-                        <span className={`flex items-center text-sm font-black mb-1.5 px-2 py-0.5 rounded-md ${trendWastage.dir === 'up' ? 'bg-red-100 text-red-700' : 'bg-emerald-100 text-emerald-700'}`}>
-                          {trendWastage.dir === 'up' ? <ChevronUp size={16}/> : <ChevronDown size={16}/>} {trendWastage.val}%
+                        <span className={`flex items-center text-xs font-black mb-1.5 px-2 py-1 rounded-md ${trendWastage.dir === 'up' ? 'bg-red-100 text-red-700' : 'bg-emerald-100 text-emerald-700'}`}>
+                          {trendWastage.dir === 'up' ? <ChevronUp size={14}/> : <ChevronDown size={14}/>} {trendWastage.val}%
                         </span>
                       )}
                     </div>
@@ -1059,47 +1049,47 @@ const App = () => {
               {/* Live Order Tracker */}
               <div className="pb-2">
                 <SortableTable 
-                  title="Master Job Order List (Live Status)" data={activeOrdersData}
+                  title="Live Order Tracker" data={activeOrdersData}
                   columns={[
-                    { label: 'Issue Date', dataIndex: 'issueDateMs', type: 'number', render: (_, row) => <span className="text-slate-500 font-medium whitespace-nowrap">{row.issueDateDisplay}</span> },
-                    { label: 'J/O No.', dataIndex: 'jo', type: 'string', render: v => <span className="font-bold text-slate-900 whitespace-nowrap">{v}</span> },
+                    { label: 'Issue Date', dataIndex: 'issueDateMs', type: 'number', render: (_, row) => <span className="text-slate-500 font-bold whitespace-nowrap">{row.issueDateDisplay}</span> },
+                    { label: 'J/O No.', dataIndex: 'jo', type: 'string', render: v => <span className="font-black text-slate-900 whitespace-nowrap text-base">{v}</span> },
                     { label: 'Order Details', dataIndex: 'customer', type: 'string', render: (v, row) => (
-                      <div className="flex flex-col min-w-[140px] max-w-[200px]">
-                        <span className="text-slate-900 font-bold truncate" title={v}>{v}</span>
-                        {(row.description && row.description !== '-') && <span className="text-slate-600 text-xs font-semibold truncate mt-0.5" title={row.description}>{row.description}</span>}
-                        {(row.dimension && row.dimension !== '-') && <span className="text-slate-400 text-[10px] tracking-wide truncate mt-0.5" title={row.dimension}>{row.dimension}</span>}
+                      <div className="flex flex-col min-w-[160px] max-w-[220px]">
+                        <span className="text-slate-900 font-black text-base truncate" title={v}>{v}</span>
+                        {(row.description && row.description !== '-') && <span className="text-slate-600 text-sm font-bold truncate mt-0.5" title={row.description}>{row.description}</span>}
+                        {(row.dimension && row.dimension !== '-') && <span className="inline-block mt-1.5 bg-slate-100 text-slate-500 text-[10px] font-black uppercase tracking-wider px-2 py-1 rounded border border-slate-200 w-fit truncate" title={row.dimension}>{row.dimension}</span>}
                       </div>
                     )},
-                    { label: 'Target', dataIndex: 'target', type: 'string', render: v => <span className="font-bold text-slate-700 whitespace-nowrap">{v}</span> },
-                    { label: 'Extrusion', dataIndex: 'extProgress', type: 'number', sortable: true, render: v => (
-                      <div className="w-28 sm:w-40">
-                        <div className="flex justify-between items-center mb-1.5">
-                          <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider hidden sm:inline">Progress</span>
-                          <span className="text-xs sm:text-sm font-black text-blue-700">{v.toFixed(1)}%</span>
+                    { label: 'Target', dataIndex: 'target', type: 'string', render: v => <span className="font-black text-slate-700 text-base whitespace-nowrap">{v}</span> },
+                    { label: 'Extrusion', dataIndex: 'extProgress', type: 'number', render: v => (
+                      <div className="w-32 sm:w-44">
+                        <div className="flex justify-between items-center mb-2">
+                          <span className="text-[11px] uppercase font-black text-slate-400 tracking-wider hidden sm:inline">Progress</span>
+                          <span className="text-sm sm:text-base font-black text-blue-700">{v.toFixed(1)}%</span>
                         </div>
-                        <div className="w-full bg-slate-200 rounded-full h-2.5 overflow-hidden shadow-inner border border-slate-300/50">
+                        <div className="w-full bg-slate-200 rounded-full h-3 overflow-hidden shadow-inner border border-slate-300/50">
                           <div className="bg-gradient-to-r from-blue-500 to-blue-400 h-full rounded-full transition-all duration-500" style={{width: `${Math.min(v, 100)}%`}}></div>
                         </div>
                       </div>
                     )},
-                    { label: 'Cutting', dataIndex: 'cutProgress', type: 'number', sortable: true, render: v => (
-                      <div className="w-28 sm:w-40">
-                        <div className="flex justify-between items-center mb-1.5">
-                          <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider hidden sm:inline">Progress</span>
-                          <span className="text-xs sm:text-sm font-black text-emerald-700">{v.toFixed(1)}%</span>
+                    { label: 'Cutting', dataIndex: 'cutProgress', type: 'number', render: v => (
+                      <div className="w-32 sm:w-44">
+                        <div className="flex justify-between items-center mb-2">
+                          <span className="text-[11px] uppercase font-black text-slate-400 tracking-wider hidden sm:inline">Progress</span>
+                          <span className="text-sm sm:text-base font-black text-emerald-700">{v.toFixed(1)}%</span>
                         </div>
-                        <div className="w-full bg-slate-200 rounded-full h-2.5 overflow-hidden shadow-inner border border-slate-300/50">
+                        <div className="w-full bg-slate-200 rounded-full h-3 overflow-hidden shadow-inner border border-slate-300/50">
                           <div className="bg-gradient-to-r from-emerald-500 to-emerald-400 h-full rounded-full transition-all duration-500" style={{width: `${Math.min(v, 100)}%`}}></div>
                         </div>
                       </div>
                     )},
-                    { label: 'Packing', dataIndex: 'packProgress', type: 'number', sortable: true, render: v => (
-                      <div className="w-28 sm:w-40">
-                        <div className="flex justify-between items-center mb-1.5">
-                          <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider hidden sm:inline">Progress</span>
-                          <span className="text-xs sm:text-sm font-black text-purple-700">{v.toFixed(1)}%</span>
+                    { label: 'Packing', dataIndex: 'packProgress', type: 'number', render: v => (
+                      <div className="w-32 sm:w-44">
+                        <div className="flex justify-between items-center mb-2">
+                          <span className="text-[11px] uppercase font-black text-slate-400 tracking-wider hidden sm:inline">Progress</span>
+                          <span className="text-sm sm:text-base font-black text-purple-700">{v.toFixed(1)}%</span>
                         </div>
-                        <div className="w-full bg-slate-200 rounded-full h-2.5 overflow-hidden shadow-inner border border-slate-300/50">
+                        <div className="w-full bg-slate-200 rounded-full h-3 overflow-hidden shadow-inner border border-slate-300/50">
                           <div className="bg-gradient-to-r from-purple-500 to-purple-400 h-full rounded-full transition-all duration-500" style={{width: `${Math.min(v, 100)}%`}}></div>
                         </div>
                       </div>
@@ -1109,13 +1099,13 @@ const App = () => {
               </div>
 
               {/* Data Tables Grid */}
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 pb-8">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8 pb-8">
                 <SortableTable 
                   title="Latest Extrusion Runs" data={dashboardData.extrusion} onFlag={(r) => {setFlagData({department: 'Extrusion', date: new Date(r[1]).toLocaleDateString('en-GB'), jobOrder: r[3], reason: ''}); setIsFlagModalOpen(true);}}
                   columns={[
                     { label: 'Date', dataIndex: 1, type: 'date', render: d => new Date(d).toLocaleDateString('en-GB') },
                     { label: 'Job Order', dataIndex: 3, type: 'string', render: v => <span className="font-bold text-slate-900">{v}</span> },
-                    { label: 'Output (kg)', dataIndex: 6, type: 'number', render: v => <span className="font-semibold text-blue-700">{v}</span> }
+                    { label: 'Output (kg)', dataIndex: 6, type: 'number', render: v => <span className="font-black text-blue-700">{v}</span> }
                   ]}
                 />
                 <SortableTable 
@@ -1123,7 +1113,7 @@ const App = () => {
                   columns={[
                     { label: 'Date', dataIndex: 1, type: 'date', render: d => new Date(d).toLocaleDateString('en-GB') },
                     { label: 'Job Order', dataIndex: 3, type: 'string', render: v => <span className="font-bold text-slate-900">{v}</span> },
-                    { label: 'Output (kg)', dataIndex: 6, type: 'number', render: v => <span className="font-semibold text-emerald-700">{v}</span> }
+                    { label: 'Output (kg)', dataIndex: 6, type: 'number', render: v => <span className="font-black text-emerald-700">{v}</span> }
                   ]}
                 />
                 <SortableTable 
@@ -1131,7 +1121,7 @@ const App = () => {
                   columns={[
                     { label: 'Date', dataIndex: 1, type: 'date', render: d => new Date(d).toLocaleDateString('en-GB') },
                     { label: 'Job Order', dataIndex: 3, type: 'string', render: v => <span className="font-bold text-slate-900">{v}</span> },
-                    { label: 'Qty', dataIndex: 6, type: 'number', render: v => <span className="font-semibold text-purple-700">{v}</span> }
+                    { label: 'Qty', dataIndex: 6, type: 'number', render: v => <span className="font-black text-purple-700">{v}</span> }
                   ]}
                 />
                 <SortableTable 
@@ -1139,7 +1129,7 @@ const App = () => {
                   columns={[
                     { label: 'Date', dataIndex: 1, type: 'date', render: d => new Date(d).toLocaleDateString('en-GB') },
                     { label: 'Material', dataIndex: 2, type: 'string', render: v => <span className="font-bold text-slate-900">{v}</span> },
-                    { label: 'Amount (kg)', dataIndex: 3, type: 'number', render: v => <span className="font-semibold text-blue-700">{v}</span> }
+                    { label: 'Amount (kg)', dataIndex: 3, type: 'number', render: v => <span className="font-black text-blue-700">{v}</span> }
                   ]}
                 />
               </div>
@@ -1147,135 +1137,133 @@ const App = () => {
 
           ) : (
             // ================= DATA ENTRY FORMS =================
-            <form className="space-y-4 sm:space-y-6 animate-in fade-in zoom-in-95 duration-300">
+            <form className="space-y-6 md:space-y-8 animate-in fade-in zoom-in-95 duration-300">
               
-              <div className="hidden md:flex justify-between items-center mb-4">
+              <div className="hidden md:flex justify-between items-center mb-2">
                 <div>
-                  <h2 className="text-2xl lg:text-3xl font-black text-slate-800 flex items-center gap-2 lg:gap-3 tracking-tight">
-                    {department === 'Extrusion' && <Activity className="text-blue-600" size={24} />}
-                    {department === 'Packing' && <Package className="text-purple-600" size={24} />}
-                    {department === 'Quality Control' && <CheckCircle className="text-emerald-600" size={24} />}
+                  <h2 className="text-3xl font-black text-slate-800 flex items-center gap-3 tracking-tight">
+                    {department === 'Extrusion' && <Activity className="text-blue-600" size={32} />}
+                    {department === 'Packing' && <Package className="text-purple-600" size={32} />}
+                    {department === 'Quality Control' && <CheckCircle className="text-emerald-600" size={32} />}
                     {department} Report
                   </h2>
                 </div>
               </div>
 
               {/* Section 1: Session Parameters */}
-              <section className="bg-white p-4 sm:p-6 md:p-8 rounded-2xl border border-slate-200 shadow-sm">
-                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-5 sm:mb-6">
-                  <h3 className="text-lg sm:text-xl font-bold text-slate-800 flex items-center gap-2"><ClipboardList size={18} className="text-slate-400"/> {t("Session Parameters")}</h3>
-                  <div className="inline-flex items-center gap-2 bg-slate-50 text-slate-500 text-xs font-bold px-3 py-1.5 rounded-lg border border-slate-200 w-fit">
-                    <CheckCircle size={14} className="text-emerald-500" /> {saveIndicator}
-                  </div>
+              <section className="bg-white p-5 md:p-8 rounded-3xl border border-slate-200 shadow-sm relative">
+                <div className="absolute top-5 md:top-8 right-5 md:right-8 flex items-center gap-2 bg-slate-50 text-slate-500 text-xs font-bold px-3 py-1.5 rounded-lg border border-slate-200">
+                  <CheckCircle size={14} className="text-emerald-500" /> {saveIndicator}
                 </div>
+                <h3 className="text-xl font-black text-slate-800 mb-6 flex items-center gap-2"><ClipboardList size={20} className="text-slate-400"/> {t("Session Parameters")}</h3>
                 
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
                   <div className="min-w-0">
-                    <label className="block text-xs sm:text-sm font-bold text-slate-700 mb-1.5">{t("Date")}</label>
-                    <input type="date" name="date" value={formData.date} onChange={handleInputChange} required className="w-full box-border block appearance-none h-12 px-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none bg-slate-50 focus:bg-white transition-colors text-base" />
+                    <label className="block text-sm font-bold text-slate-700 mb-2">{t("Date")}</label>
+                    <input type="date" name="date" value={formData.date} onChange={handleInputChange} required className="box-border block w-full appearance-none h-14 px-4 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none bg-slate-50 focus:bg-white transition-colors text-base font-bold" />
                   </div>
                   {department !== 'Incoming Goods' && (
                     <div className="min-w-0">
-                      <label className="block text-xs sm:text-sm font-bold text-slate-700 mb-1.5">{t("Shift")}</label>
-                      <select name="shift" value={formData.shift} onChange={handleInputChange} className="w-full h-12 px-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none bg-slate-50 focus:bg-white transition-colors text-base font-semibold">
+                      <label className="block text-sm font-bold text-slate-700 mb-2">{t("Shift")}</label>
+                      <select name="shift" value={formData.shift} onChange={handleInputChange} className="w-full h-14 px-4 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none bg-slate-50 focus:bg-white transition-colors text-base font-black">
                         <option value="AM">{t("Morning (AM)")}</option>
                         <option value="PM">{t("Night (PM)")}</option>
                       </select>
                     </div>
                   )}
                   <div className={`min-w-0 ${department === 'Incoming Goods' ? 'sm:col-span-2 lg:col-span-3' : ''}`}>
-                    <label className="block text-xs sm:text-sm font-bold text-slate-700 mb-1.5">{department === 'Incoming Goods' ? t('Receiver / Admin Name') : department === 'Quality Control' ? t('QC Inspector') : t('Operator / Supervisor')}</label>
-                    <input type="text" name="supervisor" value={formData.supervisor} onChange={handleInputChange} required className="w-full h-12 px-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none bg-slate-50 focus:bg-white transition-colors text-base" />
+                    <label className="block text-sm font-bold text-slate-700 mb-2">{department === 'Incoming Goods' ? t('Receiver / Admin Name') : department === 'Quality Control' ? t('QC Inspector') : t('Operator / Supervisor')}</label>
+                    <input type="text" name="supervisor" value={formData.supervisor} onChange={handleInputChange} required className="w-full h-14 px-4 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none bg-slate-50 focus:bg-white transition-colors text-base font-bold" />
                   </div>
                   {(department === 'Extrusion' || department === 'Cutting' || department === 'Quality Control') && (
                     <div className="min-w-0">
-                      <label className="block text-xs sm:text-sm font-bold text-slate-700 mb-1.5">{t("Machine No.")}</label>
-                      <input type="text" name="machineId" value={formData.machineId} onChange={handleInputChange} required={department !== 'Quality Control'} placeholder="EXT-01" className="w-full h-12 px-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none bg-slate-50 focus:bg-white uppercase transition-colors text-base font-bold" list="machine-suggestions" />
+                      <label className="block text-sm font-bold text-slate-700 mb-2">{t("Machine No.")}</label>
+                      <input type="text" name="machineId" value={formData.machineId} onChange={handleInputChange} required={department !== 'Quality Control'} placeholder={department === 'Extrusion' ? 'e.g. B1' : department === 'Cutting' ? 'e.g. C1' : 'e.g. M1'} className="w-full h-14 px-4 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none bg-slate-50 focus:bg-white uppercase transition-colors text-base font-black" list="machine-suggestions" />
                     </div>
                   )}
                 </div>
               </section>
 
-              {/* MANUFACTURING DEPARTMENTS (Extrusion & Cutting) */}
+              {/* MANUFACTURING DEPARTMENTS (Extrusion & Cutting) -> 2 Column Grid */}
               {(department === 'Extrusion' || department === 'Cutting') && (
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8 items-start">
                   
-                  {/* Material Inputs */}
-                  <section className="bg-white p-4 sm:p-6 md:p-8 rounded-2xl border border-slate-200 shadow-sm flex flex-col">
-                    <h3 className="text-lg sm:text-xl font-bold text-slate-800 mb-4 sm:mb-6 flex items-center gap-2"><Box size={18} className="text-blue-500"/> {t("Material Inputs")}</h3>
+                  {/* Left Column: 1. Material Inputs */}
+                  <section className="bg-white p-5 md:p-8 rounded-3xl border border-slate-200 shadow-sm flex flex-col">
+                    <h3 className="text-xl font-black text-slate-800 mb-6 flex items-center gap-2"><Box size={22} className="text-blue-500"/> {t("Material Inputs")}</h3>
                     
-                    <div className="mb-5">
-                      <label className="block text-xs sm:text-sm font-bold text-slate-700 mb-1.5">{t("Job Order No.")}</label>
-                      <input type="text" name="jobOrder" value={formData.jobOrder} onChange={handleInputChange} required placeholder="WO-12345" className="w-full h-12 px-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none uppercase font-black text-slate-800 text-base" list="jo-suggestions" />
+                    <div className="mb-6">
+                      <label className="block text-sm font-bold text-slate-700 mb-2">{t("Job Order No.")}</label>
+                      <input type="text" name="jobOrder" value={formData.jobOrder} onChange={handleInputChange} required placeholder="e.g. 99-1" className="w-full h-14 px-4 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none uppercase font-black text-slate-800 text-base" list="jo-suggestions" />
                     </div>
 
                     {department === 'Extrusion' ? (
-                      <div className="bg-slate-50 p-4 sm:p-5 rounded-2xl border border-slate-200 flex-1">
-                        <h4 className="text-xs sm:text-sm font-black text-slate-700 mb-3 sm:mb-4 tracking-wide">{t("Shift Accumulator (Materials)")}</h4>
-                        <div className="flex flex-col gap-2 sm:gap-3 mb-4">
+                      <div className="bg-slate-50 p-5 rounded-2xl border border-slate-200 flex-1">
+                        <h4 className="text-sm font-black text-slate-700 mb-4 tracking-wide">{t("Shift Accumulator (Materials)")}</h4>
+                        <div className="flex flex-col gap-3 mb-5">
                           <div className="min-w-0">
-                            <input type="text" value={quickMaterialBatch} onChange={e => setQuickMaterialBatch(e.target.value)} className="w-full h-12 px-3 border border-slate-300 rounded-xl focus:ring-blue-500 outline-none text-base font-bold uppercase" placeholder="Scan Batch No." list="batch-suggestions" />
+                            <input type="text" value={quickMaterialBatch} onChange={e => setQuickMaterialBatch(e.target.value)} className="w-full h-14 px-4 border border-slate-300 rounded-xl focus:ring-blue-500 outline-none text-base font-bold uppercase" placeholder="e.g. LDN1CY-2" list="batch-suggestions" />
                           </div>
-                          <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 items-stretch sm:items-center">
+                          <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center">
                             <div className="flex min-w-0 sm:flex-1 gap-2">
-                              <input type="number" step="0.01" value={quickMaterialWeight} onChange={e => setQuickMaterialWeight(e.target.value)} onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), handleAddMaterial())} className="min-w-0 flex-1 h-12 px-3 border border-slate-300 rounded-xl focus:ring-blue-500 outline-none text-base font-black" placeholder="Amount" />
-                              <select value={quickMaterialUom} onChange={e => setQuickMaterialUom(e.target.value)} className="h-12 w-20 sm:w-24 px-1 sm:px-2 border border-slate-300 rounded-xl focus:ring-blue-500 outline-none text-base font-bold bg-white shrink-0">
+                              <input type="number" step="0.01" value={quickMaterialWeight} onChange={e => setQuickMaterialWeight(e.target.value)} onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), handleAddMaterial())} className="min-w-0 flex-1 h-14 px-4 border border-slate-300 rounded-xl focus:ring-blue-500 outline-none text-base font-black" placeholder="Amount" />
+                              <select value={quickMaterialUom} onChange={e => setQuickMaterialUom(e.target.value)} className="h-14 w-24 sm:w-28 px-2 border border-slate-300 rounded-xl focus:ring-blue-500 outline-none text-base font-bold bg-white shrink-0">
                                 <option value="kg">kg</option>
                                 <option value="bag">{t("bag")}</option>
                               </select>
                             </div>
-                            <button type="button" onClick={handleAddMaterial} className="h-12 w-full sm:w-auto px-5 bg-blue-100 hover:bg-blue-200 text-blue-700 font-black rounded-xl transition-colors shrink-0 active:scale-95">Add Mat.</button>
+                            <button type="button" onClick={handleAddMaterial} className="h-14 w-full sm:w-auto px-6 bg-blue-100 hover:bg-blue-200 text-blue-700 font-black rounded-xl transition-colors shrink-0 active:scale-95">Add Mat.</button>
                           </div>
                           {quickMaterialBatch && quickMaterialName && (
-                            <div className="text-[10px] sm:text-xs text-emerald-700 flex items-center gap-1.5 font-bold bg-emerald-100 p-2 rounded-lg border border-emerald-200 mt-1"><CheckCircle size={14}/> Matched: {quickMaterialName}</div>
+                            <div className="text-xs text-emerald-700 flex items-center gap-1.5 font-bold bg-emerald-100 p-2.5 rounded-lg border border-emerald-200 mt-1"><CheckCircle size={16}/> Matched: {quickMaterialName}</div>
                           )}
                         </div>
                         
-                        <div className="space-y-2 max-h-48 overflow-y-auto pr-1 custom-scrollbar">
+                        <div className="space-y-2 max-h-52 overflow-y-auto pr-1 custom-scrollbar">
                           {formData.extrusionMaterials.map((mat) => (
-                            <div key={mat.id} className="flex justify-between items-center bg-white p-3 rounded-xl border border-slate-200 text-sm shadow-sm group">
+                            <div key={mat.id} className="flex justify-between items-center bg-white p-3.5 rounded-xl border border-slate-200 shadow-sm group">
                               <div className="min-w-0 flex-1 pr-2">
-                                <div className="font-black text-slate-800 text-xs sm:text-sm truncate">{mat.materialId !== 'N/A' ? mat.materialId : (mat.materialName !== 'N/A' ? mat.materialName : 'Unknown')}</div>
-                                <div className="text-[10px] sm:text-xs text-slate-500 font-semibold mt-0.5 truncate">Batch: {mat.batchNo}</div>
+                                <div className="font-black text-slate-800 text-sm truncate">{mat.materialId !== 'N/A' ? mat.materialId : (mat.materialName !== 'N/A' ? mat.materialName : 'Unknown')}</div>
+                                <div className="text-[11px] text-slate-500 font-bold mt-0.5 truncate">Batch: {mat.batchNo}</div>
                               </div>
-                              <div className="flex items-center gap-2 sm:gap-4 shrink-0">
+                              <div className="flex items-center gap-3 shrink-0">
                                 <InlineEdit value={mat.quantity} onSave={(val) => updateMaterialQuantity(mat.id, val)} suffix="kg" />
-                                <button type="button" onClick={() => handleRemoveMaterial(mat.id)} className="text-slate-300 hover:text-red-500 p-1.5 bg-slate-50 hover:bg-red-50 rounded-lg transition-colors"><Trash2 size={16}/></button>
+                                <button type="button" onClick={() => handleRemoveMaterial(mat.id)} className="text-slate-300 hover:text-red-500 p-2 bg-slate-50 hover:bg-red-50 rounded-lg transition-colors"><Trash2 size={18}/></button>
                               </div>
                             </div>
                           ))}
                         </div>
-                        <div className="mt-3 sm:mt-4 pt-3 sm:pt-4 border-t border-slate-200 flex justify-between items-center text-xs sm:text-sm font-bold">
+                        <div className="mt-4 pt-4 border-t border-slate-200 flex justify-between items-center text-sm font-bold">
                           <span className="text-slate-600 uppercase tracking-wide">{t("Total Input Material:")}</span>
-                          <span className="text-blue-700 text-base sm:text-lg font-black">{formData.extrusionMaterials.reduce((sum, m) => sum + Number(m.quantity || 0), 0).toFixed(2)} kg</span>
+                          <span className="text-blue-700 text-lg font-black">{formData.extrusionMaterials.reduce((sum, m) => sum + Number(m.quantity || 0), 0).toFixed(2)} kg</span>
                         </div>
                       </div>
                     ) : (
                       <div className="min-w-0">
-                        <label className="block text-xs sm:text-sm font-bold text-slate-700 mb-1.5">{t("Input Roll Weight (kg)")}</label>
-                        <input type="number" step="0.01" name="inputRollWeight" value={formData.inputRollWeight} onChange={handleInputChange} className="w-full h-12 px-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-base font-black bg-white" placeholder="0.00" />
+                        <label className="block text-sm font-bold text-slate-700 mb-2">{t("Input Roll Weight (kg)")}</label>
+                        <input type="number" step="0.01" name="inputRollWeight" value={formData.inputRollWeight} onChange={handleInputChange} className="w-full h-14 px-4 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-base font-black bg-white" placeholder="0.00" />
                       </div>
                     )}
                   </section>
 
-                  {/* Output & Scrap */}
-                  <section className="bg-white p-4 sm:p-6 md:p-8 rounded-2xl border border-slate-200 shadow-sm flex flex-col">
-                    <h3 className="text-lg sm:text-xl font-bold text-slate-800 mb-4 sm:mb-6 flex items-center gap-2"><Settings size={18} className="text-emerald-500"/> {t("Production Output & Scrap")}</h3>
+                  {/* Right Column: Output & Wastage Joined */}
+                  <section className="bg-white p-5 md:p-8 rounded-3xl border border-slate-200 shadow-sm flex flex-col">
+                    <h3 className="text-xl font-black text-slate-800 mb-6 flex items-center gap-2"><Settings size={22} className="text-emerald-500"/> {t("Production Output & Wastage")}</h3>
 
                     {department === 'Extrusion' && (
-                      <div className="bg-emerald-50/50 p-4 sm:p-5 rounded-2xl border border-emerald-100 mb-5">
-                        <h4 className="text-xs sm:text-sm font-black text-emerald-800 mb-3 tracking-wide">{t("Shift Accumulator (Rolls)")}</h4>
-                        <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 mb-4">
-                          <input type="number" step="0.01" value={quickRollWeight} onChange={e => setQuickRollWeight(e.target.value)} onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), handleAddRoll())} className="w-full sm:flex-1 h-12 px-3 border border-emerald-200 rounded-xl focus:ring-emerald-500 outline-none font-black text-base bg-white" placeholder="Weight (kg)" />
-                          <button type="button" onClick={handleAddRoll} className="w-full sm:w-auto h-12 px-5 bg-emerald-200 hover:bg-emerald-300 text-emerald-800 font-black rounded-xl transition-colors shrink-0 active:scale-95">Add Roll</button>
+                      <div className="bg-emerald-50/50 p-5 rounded-2xl border border-emerald-100 mb-6">
+                        <h4 className="text-sm font-black text-emerald-800 mb-4 tracking-wide">{t("Shift Accumulator (Rolls)")}</h4>
+                        <div className="flex flex-col sm:flex-row gap-3 mb-5">
+                          <input type="number" step="0.01" value={quickRollWeight} onChange={e => setQuickRollWeight(e.target.value)} onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), handleAddRoll())} className="w-full sm:flex-1 h-14 px-4 border border-emerald-200 rounded-xl focus:ring-emerald-500 outline-none font-black text-base bg-white" placeholder="Weight (kg)" />
+                          <button type="button" onClick={handleAddRoll} className="w-full sm:w-auto h-14 px-6 bg-emerald-200 hover:bg-emerald-300 text-emerald-800 font-black rounded-xl transition-colors shrink-0 active:scale-95">Add Roll</button>
                         </div>
-                        <div className="space-y-2 max-h-36 overflow-y-auto pr-1 custom-scrollbar">
+                        <div className="space-y-2 max-h-48 overflow-y-auto pr-1 custom-scrollbar">
                           {formData.extrusionRolls.map((roll, i) => (
-                            <div key={roll.id} className="flex justify-between items-center bg-white p-3 rounded-xl border border-emerald-100 text-sm shadow-sm group">
-                              <span className="text-slate-600 font-bold text-xs sm:text-sm">Roll {i + 1}</span>
-                              <div className="flex items-center gap-3 sm:gap-4">
+                            <div key={roll.id} className="flex justify-between items-center bg-white p-3.5 rounded-xl border border-emerald-100 shadow-sm group">
+                              <span className="text-slate-600 font-bold text-sm">Roll {i + 1}</span>
+                              <div className="flex items-center gap-4">
                                 <InlineEdit value={roll.weight} onSave={(val) => updateRollWeight(roll.id, val)} suffix="kg" />
-                                <button type="button" onClick={() => handleRemoveRoll(roll.id)} className="text-slate-300 hover:text-red-500 p-1.5 bg-slate-50 hover:bg-red-50 rounded-lg transition-colors"><Trash2 size={16}/></button>
+                                <button type="button" onClick={() => handleRemoveRoll(roll.id)} className="text-slate-300 hover:text-red-500 p-2 bg-slate-50 hover:bg-red-50 rounded-lg transition-colors"><Trash2 size={18}/></button>
                               </div>
                             </div>
                           ))}
@@ -1283,60 +1271,58 @@ const App = () => {
                       </div>
                     )}
                     
-                    <div className="flex gap-3 mb-5">
+                    <div className="flex gap-4 mb-6">
                       <div className="flex-1 min-w-0">
-                        <label className="block text-xs sm:text-sm font-bold text-slate-700 mb-1.5">{t("Actual Good Output")}</label>
+                        <label className="block text-sm font-bold text-slate-700 mb-2">{t("Actual Good Output")}</label>
                         <input 
                           type="number" step="0.01" name="actualOutput" value={formData.actualOutput} onChange={handleInputChange} required
                           readOnly={department === 'Extrusion' && formData.extrusionRolls?.length > 0}
-                          className={`w-full h-12 px-3 border-2 rounded-xl outline-none text-base sm:text-xl font-black transition-colors ${massBalance.isFailed && formData.uom === 'kg' ? 'border-red-400 text-red-700 bg-red-50' : 'border-slate-300 focus:border-emerald-500 text-slate-800 bg-white'}`} 
+                          className={`w-full h-14 px-4 border-2 rounded-xl outline-none text-xl font-black transition-colors ${massBalance.isFailed && formData.uom === 'kg' ? 'border-red-400 text-red-700 bg-red-50' : 'border-slate-300 focus:border-emerald-500 text-slate-800 bg-white'}`} 
                         />
                       </div>
-                      <div className="w-20 sm:w-24 shrink-0">
-                        <label className="block text-xs sm:text-sm font-bold text-slate-700 mb-1.5">{t("UoM")}</label>
-                        <select name="uom" value={formData.uom} onChange={handleInputChange} className="w-full h-12 px-2 border border-slate-300 rounded-xl outline-none bg-white font-bold text-base">
+                      <div className="w-24 sm:w-28 shrink-0">
+                        <label className="block text-sm font-bold text-slate-700 mb-2">{t("UoM")}</label>
+                        <select name="uom" value={formData.uom} onChange={handleInputChange} className="w-full h-14 px-3 border border-slate-300 rounded-xl outline-none bg-white font-bold text-base">
                           <option value="kg">kg</option>
                           <option value="pcs">pcs</option>
                         </select>
                       </div>
                     </div>
 
-                    {/* Scrap */}
-                    <div className="bg-rose-50/40 p-4 sm:p-5 rounded-2xl border border-rose-100 mt-auto">
-                      <h4 className="text-xs sm:text-sm font-black text-rose-800 mb-3 tracking-wide">{t("Scrap Accumulator")}</h4>
-                      <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 mb-4">
-                        <select value={quickScrapType} onChange={e => setQuickScrapType(e.target.value)} className="w-full sm:flex-1 h-12 px-2 border border-rose-200 rounded-xl focus:ring-rose-500 outline-none text-base font-bold bg-white">
-                          <option value="setupScrap">Setup Scrap</option>
-                          <option value="processScrap">Process Scrap</option>
+                    {/* Wastage */}
+                    <div className="bg-rose-50/40 p-5 rounded-2xl border border-rose-100 flex-1 flex flex-col mt-auto">
+                      <h4 className="text-sm font-black text-rose-800 mb-4 tracking-wide">{t("Wastage Accumulator")}</h4>
+                      <div className="flex flex-col sm:flex-row gap-3 mb-5">
+                        <select value={quickScrapType} onChange={e => setQuickScrapType(e.target.value)} className="w-full sm:flex-1 h-14 px-3 border border-rose-200 rounded-xl focus:ring-rose-500 outline-none text-base font-bold bg-white">
+                          <option value="setupScrap">{t("Setup Wastage")}</option>
+                          <option value="processScrap">{t("Process Wastage")}</option>
                         </select>
                         <div className="flex w-full sm:w-auto sm:flex-[0.8] gap-2">
-                          <input type="number" step="0.01" value={quickScrapWeight} onChange={e => setQuickScrapWeight(e.target.value)} onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), handleAddScrap())} className="min-w-0 flex-1 h-12 px-3 border border-rose-200 rounded-xl focus:ring-rose-500 outline-none text-base font-black bg-white" placeholder="kg" />
-                          <button type="button" onClick={handleAddScrap} className="h-12 w-16 sm:w-auto sm:px-4 bg-rose-200 hover:bg-rose-300 text-rose-900 font-black rounded-xl transition-colors active:scale-95 shrink-0 text-sm">Add</button>
+                          <input type="number" step="0.01" value={quickScrapWeight} onChange={e => setQuickScrapWeight(e.target.value)} onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), handleAddScrap())} className="min-w-0 flex-1 h-14 px-4 border border-rose-200 rounded-xl focus:ring-rose-500 outline-none text-base font-black bg-white" placeholder="kg" />
+                          <button type="button" onClick={handleAddScrap} className="h-14 w-20 sm:w-auto px-5 bg-rose-200 hover:bg-rose-300 text-rose-900 font-black rounded-xl transition-colors active:scale-95 shrink-0 text-base">Add</button>
                         </div>
                       </div>
                       
-                      {formData.scrapEntries?.length > 0 && (
-                        <div className="space-y-2 mb-3 max-h-32 overflow-y-auto pr-1 custom-scrollbar">
-                          {formData.scrapEntries.map((scrap) => (
-                            <div key={scrap.id} className="flex justify-between items-center bg-white p-2.5 rounded-xl border border-rose-100 text-xs sm:text-sm shadow-sm">
-                              <span className="text-slate-600 font-bold">{scrap.type === 'setupScrap' ? 'Setup' : 'Process'}</span>
-                              <div className="flex items-center gap-3 sm:gap-4">
-                                <InlineEdit value={scrap.weight} onSave={(val) => updateScrapWeight(scrap.id, val)} suffix="kg" className="text-rose-700" />
-                                <button type="button" onClick={() => handleRemoveScrap(scrap.id)} className="text-slate-300 hover:text-rose-600 p-1.5 bg-rose-50 hover:bg-rose-100 rounded-lg transition-colors"><Trash2 size={16}/></button>
-                              </div>
+                      <div className="space-y-2 mb-4 max-h-48 overflow-y-auto pr-1 custom-scrollbar flex-1">
+                        {formData.scrapEntries?.length > 0 && formData.scrapEntries.map((scrap) => (
+                          <div key={scrap.id} className="flex justify-between items-center bg-white p-3.5 rounded-xl border border-rose-100 shadow-sm">
+                            <span className="text-slate-600 font-bold text-sm">{scrap.type === 'setupScrap' ? 'Setup' : 'Process'}</span>
+                            <div className="flex items-center gap-4">
+                              <InlineEdit value={scrap.weight} onSave={(val) => updateScrapWeight(scrap.id, val)} suffix="kg" className="text-rose-700" />
+                              <button type="button" onClick={() => handleRemoveScrap(scrap.id)} className="text-slate-300 hover:text-rose-600 p-2 bg-rose-50 hover:bg-rose-100 rounded-lg transition-colors"><Trash2 size={18}/></button>
                             </div>
-                          ))}
-                        </div>
-                      )}
+                          </div>
+                        ))}
+                      </div>
                       
-                      <div className="flex gap-3 pt-3 border-t border-rose-100">
+                      <div className="flex gap-4 pt-4 border-t border-rose-100 mt-auto">
                         <div className="flex-1 min-w-0">
-                          <label className="block text-[10px] font-black text-rose-700 uppercase tracking-wider mb-1.5">Total Setup</label>
-                          <input type="number" name="setupScrap" value={formData.setupScrap} onChange={handleInputChange} readOnly={formData.scrapEntries?.some(s => s.type === 'setupScrap')} className={`w-full h-10 px-2 rounded-lg outline-none text-base font-black border ${formData.scrapEntries?.some(s => s.type === 'setupScrap') ? 'bg-rose-50 border-transparent text-rose-900' : 'bg-white border-rose-200 focus:border-rose-400'}`} placeholder="0.00" />
+                          <label className="block text-[11px] font-black text-rose-700 uppercase tracking-wider mb-2">Total Setup</label>
+                          <input type="number" name="setupScrap" value={formData.setupScrap} onChange={handleInputChange} readOnly={formData.scrapEntries?.some(s => s.type === 'setupScrap')} className={`w-full h-12 px-3 rounded-xl outline-none text-base font-black border ${formData.scrapEntries?.some(s => s.type === 'setupScrap') ? 'bg-rose-50 border-transparent text-rose-900' : 'bg-white border-rose-200 focus:border-rose-400'}`} placeholder="0.00" />
                         </div>
                         <div className="flex-1 min-w-0">
-                          <label className="block text-[10px] font-black text-rose-700 uppercase tracking-wider mb-1.5">Total Process</label>
-                          <input type="number" name="processScrap" value={formData.processScrap} onChange={handleInputChange} readOnly={formData.scrapEntries?.some(s => s.type === 'processScrap')} className={`w-full h-10 px-2 rounded-lg outline-none text-base font-black border ${formData.scrapEntries?.some(s => s.type === 'processScrap') ? 'bg-rose-50 border-transparent text-rose-900' : 'bg-white border-rose-200 focus:border-rose-400'}`} placeholder="0.00" />
+                          <label className="block text-[11px] font-black text-rose-700 uppercase tracking-wider mb-2">Total Process</label>
+                          <input type="number" name="processScrap" value={formData.processScrap} onChange={handleInputChange} readOnly={formData.scrapEntries?.some(s => s.type === 'processScrap')} className={`w-full h-12 px-3 rounded-xl outline-none text-base font-black border ${formData.scrapEntries?.some(s => s.type === 'processScrap') ? 'bg-rose-50 border-transparent text-rose-900' : 'bg-white border-rose-200 focus:border-rose-400'}`} placeholder="0.00" />
                         </div>
                       </div>
                     </div>
@@ -1346,59 +1332,59 @@ const App = () => {
 
               {/* PACKING DEPARTMENT */}
               {department === 'Packing' && (
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 w-full">
-                  <section className="bg-white p-4 sm:p-6 md:p-8 rounded-2xl border border-slate-200 shadow-sm">
-                    <h3 className="text-lg sm:text-xl font-bold text-slate-800 mb-5 flex items-center gap-2"><Package size={18} className="text-purple-500"/> {t("Finished Goods Packing")}</h3>
-                    <div className="space-y-4 sm:space-y-5">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8 w-full">
+                  <section className="bg-white p-5 md:p-8 rounded-3xl border border-slate-200 shadow-sm">
+                    <h3 className="text-xl font-black text-slate-800 mb-6 flex items-center gap-2"><Package size={22} className="text-purple-500"/> {t("Finished Goods Packing")}</h3>
+                    <div className="space-y-5">
                       <div className="min-w-0">
-                        <label className="block text-xs sm:text-sm font-bold text-slate-700 mb-1.5">{t("Job Order No.")}</label>
-                        <input type="text" name="jobOrder" value={formData.jobOrder} onChange={handleInputChange} required placeholder="WO-12345" className="w-full h-12 px-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-purple-500 outline-none uppercase font-black text-slate-800 bg-slate-50 focus:bg-white text-base" list="jo-suggestions" />
+                        <label className="block text-sm font-bold text-slate-700 mb-2">{t("Job Order No.")}</label>
+                        <input type="text" name="jobOrder" value={formData.jobOrder} onChange={handleInputChange} required placeholder="e.g. 99-1" className="w-full h-14 px-4 border border-slate-300 rounded-xl focus:ring-2 focus:ring-purple-500 outline-none uppercase font-black text-slate-800 bg-slate-50 focus:bg-white text-base" list="jo-suggestions" />
                       </div>
-                      <div className="flex gap-3">
+                      <div className="flex gap-4">
                         <div className="flex-1 min-w-0">
-                          <label className="block text-xs sm:text-sm font-bold text-slate-700 mb-1.5">{t("Packing Size")}</label>
-                          <input type="number" step="0.01" name="packingSize" value={formData.packingSize} onChange={handleInputChange} placeholder="e.g. 25.00" className="w-full h-12 px-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-purple-500 outline-none bg-white font-black text-base sm:text-base" />
+                          <label className="block text-sm font-bold text-slate-700 mb-2">{t("Packing Size")}</label>
+                          <input type="number" step="0.01" name="packingSize" value={formData.packingSize} onChange={handleInputChange} placeholder="e.g. 25.00" className="w-full h-14 px-4 border border-slate-300 rounded-xl focus:ring-2 focus:ring-purple-500 outline-none bg-white font-black text-base" />
                         </div>
-                        <div className="w-24 sm:w-28 shrink-0">
-                          <label className="block text-xs sm:text-sm font-bold text-slate-700 mb-1.5">{t("UoM")}</label>
-                          <select name="packingUom" value={formData.packingUom} onChange={handleInputChange} className="w-full h-12 px-2 border border-slate-300 rounded-xl outline-none bg-white font-bold text-base">
+                        <div className="w-28 sm:w-32 shrink-0">
+                          <label className="block text-sm font-bold text-slate-700 mb-2">{t("UoM")}</label>
+                          <select name="packingUom" value={formData.packingUom} onChange={handleInputChange} className="w-full h-14 px-3 border border-slate-300 rounded-xl outline-none bg-white font-bold text-base">
                             <option value="kg/bag">kg/bag</option><option value="pcs/bag">pcs/bag</option><option value="kg/roll">kg/roll</option><option value="kg/carton">kg/carton</option>
                           </select>
                         </div>
                       </div>
                       <div className="min-w-0">
-                        <label className="block text-xs sm:text-sm font-bold text-slate-700 mb-1.5">{t("Quantity Packed")}</label>
-                        <input type="number" name="quantityPacked" value={formData.quantityPacked} onChange={handleInputChange} placeholder="e.g. 10" className="w-full h-12 px-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-purple-500 outline-none bg-white font-black text-lg sm:text-xl text-purple-700" />
+                        <label className="block text-sm font-bold text-slate-700 mb-2">{t("Quantity Packed")}</label>
+                        <input type="number" name="quantityPacked" value={formData.quantityPacked} onChange={handleInputChange} placeholder="e.g. 10" className="w-full h-14 px-4 border border-slate-300 rounded-xl focus:ring-2 focus:ring-purple-500 outline-none bg-white font-black text-xl text-purple-700" />
                       </div>
                     </div>
                   </section>
 
-                  <section className="bg-white p-4 sm:p-6 md:p-8 rounded-2xl border border-slate-200 shadow-sm flex flex-col">
-                    <h3 className="text-lg sm:text-xl font-bold text-slate-800 mb-5 flex items-center gap-2"><Scale size={18} className="text-blue-500"/> {t("Palletisation Details")}</h3>
+                  <section className="bg-white p-5 md:p-8 rounded-3xl border border-slate-200 shadow-sm flex flex-col">
+                    <h3 className="text-xl font-black text-slate-800 mb-6 flex items-center gap-2"><Scale size={22} className="text-blue-500"/> {t("Palletisation Details")}</h3>
                     
-                    <div className="mb-5 min-w-0">
-                      <label className="block text-xs sm:text-sm font-bold text-slate-700 mb-1.5">{t("Pallet Weight (kg) [Tare/Gross]")}</label>
-                      <input type="number" step="0.01" name="palletWeight" value={formData.palletWeight} onChange={handleInputChange} placeholder="e.g. 15.00" className="w-full md:w-1/2 h-12 px-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none bg-white font-black text-base sm:text-base" />
+                    <div className="mb-6 min-w-0">
+                      <label className="block text-sm font-bold text-slate-700 mb-2">{t("Pallet Weight (kg) [Tare/Gross]")}</label>
+                      <input type="number" step="0.01" name="palletWeight" value={formData.palletWeight} onChange={handleInputChange} placeholder="e.g. 15.00" className="w-full md:w-1/2 h-14 px-4 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none bg-white font-black text-base" />
                     </div>
 
-                    <div className="p-4 sm:p-5 bg-slate-50 border border-slate-200 rounded-2xl flex-1 flex flex-col">
-                      <h4 className="text-xs sm:text-sm font-black text-slate-700 mb-1 tracking-wide">{t("Individual Bag Accumulator")}</h4>
-                      <p className="text-[10px] sm:text-xs font-semibold text-slate-500 mb-4">Tap added weights below to edit inline.</p>
+                    <div className="p-5 bg-slate-50 border border-slate-200 rounded-2xl flex-1 flex flex-col">
+                      <h4 className="text-sm font-black text-slate-700 mb-1 tracking-wide">{t("Individual Bag Accumulator")}</h4>
+                      <p className="text-[11px] sm:text-xs font-semibold text-slate-500 mb-5">Tap added weights below to edit inline.</p>
                       
-                      <div className="flex-1 space-y-2 overflow-y-auto pr-1 custom-scrollbar">
+                      <div className="flex-1 space-y-3 overflow-y-auto pr-1 custom-scrollbar">
                         {formData.bagWeights.map((bag, index) => (
-                          <div key={bag.id} className="flex gap-2 sm:gap-3 items-center">
-                            <span className="text-[10px] font-black uppercase text-slate-400 w-10 sm:w-12 shrink-0 tracking-wider">Bag {index + 1}</span>
-                            <input type="number" step="0.01" value={bag.weight} onChange={(e) => updateBagWeight(bag.id, e.target.value)} placeholder="0.00 kg" className="min-w-0 flex-1 h-10 sm:h-12 px-3 border border-slate-300 rounded-lg focus:border-blue-500 outline-none font-bold bg-white text-base" />
+                          <div key={bag.id} className="flex gap-3 items-center">
+                            <span className="text-[11px] font-black uppercase text-slate-400 w-12 shrink-0 tracking-wider">Bag {index + 1}</span>
+                            <input type="number" step="0.01" value={bag.weight} onChange={(e) => updateBagWeight(bag.id, e.target.value)} placeholder="0.00 kg" className="min-w-0 flex-1 h-12 px-4 border border-slate-300 rounded-xl focus:border-blue-500 outline-none font-bold bg-white text-base" />
                             {formData.bagWeights.length > 1 && (
-                              <button type="button" onClick={() => removeBagWeightRow(bag.id)} className="text-slate-300 hover:text-red-500 p-2 sm:p-2.5 bg-white border border-slate-200 rounded-lg transition-colors shrink-0"><Trash2 size={16}/></button>
+                              <button type="button" onClick={() => removeBagWeightRow(bag.id)} className="text-slate-300 hover:text-red-500 p-3 bg-white border border-slate-200 rounded-xl transition-colors shrink-0"><Trash2 size={18}/></button>
                             )}
                           </div>
                         ))}
                       </div>
                       
-                      <button type="button" onClick={addBagWeightRow} className="mt-4 flex items-center justify-center gap-2 py-3 text-sm text-blue-700 bg-blue-100 hover:bg-blue-200 rounded-xl font-black transition-colors active:scale-95">
-                        <PlusCircle size={16} /> Add Another Bag
+                      <button type="button" onClick={addBagWeightRow} className="mt-5 flex items-center justify-center gap-2 py-3.5 text-base text-blue-700 bg-blue-100 hover:bg-blue-200 rounded-xl font-black transition-colors active:scale-95">
+                        <PlusCircle size={18} /> Add Another Bag
                       </button>
                     </div>
                   </section>
@@ -1407,21 +1393,21 @@ const App = () => {
 
               {/* DISPATCH & INCOMING & QC */}
               {department === 'Dispatch' && (
-                <section className="bg-white p-4 sm:p-6 md:p-8 rounded-2xl border border-slate-200 shadow-sm max-w-2xl mx-auto">
-                  <h3 className="text-lg sm:text-xl font-bold text-slate-800 mb-5 flex items-center gap-2"><Truck size={18} className="text-blue-500"/> {t("Dispatch / Shipping")}</h3>
-                  <div className="space-y-4 sm:space-y-5">
+                <section className="bg-white p-5 md:p-8 rounded-3xl border border-slate-200 shadow-sm max-w-2xl mx-auto">
+                  <h3 className="text-xl font-black text-slate-800 mb-6 flex items-center gap-2"><Truck size={22} className="text-blue-500"/> {t("Dispatch / Shipping")}</h3>
+                  <div className="space-y-5">
                     <div className="min-w-0">
-                      <label className="block text-xs sm:text-sm font-bold text-slate-700 mb-1.5">{t("Job Order No.")}</label>
-                      <input type="text" name="jobOrder" value={formData.jobOrder} onChange={handleInputChange} required placeholder="WO-12345" className="w-full h-12 px-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none uppercase font-black text-base" list="jo-suggestions" />
+                      <label className="block text-sm font-bold text-slate-700 mb-2">{t("Job Order No.")}</label>
+                      <input type="text" name="jobOrder" value={formData.jobOrder} onChange={handleInputChange} required placeholder="e.g. 99-1" className="w-full h-14 px-4 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none uppercase font-black text-base" list="jo-suggestions" />
                     </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                       <div className="min-w-0">
-                        <label className="block text-xs sm:text-sm font-bold text-slate-700 mb-1.5">{t("Shipped Quantity (kg)")}</label>
-                        <input type="number" step="0.01" name="dispatchQty" value={formData.dispatchQty} onChange={handleInputChange} className="w-full h-12 px-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none font-black text-base" />
+                        <label className="block text-sm font-bold text-slate-700 mb-2">{t("Shipped Quantity (kg)")}</label>
+                        <input type="number" step="0.01" name="dispatchQty" value={formData.dispatchQty} onChange={handleInputChange} className="w-full h-14 px-4 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none font-black text-base" />
                       </div>
                       <div className="min-w-0">
-                        <label className="block text-xs sm:text-sm font-bold text-slate-700 mb-1.5">{t("Delivery Order (DO) / Invoice No.")}</label>
-                        <input type="text" name="deliveryOrderNo" value={formData.deliveryOrderNo} onChange={handleInputChange} className="w-full h-12 px-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none font-semibold text-base" />
+                        <label className="block text-sm font-bold text-slate-700 mb-2">{t("Delivery Order (DO) / Invoice No.")}</label>
+                        <input type="text" name="deliveryOrderNo" value={formData.deliveryOrderNo} onChange={handleInputChange} className="w-full h-14 px-4 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none font-semibold text-base" />
                       </div>
                     </div>
                   </div>
@@ -1429,23 +1415,23 @@ const App = () => {
               )}
 
               {department === 'Incoming Goods' && (
-                <section className="bg-white p-4 sm:p-6 md:p-8 rounded-2xl border border-slate-200 shadow-sm max-w-2xl mx-auto">
-                  <h3 className="text-lg sm:text-xl font-bold text-slate-800 mb-5 flex items-center gap-2"><ArrowDownToLine size={18} className="text-blue-500"/> {t("Raw Material Inwards")}</h3>
-                  <div className="space-y-4 sm:space-y-5">
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
-                      <div className="min-w-0"><label className="block text-xs sm:text-sm font-bold text-slate-700 mb-1.5">{t("Material Name / ID")}</label><input type="text" name="restockMaterial" value={formData.restockMaterial} onChange={handleInputChange} required className="w-full h-12 px-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none font-bold text-base" list="material-suggestions" /></div>
-                      <div className="min-w-0"><label className="block text-xs sm:text-sm font-bold text-slate-700 mb-1.5">{t("Amount (kg)")}</label><input type="number" step="0.01" name="restockAmount" value={formData.restockAmount} onChange={handleInputChange} required className="w-full h-12 px-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none font-black text-base sm:text-lg text-blue-700" /></div>
+                <section className="bg-white p-5 md:p-8 rounded-3xl border border-slate-200 shadow-sm max-w-2xl mx-auto">
+                  <h3 className="text-xl font-black text-slate-800 mb-6 flex items-center gap-2"><ArrowDownToLine size={22} className="text-blue-500"/> {t("Raw Material Inwards")}</h3>
+                  <div className="space-y-5">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                      <div className="min-w-0"><label className="block text-sm font-bold text-slate-700 mb-2">{t("Material Name / ID")}</label><input type="text" name="restockMaterial" value={formData.restockMaterial} onChange={handleInputChange} required className="w-full h-14 px-4 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none font-bold text-base" list="material-suggestions" /></div>
+                      <div className="min-w-0"><label className="block text-sm font-bold text-slate-700 mb-2">{t("Amount (kg)")}</label><input type="number" step="0.01" name="restockAmount" value={formData.restockAmount} onChange={handleInputChange} required className="w-full h-14 px-4 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none font-black text-lg text-blue-700" /></div>
                     </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
-                      <div className="min-w-0"><label className="block text-xs sm:text-sm font-bold text-slate-700 mb-1.5">{t("Supplier Name")}</label><input type="text" name="supplier" value={formData.supplier} onChange={handleInputChange} className="w-full h-12 px-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none font-semibold text-base" list="supplier-suggestions" /></div>
-                      <div className="min-w-0"><label className="block text-xs sm:text-sm font-bold text-slate-700 mb-1.5">{t("PO No.")}</label><input type="text" name="poNumber" value={formData.poNumber} onChange={handleInputChange} className="w-full h-12 px-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none font-semibold text-base" /></div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                      <div className="min-w-0"><label className="block text-sm font-bold text-slate-700 mb-2">{t("Supplier Name")}</label><input type="text" name="supplier" value={formData.supplier} onChange={handleInputChange} className="w-full h-14 px-4 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none font-semibold text-base" list="supplier-suggestions" /></div>
+                      <div className="min-w-0"><label className="block text-sm font-bold text-slate-700 mb-2">{t("PO No.")}</label><input type="text" name="poNumber" value={formData.poNumber} onChange={handleInputChange} className="w-full h-14 px-4 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none font-semibold text-base" /></div>
                     </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-5 pt-4 sm:pt-5 border-t border-slate-200">
-                      <div className="min-w-0"><label className="block text-xs sm:text-sm font-bold text-slate-700 mb-1.5">{t("Batch No.")}</label><input type="text" name="batchNumber" value={formData.batchNumber} onChange={handleInputChange} className="w-full h-12 px-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none font-bold uppercase text-base" list="batch-suggestions" /></div>
-                      <div className="min-w-0"><label className="block text-xs sm:text-sm font-bold text-slate-700 mb-1.5">{t("Location")}</label><input type="text" name="location" value={formData.location} onChange={handleInputChange} className="w-full h-12 px-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none font-semibold uppercase text-base" /></div>
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 pt-6 border-t border-slate-200">
+                      <div className="min-w-0"><label className="block text-sm font-bold text-slate-700 mb-2">{t("Batch No.")}</label><input type="text" name="batchNumber" value={formData.batchNumber} onChange={handleInputChange} className="w-full h-14 px-4 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none font-bold uppercase text-base" list="batch-suggestions" /></div>
+                      <div className="min-w-0"><label className="block text-sm font-bold text-slate-700 mb-2">{t("Location")}</label><input type="text" name="location" value={formData.location} onChange={handleInputChange} className="w-full h-14 px-4 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none font-semibold uppercase text-base" /></div>
                       <div className="min-w-0">
-                        <label className="block text-xs sm:text-sm font-bold text-slate-700 mb-1.5">{t("Condition")}</label>
-                        <select name="incomingQualityCheck" value={formData.incomingQualityCheck} onChange={handleInputChange} className="w-full h-12 px-3 border border-slate-300 rounded-xl outline-none bg-white font-bold text-base">
+                        <label className="block text-sm font-bold text-slate-700 mb-2">{t("Condition")}</label>
+                        <select name="incomingQualityCheck" value={formData.incomingQualityCheck} onChange={handleInputChange} className="w-full h-14 px-4 border border-slate-300 rounded-xl outline-none bg-white font-bold text-base">
                           <option value="Pass">Pass</option><option value="Damaged">Damaged</option><option value="Contaminated">Contaminated</option>
                         </select>
                       </div>
@@ -1455,35 +1441,35 @@ const App = () => {
               )}
 
               {department === 'Quality Control' && (
-                <section className="bg-white p-4 sm:p-6 md:p-8 rounded-2xl border border-slate-200 shadow-sm max-w-3xl mx-auto">
-                  <h3 className="text-lg sm:text-xl font-bold text-slate-800 mb-5 flex items-center gap-2"><CheckCircle size={18} className="text-emerald-500"/> {t("Quality Control Assessment")}</h3>
-                  <div className="flex flex-col sm:flex-row bg-slate-100 rounded-xl p-1 mb-6">
+                <section className="bg-white p-5 md:p-8 rounded-3xl border border-slate-200 shadow-sm max-w-3xl mx-auto">
+                  <h3 className="text-xl font-black text-slate-800 mb-6 flex items-center gap-2"><CheckCircle size={22} className="text-emerald-500"/> {t("Quality Control Assessment")}</h3>
+                  <div className="flex flex-col sm:flex-row bg-slate-100 rounded-xl p-1.5 mb-8">
                     {['Extrusion', 'Cutting', 'Packing'].map(stage => (
-                      <button key={stage} type="button" onClick={() => setQcStage(stage)} className={`flex-1 py-2.5 px-2 text-xs sm:text-base font-black rounded-lg transition-all ${qcStage === stage ? 'bg-white text-blue-700 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>{t(stage)} QC</button>
+                      <button key={stage} type="button" onClick={() => setQcStage(stage)} className={`flex-1 py-3 px-3 text-base font-black rounded-lg transition-all ${qcStage === stage ? 'bg-white text-blue-700 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>{t(stage)} QC</button>
                     ))}
                   </div>
-                  <div className="space-y-4 sm:space-y-5">
-                    <div className="min-w-0"><label className="block text-xs sm:text-sm font-bold text-slate-700 mb-1.5">Job Order No.</label><input type="text" name="jobOrder" value={formData.jobOrder} onChange={handleInputChange} required className="w-full h-12 px-3 border border-slate-300 rounded-xl outline-none font-black text-base sm:text-lg uppercase" list="jo-suggestions" /></div>
+                  <div className="space-y-5">
+                    <div className="min-w-0"><label className="block text-sm font-bold text-slate-700 mb-2">Job Order No.</label><input type="text" name="jobOrder" value={formData.jobOrder} onChange={handleInputChange} required className="w-full h-14 px-4 border border-slate-300 rounded-xl outline-none font-black text-base uppercase" list="jo-suggestions" placeholder="e.g. 99-1" /></div>
                     {qcStage === 'Extrusion' && (<><QCField label="Thickness Check (Microns)" name="qcExtThickness" statusName="qcExtThicknessStatus" formData={formData} onChange={handleInputChange} t={t} /><QCField label="Width Check (mm)" name="qcExtWidth" statusName="qcExtWidthStatus" formData={formData} onChange={handleInputChange} t={t} /></>)}
                     {qcStage === 'Cutting' && (<><QCField label="Seal Integrity Assessment" name="qcCutSeal" statusName="qcCutSealStatus" formData={formData} onChange={handleInputChange} t={t} /><QCField label="Length Check (mm)" name="qcCutLength" statusName="qcCutLengthStatus" formData={formData} onChange={handleInputChange} t={t} /></>)}
                     {qcStage === 'Packing' && (<><QCField label="Bag Weight Check (kg)" name="qcPackBagWeight" statusName="qcPackBagWeightStatus" formData={formData} onChange={handleInputChange} t={t} /><QCField label="Quantity Verified" name="qcPackTotalBags" statusName="qcPackTotalBagsStatus" formData={formData} onChange={handleInputChange} t={t} /></>)}
-                    <div className="pt-4 border-t border-slate-200 min-w-0"><label className="block text-xs sm:text-sm font-bold text-slate-700 mb-1.5">Remarks</label><textarea name="qcNotes" value={formData.qcNotes} onChange={handleInputChange} rows="3" className="w-full p-3 border border-slate-300 rounded-xl outline-none text-base"></textarea></div>
+                    <div className="pt-6 border-t border-slate-200 min-w-0"><label className="block text-sm font-bold text-slate-700 mb-2">Remarks</label><textarea name="qcNotes" value={formData.qcNotes} onChange={handleInputChange} rows="4" className="w-full p-4 border border-slate-300 rounded-xl outline-none text-base"></textarea></div>
                   </div>
                 </section>
               )}
 
               {/* Downtime (Only for Manufacturing) */}
               {['Extrusion', 'Cutting'].includes(department) && (
-                <section className="bg-white p-4 sm:p-6 md:p-8 rounded-2xl border border-slate-200 shadow-sm">
-                  <h3 className="text-lg sm:text-xl font-bold text-slate-800 mb-5 flex items-center gap-2"><Clock size={18} className="text-blue-500"/> {t("Machine Downtime")}</h3>
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
-                    <div className="grid grid-cols-2 gap-3 sm:gap-4 min-w-0">
-                      <div className="min-w-0"><label className="block text-xs sm:text-sm font-bold text-slate-700 mb-1.5">{t("Planned (mins)")}</label><input type="number" name="plannedDowntime" value={formData.plannedDowntime} onChange={handleInputChange} className="w-full h-12 px-3 border border-slate-300 rounded-xl outline-none font-bold text-base" /></div>
-                      <div className="min-w-0"><label className="block text-xs sm:text-sm font-bold text-slate-700 mb-1.5">{t("Unplanned (mins)")}</label><input type="number" name="unplannedDowntime" value={formData.unplannedDowntime} onChange={handleInputChange} className="w-full h-12 px-3 border border-slate-300 rounded-xl outline-none font-bold text-base" /></div>
+                <section className="bg-white p-5 md:p-8 rounded-3xl border border-slate-200 shadow-sm">
+                  <h3 className="text-xl font-black text-slate-800 mb-6 flex items-center gap-2"><Clock size={22} className="text-blue-500"/> {t("Machine Downtime")}</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div className="grid grid-cols-2 gap-4 min-w-0">
+                      <div className="min-w-0"><label className="block text-sm font-bold text-slate-700 mb-2">{t("Planned (mins)")}</label><input type="number" name="plannedDowntime" value={formData.plannedDowntime} onChange={handleInputChange} className="w-full h-14 px-4 border border-slate-300 rounded-xl outline-none font-bold text-base" /></div>
+                      <div className="min-w-0"><label className="block text-sm font-bold text-slate-700 mb-2">{t("Unplanned (mins)")}</label><input type="number" name="unplannedDowntime" value={formData.unplannedDowntime} onChange={handleInputChange} className="w-full h-14 px-4 border border-slate-300 rounded-xl outline-none font-bold text-base" /></div>
                     </div>
-                    <div className="sm:col-span-2 min-w-0">
-                      <label className="block text-xs sm:text-sm font-bold text-slate-700 mb-1.5">{t("Primary Downtime Reason")}</label>
-                      <input type="text" name="downtimeReason" value={formData.downtimeReason} onChange={handleInputChange} className="w-full h-12 px-3 border border-slate-300 rounded-xl outline-none font-semibold text-base" list="downtime-suggestions" />
+                    <div className="md:col-span-2 min-w-0">
+                      <label className="block text-sm font-bold text-slate-700 mb-2">{t("Primary Downtime Reason")}</label>
+                      <input type="text" name="downtimeReason" value={formData.downtimeReason} onChange={handleInputChange} className="w-full h-14 px-4 border border-slate-300 rounded-xl outline-none font-semibold text-base" list="downtime-suggestions" />
                     </div>
                   </div>
                 </section>
@@ -1491,9 +1477,9 @@ const App = () => {
               
               {/* Discrepancy Box (if failed) */}
               {['Extrusion', 'Cutting'].includes(department) && massBalance.isFailed && (
-                <div className="p-4 sm:p-5 bg-red-50 border border-red-200 rounded-2xl animate-in slide-in-from-bottom-2">
-                   <label className="block text-xs sm:text-sm font-black text-red-800 mb-2 tracking-wide">{t("Reason for Discrepancy (Required for Override)")}</label>
-                   <input type="text" name="discrepancyReason" value={formData.discrepancyReason} onChange={handleInputChange} placeholder="e.g. Scale calibration issue..." className="w-full h-12 px-3 border border-red-300 rounded-xl focus:ring-2 focus:ring-red-500 outline-none bg-white font-semibold text-base" />
+                <div className="p-6 bg-red-50 border border-red-200 rounded-2xl animate-in slide-in-from-bottom-2">
+                   <label className="block text-sm font-black text-red-800 mb-3 tracking-wide">{t("Reason for Discrepancy (Required for Override)")}</label>
+                   <input type="text" name="discrepancyReason" value={formData.discrepancyReason} onChange={handleInputChange} placeholder="e.g. Scale calibration issue..." className="w-full h-14 px-4 border border-red-300 rounded-xl focus:ring-2 focus:ring-red-500 outline-none bg-white font-semibold text-base" />
                 </div>
               )}
 
@@ -1503,21 +1489,21 @@ const App = () => {
 
         {/* STICKY FOOTER ACTION BAR */}
         {department !== 'Dashboard' && (
-          <div className="fixed bottom-0 right-0 w-full md:w-[calc(100%-16rem)] bg-white/95 backdrop-blur-md border-t border-slate-200 p-3 sm:p-4 shadow-[0_-10px_30px_-5px_rgba(0,0,0,0.1)] z-50 flex flex-col sm:flex-row justify-between items-center gap-2 sm:gap-4 md:px-8">
+          <div className="fixed bottom-0 right-0 w-full md:w-[calc(100%-18rem)] bg-white/95 backdrop-blur-md border-t border-slate-200 p-4 shadow-[0_-10px_30px_-5px_rgba(0,0,0,0.1)] z-50 flex flex-col sm:flex-row justify-between items-center gap-3 sm:gap-4 px-4 md:px-8">
             <div className="flex flex-col text-center sm:text-left text-sm w-full sm:w-auto">
-              <span className="font-black text-slate-800 tracking-tight text-sm sm:text-base">{t(department)} Report</span>
-              <span className="text-slate-500 text-[10px] sm:text-[11px] uppercase tracking-widest font-bold flex items-center justify-center sm:justify-start gap-1.5 mt-0.5"><CheckCircle size={12} className="text-emerald-500"/> {saveIndicator}</span>
+              <span className="font-black text-slate-800 tracking-tight text-base">{t(department)} Report</span>
+              <span className="text-slate-500 text-[11px] uppercase tracking-widest font-bold flex items-center justify-center sm:justify-start gap-1.5 mt-0.5"><CheckCircle size={14} className="text-emerald-500"/> {saveIndicator}</span>
             </div>
             
             <button 
               onClick={handleSave} disabled={isSubmitting}
-              className={`flex items-center justify-center gap-2 px-6 py-3 rounded-xl text-sm sm:text-base font-black transition-all w-full sm:w-auto shadow-md active:scale-95 ${
+              className={`flex items-center justify-center gap-2 px-8 py-3.5 rounded-xl text-base font-black transition-all w-full sm:w-auto shadow-md active:scale-95 ${
                 isSubmitting ? 'bg-slate-400 cursor-not-allowed text-white' : 
                 (massBalance.isFailed && !formData.discrepancyReason && ['Extrusion', 'Cutting'].includes(department)) ? 'bg-red-500 hover:bg-red-600 text-white shadow-red-500/30 ring-4 ring-red-100' : 
                 'bg-blue-600 hover:bg-blue-700 text-white shadow-blue-500/30 hover:-translate-y-0.5'
               }`}
             >
-              <Save size={18} /> 
+              <Save size={20} /> 
               {isSubmitting ? t('Saving...') : 
                (massBalance.isFailed && !formData.discrepancyReason && ['Extrusion', 'Cutting'].includes(department)) ? t('Discrepancy Must Be Resolved') : t('Submit Shift Log')}
             </button>
