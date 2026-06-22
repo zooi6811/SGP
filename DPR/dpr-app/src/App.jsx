@@ -28,27 +28,23 @@ const dict = {
     "Job Order No.": "Job Order No.",
     "Shift Accumulator (Materials)": "Shift Accumulator (Materials)",
     "Batch No.": "Batch No.",
-    "Quantity (kg)": "Quantity (kg)",
     "Quantity": "Quantity",
-    "Unit": "Unit",
     "+ Add": "+ Add",
     "Total Input Material:": "Total Input Material:",
-    "Add Another Material": "Add Another Material",
     "Input Roll Weight (kg)": "Input Roll Weight (kg)",
-    "Production Output & Scrap": "Production Output & Scrap",
+    "Production Output & Wastage": "Production Output & Wastage",
     "Shift Accumulator (Rolls)": "Shift Accumulator (Rolls)",
     "New Roll Weight (kg)": "New Roll Weight (kg)",
     "+ Add Roll": "+ Add Roll",
     "Accumulated Good Output": "Accumulated Good Output",
     "Actual Good Output": "Actual Good Output",
     "UoM": "UoM",
-    "Shift Accumulator (Scrap)": "Shift Accumulator (Scrap)",
+    "Wastage Generated": "Wastage Generated",
+    "Wastage Accumulator": "Wastage Accumulator",
     "Type": "Type",
     "Weight (kg)": "Weight (kg)",
-    "Setup Scrap": "Setup Scrap",
-    "Process Scrap": "Process Scrap",
-    "Setup Scrap (kg) - Purging/Colour Change": "Setup Scrap (kg) - Purging/Colour Change",
-    "Process Scrap (kg) - Trims/Tears": "Process Scrap (kg) - Trims/Tears",
+    "Setup Wastage": "Setup Wastage",
+    "Process Wastage": "Process Wastage",
     "Machine Downtime": "Machine Downtime",
     "Planned (mins)": "Planned (mins)",
     "Unplanned (mins)": "Unplanned (mins)",
@@ -88,13 +84,13 @@ const dict = {
     "Pass": "Pass",
     "Fail": "Fail",
     "N/A": "N/A",
-    "Submit Full Shift Log": "Submit Full Shift Log",
-    "Saving Data...": "Saving Data...",
+    "Submit Shift Log": "Submit Shift Log",
+    "Saving...": "Saving...",
     "Discrepancy Must Be Resolved": "Discrepancy Must Be Resolved",
     "Mass Balance Verified": "Mass Balance Verified",
     "Mass Balance Failed (Discrepancy > 2%)": "Mass Balance Failed (Discrepancy > 2%)",
     "Total Input": "Total Input",
-    "Total Output + Scrap": "Total Output + Scrap",
+    "Total Output + Wastage": "Total Output + Wastage",
     "Variance": "Variance",
     "Error Margin": "Error Margin",
     "Reason for Discrepancy (Required for Override)": "Reason for Discrepancy (Required for Override)",
@@ -646,7 +642,7 @@ const getInitialFormData = (userProfile = null) => ({
   machineId: '', jobOrder: '', inputRollWeight: '', extrusionMaterials: [], extrusionRolls: [], scrapEntries: [], 
   actualOutput: '', uom: 'kg', setupScrap: '', processScrap: '', rejections: '', plannedDowntime: '', unplannedDowntime: '', downtimeReason: '', discrepancyReason: '',
   packingSize: '', packingUom: 'kg/bag', quantityPacked: '', palletWeight: '', bagWeights: [{ id: Date.now(), weight: '' }], dispatchQty: '', deliveryOrderNo: '',
-  restockMaterial: '', restockAmount: '', supplier: '', poNumber: '', batchNumber: '', location: '', incomingQualityCheck: 'Pass', qcNotes: '',
+  restockMaterial: '', restockAmount: '', supplier: '', poNumber: '', batchNumber: '', location: '', incomingQualityCheck: 'Pass', qcNotes: '', incomingBatches: [],
   qcExtThickness: '', qcExtThicknessStatus: 'Pass', qcExtWidth: '', qcExtWidthStatus: 'Pass', qcCutSeal: '', qcCutSealStatus: 'Pass', qcCutLength: '', qcCutLengthStatus: 'Pass',
   qcPackBagWeight: '', qcPackBagWeightStatus: 'Pass', qcPackBagsPerPallet: '', qcPackBagsPerPalletStatus: 'Pass', qcPackTotalBags: '', qcPackTotalBagsStatus: 'Pass', qcPackTotalPallets: '', qcPackTotalPalletsStatus: 'Pass'
 });
@@ -655,7 +651,7 @@ const defaultStats = { output: 0, prevOutput: 0, consumption: 0, prevConsumption
 const defaultAnalytics = { daily: defaultStats, weekly: defaultStats, monthly: defaultStats, yearly: defaultStats };
 
 // YOUR GOOGLE SCRIPT URL HERE
-const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxdiwJZSnsQ8pIKrP28uC1VKbJmYIrOPq4e63SXgyKdQiTd6p_uVP0CiOBGdqHKiCu9-g/exec';
+const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz2fYoNr-j0YlJDQAfODaEfnPtIEnu734yOnqgmN0K_OJiPFOey9FTR_r60w-FkfPKctA/exec';
 
 const App = () => {
   const [language, setLanguage] = useState('en');
@@ -689,6 +685,7 @@ const App = () => {
   const [quickMaterialWeight, setQuickMaterialWeight] = useState('');
   const [quickScrapType, setQuickScrapType] = useState('setupScrap');
   const [quickScrapWeight, setQuickScrapWeight] = useState('');
+  const [quickPalletCount, setQuickPalletCount] = useState('1'); // New state for Incoming Goods mass entry
 
   const [localHistory, setLocalHistory] = useState({ machineIds: [], batchNos: [], suppliers: [], downtimeReasons: [] });
 
@@ -834,6 +831,82 @@ const App = () => {
 
   const handleInputChange = (e) => setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
 
+  // --- Auto Batch Generator & Incoming Goods Handlers ---
+  const handleAutoBatch = () => {
+    if (!formData.restockMaterial) return toast.error("Select a material first to generate a batch.");
+    const palletCount = parseInt(quickPalletCount, 10) || 1;
+    const amountPerPallet = parseFloat(formData.restockAmount);
+
+    if (!amountPerPallet) return toast.error("Enter the Amount (kg) per pallet first.");
+
+    const matStr = formData.restockMaterial.toUpperCase();
+    const supStr = (formData.supplier || '').toUpperCase();
+
+    // 1. Determine Prefix
+    let prefix = 'LD'; // Default
+    if (matStr.includes('HD')) prefix = 'HD';
+    else if (matStr.includes('LL')) prefix = 'LL';
+
+    // 2. Extract Grade (Matches N1-N3, F6095, 5301, 0209SP, etc.)
+    let grade = '';
+    const gradeMatch = matStr.match(/(N[1-3]|F\d{3,}[A-Z]*|\d{4,}[A-Z]*)/);
+    if (gradeMatch) grade = gradeMatch[1];
+
+    // 3. Extract Supplier Code
+    let supplierCode = '';
+    if (supStr.includes('ECO REPRO') || supStr === 'ER') supplierCode = 'ER';
+    else if (supStr.includes('CY') || matStr.includes('CY')) supplierCode = 'CY';
+    else if (supStr.includes('NP') || matStr.includes('NP')) supplierCode = 'NP';
+    else if (supStr) supplierCode = supStr.replace(/[^A-Z]/g, '').substring(0, 2);
+
+    const baseCode = `${prefix}${grade}${supplierCode}`;
+
+    // 4. Find the highest existing increment in history
+    const history = dashboardData.incoming || [];
+    let maxIncrement = 0;
+
+    history.forEach(row => {
+      const batch = String(row[5] || '').trim().toUpperCase();
+      if (batch.startsWith(baseCode)) {
+         const match = batch.match(/-(\d+)$/);
+         if (match) {
+           const num = parseInt(match[1], 10);
+           if (num > maxIncrement) maxIncrement = num;
+         }
+      }
+    });
+
+    // 5. Generate N sequential batches
+    const newBatches = [];
+    for (let i = 1; i <= palletCount; i++) {
+      newBatches.push({
+        id: Date.now() + i,
+        batchNo: `${baseCode}-${maxIncrement + i}`,
+        amount: amountPerPallet
+      });
+    }
+
+    setFormData(prev => ({
+      ...prev,
+      incomingBatches: [...(prev.incomingBatches || []), ...newBatches]
+    }));
+
+    setQuickPalletCount('1'); // Reset counter
+    toast.success(`Generated ${palletCount} batch(es) successfully!`, { icon: '✨' });
+  };
+
+  const updateIncomingBatchNo = (id, newNo) => {
+    setFormData(prev => ({ ...prev, incomingBatches: (prev.incomingBatches || []).map(b => b.id === id ? { ...b, batchNo: newNo.toUpperCase() } : b) }));
+  };
+
+  const updateIncomingBatchAmount = (id, newAmt) => {
+    setFormData(prev => ({ ...prev, incomingBatches: (prev.incomingBatches || []).map(b => b.id === id ? { ...b, amount: newAmt } : b) }));
+  };
+
+  const removeIncomingBatch = (id) => {
+    setFormData(prev => ({ ...prev, incomingBatches: (prev.incomingBatches || []).filter(b => b.id !== id) }));
+  };
+
   // --- Accumulator & Inline Edit Handlers ---
   const updateRollWeight = (id, newWeight) => {
     const newRolls = (formData.extrusionRolls || []).map(r => r.id === id ? { ...r, weight: newWeight } : r);
@@ -930,6 +1003,11 @@ const App = () => {
     if ((department === 'Extrusion' || department === 'Cutting') && massBalance.isFailed && !formData.discrepancyReason) {
       toast.error(t("Discrepancy Must Be Resolved"), { position: 'top-center', style: { border: '1px solid #ef4444', color: '#ef4444' } }); return;
     }
+    
+    if (department === 'Incoming Goods' && (!formData.incomingBatches || formData.incomingBatches.length === 0)) {
+      toast.error("Please generate at least one pallet batch before saving.", { position: 'top-center' }); return;
+    }
+
     setIsSubmitting(true);
     const loadToast = toast.loading("Saving Shift Log to Database...");
     try {
@@ -1187,7 +1265,7 @@ const App = () => {
               <div className="pb-2">
                 <SortableTable 
                   title="Live Order Tracker" data={activeOrdersData}
-                  rowsPerPage={5}
+                  rowsPerPage={2}
                   columns={[
                     { label: 'Issue Date', dataIndex: 'issueDateMs', type: 'number', render: (_, row) => <span className="text-slate-500 font-bold whitespace-nowrap">{row.issueDateDisplay}</span> },
                     { label: 'J/O No.', dataIndex: 'jo', type: 'string', render: v => <span className="font-black text-slate-900 whitespace-nowrap text-base">{v}</span> },
@@ -1554,27 +1632,57 @@ const App = () => {
               )}
 
               {department === 'Incoming Goods' && (
-                <section className="bg-white p-5 md:p-8 rounded-3xl border border-slate-200 shadow-sm max-w-2xl mx-auto">
+                <section className="bg-white p-5 md:p-8 rounded-3xl border border-slate-200 shadow-sm max-w-4xl mx-auto">
                   <h3 className="text-xl font-black text-slate-800 mb-6 flex items-center gap-2"><ArrowDownToLine size={22} className="text-blue-500"/> {t("Raw Material Inwards")}</h3>
-                  <div className="space-y-5">
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                      <div className="min-w-0"><label className="block text-sm font-bold text-slate-700 mb-2">{t("Material Name / ID")}</label><input type="text" name="restockMaterial" value={formData.restockMaterial} onChange={handleInputChange} required className="w-full h-14 px-4 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none font-bold text-base" list="material-suggestions" /></div>
-                      <div className="min-w-0"><label className="block text-sm font-bold text-slate-700 mb-2">{t("Amount (kg)")}</label><input type="number" step="0.01" name="restockAmount" value={formData.restockAmount} onChange={handleInputChange} required className="w-full h-14 px-4 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none font-black text-lg text-blue-700" /></div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
+                    <div className="min-w-0"><label className="block text-sm font-bold text-slate-700 mb-2">{t("Material Name / ID")}</label><input type="text" name="restockMaterial" value={formData.restockMaterial} onChange={handleInputChange} required className="w-full h-14 px-4 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none font-bold text-base uppercase" list="material-suggestions" /></div>
+                    <div className="min-w-0"><label className="block text-sm font-bold text-slate-700 mb-2">{t("Supplier Name")}</label><input type="text" name="supplier" value={formData.supplier} onChange={handleInputChange} className="w-full h-14 px-4 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none font-semibold text-base uppercase" list="supplier-suggestions" /></div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-6">
+                    <div className="min-w-0"><label className="block text-sm font-bold text-slate-700 mb-2">{t("PO No.")}</label><input type="text" name="poNumber" value={formData.poNumber} onChange={handleInputChange} className="w-full h-14 px-4 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none font-semibold text-base uppercase" /></div>
+                    <div className="min-w-0"><label className="block text-sm font-bold text-slate-700 mb-2">{t("Location")}</label><input type="text" name="location" value={formData.location} onChange={handleInputChange} className="w-full h-14 px-4 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none font-semibold uppercase text-base" /></div>
+                    <div className="min-w-0">
+                      <label className="block text-sm font-bold text-slate-700 mb-2">{t("Condition")}</label>
+                      <select name="incomingQualityCheck" value={formData.incomingQualityCheck} onChange={handleInputChange} className="w-full h-14 px-4 border border-slate-300 rounded-xl outline-none bg-white font-bold text-base">
+                        <option value="Pass">Pass</option><option value="Damaged">Damaged</option><option value="Contaminated">Contaminated</option>
+                      </select>
                     </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                      <div className="min-w-0"><label className="block text-sm font-bold text-slate-700 mb-2">{t("Supplier Name")}</label><input type="text" name="supplier" value={formData.supplier} onChange={handleInputChange} className="w-full h-14 px-4 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none font-semibold text-base" list="supplier-suggestions" /></div>
-                      <div className="min-w-0"><label className="block text-sm font-bold text-slate-700 mb-2">{t("PO No.")}</label><input type="text" name="poNumber" value={formData.poNumber} onChange={handleInputChange} className="w-full h-14 px-4 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none font-semibold text-base" /></div>
-                    </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 pt-6 border-t border-slate-200">
-                      <div className="min-w-0"><label className="block text-sm font-bold text-slate-700 mb-2">{t("Batch No.")}</label><input type="text" name="batchNumber" value={formData.batchNumber} onChange={handleInputChange} className="w-full h-14 px-4 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none font-bold uppercase text-base" list="batch-suggestions" /></div>
-                      <div className="min-w-0"><label className="block text-sm font-bold text-slate-700 mb-2">{t("Location")}</label><input type="text" name="location" value={formData.location} onChange={handleInputChange} className="w-full h-14 px-4 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none font-semibold uppercase text-base" /></div>
-                      <div className="min-w-0">
-                        <label className="block text-sm font-bold text-slate-700 mb-2">{t("Condition")}</label>
-                        <select name="incomingQualityCheck" value={formData.incomingQualityCheck} onChange={handleInputChange} className="w-full h-14 px-4 border border-slate-300 rounded-xl outline-none bg-white font-bold text-base">
-                          <option value="Pass">Pass</option><option value="Damaged">Damaged</option><option value="Contaminated">Contaminated</option>
-                        </select>
+                  </div>
+
+                  {/* Batch Generator Section */}
+                  <div className="bg-slate-50 p-5 rounded-2xl border border-slate-200">
+                    <h4 className="text-sm font-black text-slate-700 mb-4 tracking-wide">Pallet / Batch Generator</h4>
+                    <div className="flex flex-col sm:flex-row gap-4 items-end">
+                      <div className="w-full sm:w-1/3">
+                        <label className="block text-xs font-bold text-slate-500 mb-2 uppercase tracking-wider">Amount Per Pallet (kg)</label>
+                        <input type="number" step="0.01" name="restockAmount" value={formData.restockAmount} onChange={handleInputChange} className="w-full h-14 px-4 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none font-black text-xl text-blue-700" placeholder="e.g. 1250" />
                       </div>
+                      <div className="w-full sm:w-1/3">
+                        <label className="block text-xs font-bold text-slate-500 mb-2 uppercase tracking-wider">No. of Pallets</label>
+                        <input type="number" value={quickPalletCount} onChange={e => setQuickPalletCount(e.target.value)} className="w-full h-14 px-4 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none font-black text-lg" min="1" />
+                      </div>
+                      <button type="button" onClick={handleAutoBatch} className="w-full sm:w-1/3 h-14 bg-blue-600 hover:bg-blue-700 text-white font-black rounded-xl transition-all shadow-md active:scale-95 text-base">Generate Batches</button>
                     </div>
+
+                    {/* List of generated batches */}
+                    {(formData.incomingBatches && formData.incomingBatches.length > 0) && (
+                      <div className="mt-6 space-y-2 max-h-64 overflow-y-auto pr-1 custom-scrollbar">
+                        {formData.incomingBatches.map((batch, idx) => (
+                           <div key={batch.id} className="flex justify-between items-center bg-white p-3.5 rounded-xl border border-slate-200 shadow-sm">
+                             <div className="flex items-center gap-3">
+                               <span className="bg-blue-100 text-blue-700 font-black text-xs px-2.5 py-1 rounded-md">{idx + 1}</span>
+                               <input type="text" value={batch.batchNo} onChange={(e) => updateIncomingBatchNo(batch.id, e.target.value)} className="font-bold text-slate-800 text-base outline-none border-b border-dashed border-slate-300 focus:border-blue-500 bg-transparent w-40 uppercase" />
+                             </div>
+                             <div className="flex items-center gap-4">
+                               <InlineEdit value={batch.amount} onSave={(val) => updateIncomingBatchAmount(batch.id, val)} suffix="kg" />
+                               <button type="button" onClick={() => removeIncomingBatch(batch.id)} className="text-slate-400 hover:text-red-500 p-2 bg-slate-50 hover:bg-red-50 rounded-lg transition-colors"><Trash2 size={18}/></button>
+                             </div>
+                           </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 </section>
               )}
