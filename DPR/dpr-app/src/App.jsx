@@ -3,7 +3,8 @@ import {
   ClipboardList, Settings, Box, AlertTriangle, Clock, Save, Printer, Scale, 
   Package, Truck, ArrowDownToLine, PlusCircle, Trash2, CheckCircle, BarChart3, 
   Activity, RefreshCw, Flag, TrendingUp, X, Search, PackageCheck, Layers, 
-  Lock, LogOut, UserCircle, Globe, Menu, ChevronUp, ChevronDown, Edit2
+  Lock, LogOut, UserCircle, Globe, Menu, ChevronUp, ChevronDown, Edit2, Camera,
+  Archive, ShoppingCart
 } from 'lucide-react';
 import toast, { Toaster } from 'react-hot-toast';
 
@@ -80,6 +81,19 @@ const dict = {
     "Total Bags Verified": "Total Bags Verified",
     "Total Pallets Counted": "Total Pallets Counted",
     "Overall QC Remarks / Issues Noted": "Overall QC Remarks / Issues Noted",
+    "Machine Inspection": "Machine Inspection",
+    "Machine Type": "Machine Type",
+    "Filter Status": "Filter Status",
+    "Scrap Purged": "Scrap Purged",
+    "Sealing Temperature (℃)": "Sealing Temperature (℃)",
+    "Blade / Thickness Check": "Blade / Thickness Check",
+    "Machine Cleanliness": "Machine Cleanliness",
+    "Safety Guards": "Safety Guards",
+    "Good": "Good",
+    "Needs Change": "Needs Change",
+    "Changed": "Changed",
+    "Yes": "Yes",
+    "No": "No",
     "Status": "Status",
     "Pass": "Pass",
     "Fail": "Fail",
@@ -103,15 +117,36 @@ const dict = {
     "Incoming Goods": "Incoming Goods",
     "Print": "Print",
     "Exit": "Exit",
-    "Daily Production Report": "Daily Production Report",
-    "Operational Log & Analytics": "Operational Log & Analytics",
-    "Draft Auto-Saved": "Draft Auto-Saved",
-    "Log bags incrementally as they are packed onto the pallet.": "Log bags incrementally as they are packed onto the pallet.",
-    "Load hoppers incrementally. Click '+ Add Another Material' when a new batch is added during the shift.": "Load hoppers incrementally. Click '+ Add Another Material' when a new batch is added during the shift.",
     "Optional": "Optional",
-    "Material ID": "Material ID",
-    "Material Name": "Material Name",
-    "bag": "bag"
+    "Evidence Photo (Optional)": "Evidence Photo (Optional)",
+    "Tap to take photo or upload": "Tap to take photo or upload",
+    "bag": "bag",
+    "Mark Job as Complete": "Mark Job as Complete",
+    "Flag this order as fully packed and ready for shipping.": "Flag this order as fully packed and ready for shipping.",
+    "Ready to Ship Tracker": "Ready to Ship Tracker",
+    "Customer": "Customer",
+    "Packing Details": "Packing Details",
+    "Packed Weight": "Packed Weight",
+    "Pending Dispatch": "Pending Dispatch",
+    "Container Logistics": "Container Logistics",
+    "Container": "Container",
+    "Arrival Date": "Arrival Date",
+    "Laden Date": "Laden Date",
+    "ETD PK Date": "ETD PK Date",
+    "Inventory": "Inventory",
+    "Warehouse Overview": "Warehouse Overview",
+    "Raw Material Stock": "Raw Material Stock",
+    "Finished Goods (Pending)": "Finished Goods (Pending)",
+    "Total Volume": "Total Volume",
+    "Material": "Material",
+    "Incoming": "Incoming",
+    "Consumed": "Consumed",
+    "Current Stock": "Current Stock",
+    "Purchase Requisition": "Purchase Requisition",
+    "Item Name": "Item Name",
+    "Remarks": "Remarks",
+    "Resolve": "Resolve",
+    "Action": "Action"
   },
   bn: {
     "Production Hub": "উৎপাদন হাব",
@@ -132,27 +167,24 @@ const dict = {
     "Job Order No.": "জব অর্ডার নম্বর (JO)",
     "Shift Accumulator (Materials)": "শিফট অ্যাকুমুলেটর (কাঁচামাল)",
     "Batch No.": "ব্যাচ নম্বর",
-    "Quantity (kg)": "পরিমাণ (কেজি)",
     "Quantity": "পরিমাণ",
     "Unit": "একক",
     "+ Add": "+ যোগ করুন",
     "Total Input Material:": "মোট ইনপুট কাঁচামাল:",
-    "Add Another Material": "আরও কাঁচামাল যোগ করুন",
     "Input Roll Weight (kg)": "ইনপুট রোল ওজন (কেজি)",
-    "Production Output & Scrap": "উৎপাদন আউটপুট এবং স্ক্র্যাপ",
+    "Production Output & Wastage": "উৎপাদন আউটপুট এবং বর্জ্য",
     "Shift Accumulator (Rolls)": "শিফট অ্যাকুমুলেটর (রোল)",
     "New Roll Weight (kg)": "নতুন রোলের ওজন (কেজি)",
     "+ Add Roll": "+ রোল যোগ করুন",
     "Accumulated Good Output": "জমে থাকা ভালো আউটপুট",
     "Actual Good Output": "প্রকৃত ভালো আউটপুট",
     "UoM": "একক (UoM)",
-    "Shift Accumulator (Scrap)": "শিফট অ্যাকুমুলেটর (স্ক্র্যাপ)",
+    "Wastage Generated": "উৎপাদিত বর্জ্য",
+    "Wastage Accumulator": "বর্জ্য অ্যাকুমুলেটর",
     "Type": "ধরন",
     "Weight (kg)": "ওজন (কেজি)",
-    "Setup Scrap": "সেটআপ স্ক্র্যাপ",
-    "Process Scrap": "প্রসেস স্ক্র্যাপ",
-    "Setup Scrap (kg) - Purging/Colour Change": "সেটআপ স্ক্র্যাপ (কেজি) - পার্জিং/রঙ পরিবর্তন",
-    "Process Scrap (kg) - Trims/Tears": "প্রসেস স্ক্র্যাপ (কেজি) - ট্রিমস/টিয়ারস",
+    "Setup Wastage": "সেটআপ বর্জ্য",
+    "Process Wastage": "প্রসেস বর্জ্য",
     "Machine Downtime": "মেশিন ডাউনটাইম",
     "Planned (mins)": "পরিকল্পিত (মিনিট)",
     "Unplanned (mins)": "অপরিকল্পিত (মিনিট)",
@@ -188,17 +220,30 @@ const dict = {
     "Total Bags Verified": "মোট যাচাইকৃত ব্যাগ",
     "Total Pallets Counted": "মোট গোনা প্যালেট",
     "Overall QC Remarks / Issues Noted": "সার্বিক কিউসি মন্তব্য",
+    "Machine Inspection": "মেশিন পরিদর্শন",
+    "Machine Type": "মেশিনের ধরন",
+    "Filter Status": "ফিল্টার স্ট্যাটাস",
+    "Scrap Purged": "স্ক্র্যাপ পার্জ করা হয়েছে",
+    "Sealing Temperature (℃)": "সিলিং তাপমাত্রা (℃)",
+    "Blade / Thickness Check": "ব্লেড / পুরুত্ব চেক",
+    "Machine Cleanliness": "মেশিনের পরিচ্ছন্নতা",
+    "Safety Guards": "নিরাপত্তা গার্ড",
+    "Good": "ভালো",
+    "Needs Change": "পরিবর্তন প্রয়োজন",
+    "Changed": "পরিবর্তন করা হয়েছে",
+    "Yes": "হ্যাঁ",
+    "No": "না",
     "Status": "স্ট্যাটাস",
     "Pass": "পাস",
     "Fail": "ফেইল",
     "N/A": "প্রযোজ্য নয়",
-    "Submit Full Shift Log": "সম্পূর্ণ শিফট লগ জমা দিন",
-    "Saving Data...": "ডেটা সেভ হচ্ছে...",
+    "Submit Shift Log": "শিফট লগ জমা দিন",
+    "Saving...": "সেভ হচ্ছে...",
     "Discrepancy Must Be Resolved": "অসঙ্গতি সমাধান করতে হবে",
     "Mass Balance Verified": "ম্যাস ব্যালেন্স যাচাই করা হয়েছে",
     "Mass Balance Failed (Discrepancy > 2%)": "ম্যাস ব্যালেন্স ফেইল (পার্থক্য > ২%)",
     "Total Input": "মোট ইনপুট",
-    "Total Output + Scrap": "মোট আউটপুট + স্ক্র্যাপ",
+    "Total Output + Wastage": "মোট আউটপুট + বর্জ্য",
     "Variance": "পার্থক্য",
     "Error Margin": "ভুলের মার্জিন",
     "Reason for Discrepancy (Required for Override)": "অসঙ্গতির কারণ (অপরিহার্য)",
@@ -211,15 +256,36 @@ const dict = {
     "Incoming Goods": "ইনকামিং গুডস",
     "Print": "প্রিন্ট",
     "Exit": "প্রস্থান",
-    "Daily Production Report": "দৈনিক উৎপাদন প্রতিবেদন",
-    "Operational Log & Analytics": "অপারেশনাল লগ এবং অ্যানালিটিক্স",
-    "Draft Auto-Saved": "খসড়া অটো-সেভ হয়েছে",
-    "Log bags incrementally as they are packed onto the pallet.": "প্যালেটে প্যাক করার সাথে সাথে ব্যাগের ওজন ক্রমান্বয়ে লগ করুন।",
-    "Load hoppers incrementally. Click '+ Add Another Material' when a new batch is added during the shift.": "হপারে মাল যোগ করার সাথে সাথে লগ করুন। শিফটে নতুন ব্যাচ যোগ হলে '+ আরও কাঁচামাল যোগ করুন'-এ ক্লিক করুন।",
     "Optional": "ঐচ্ছিক",
-    "Material ID": "কাঁচামালের আইডি",
-    "Material Name": "কাঁচামালের নাম",
-    "bag": "ব্যাগ"
+    "Evidence Photo (Optional)": "প্রমাণের ছবি (ঐচ্ছিক)",
+    "Tap to take photo or upload": "ছবি তুলতে বা আপলোড করতে ট্যাপ করুন",
+    "bag": "ব্যাগ",
+    "Mark Job as Complete": "কাজটি সম্পূর্ণ হিসেবে চিহ্নিত করুন",
+    "Flag this order as fully packed and ready for shipping.": "এই অর্ডারটি সম্পূর্ণ প্যাক করা এবং শিপিংয়ের জন্য প্রস্তুত হিসেবে ফ্ল্যাগ করুন।",
+    "Ready to Ship Tracker": "শিপিংয়ের জন্য প্রস্তুত ট্র্যাকার",
+    "Customer": "গ্রাহক",
+    "Packing Details": "প্যাকিং বিবরণ",
+    "Packed Weight": "প্যাক করা ওজন",
+    "Pending Dispatch": "অপেক্ষমাণ ডিসপ্যাচ",
+    "Container Logistics": "কনটেইনার লজিস্টিকস",
+    "Container": "কনটেইনার",
+    "Arrival Date": "আগমনের তারিখ",
+    "Laden Date": "লাডেন তারিখ",
+    "ETD PK Date": "ইটিডি পিকে তারিখ",
+    "Inventory": "ইনভেন্টরি",
+    "Warehouse Overview": "গুদাম ওভারভিউ",
+    "Raw Material Stock": "কাঁচামাল স্টক",
+    "Finished Goods (Pending)": "ফিনিশড গুডস (অপেক্ষমাণ)",
+    "Total Volume": "মোট আয়তন",
+    "Material": "উপাদান",
+    "Incoming": "ইনকামিং",
+    "Consumed": "ব্যবহৃত",
+    "Current Stock": "বর্তমান স্টক",
+    "Purchase Requisition": "ক্রয় রিকুইজিশন",
+    "Item Name": "আইটেমের নাম",
+    "Remarks": "মন্তব্য",
+    "Resolve": "সমাধান করুন",
+    "Action": "অ্যাকশন"
   },
   ms: {
     "Production Hub": "Pusat Pengeluaran",
@@ -240,27 +306,24 @@ const dict = {
     "Job Order No.": "No. Pesanan Kerja (JO)",
     "Shift Accumulator (Materials)": "Pengumpul Syif (Bahan)",
     "Batch No.": "No. Kumpulan",
-    "Quantity (kg)": "Kuantiti (kg)",
     "Quantity": "Kuantiti",
     "Unit": "Unit",
     "+ Add": "+ Tambah",
     "Total Input Material:": "Jumlah Bahan Input:",
-    "Add Another Material": "Tambah Bahan Lain",
     "Input Roll Weight (kg)": "Berat Gulungan Input (kg)",
-    "Production Output & Scrap": "Keluaran Pengeluaran & Sisa",
+    "Production Output & Wastage": "Keluaran Pengeluaran & Sisa",
     "Shift Accumulator (Rolls)": "Pengumpul Syif (Gulungan)",
     "New Roll Weight (kg)": "Berat Gulungan Baru (kg)",
     "+ Add Roll": "+ Tambah Gulungan",
     "Accumulated Good Output": "Terkumpul Keluaran Baik",
     "Actual Good Output": "Keluaran Baik Sebenar",
     "UoM": "Unit",
-    "Shift Accumulator (Scrap)": "Pengumpul Syif (Sisa)",
+    "Wastage Generated": "Sisa Terjana",
+    "Wastage Accumulator": "Pengumpul Sisa",
     "Type": "Jenis",
     "Weight (kg)": "Berat (kg)",
-    "Setup Scrap": "Sisa Persediaan",
-    "Process Scrap": "Sisa Proses",
-    "Setup Scrap (kg) - Purging/Colour Change": "Sisa Persediaan (kg) - Purging/Tukar Warna",
-    "Process Scrap (kg) - Trims/Tears": "Sisa Proses (kg) - Potongan/Koyak",
+    "Setup Wastage": "Sisa Persediaan",
+    "Process Wastage": "Sisa Proses",
     "Machine Downtime": "Masa Henti Mesin",
     "Planned (mins)": "Dirancang (minit)",
     "Unplanned (mins)": "Tidak Dirancang (minit)",
@@ -296,17 +359,30 @@ const dict = {
     "Total Bags Verified": "Jumlah Beg Disahkan",
     "Total Pallets Counted": "Jumlah Pallet Dikira",
     "Overall QC Remarks / Issues Noted": "Ulasan QC Keseluruhan / Isu Dicatat",
+    "Machine Inspection": "Pemeriksaan Mesin",
+    "Machine Type": "Jenis Mesin",
+    "Filter Status": "Status Penapis",
+    "Scrap Purged": "Sisa Dibuang",
+    "Sealing Temperature (℃)": "Suhu Pengedap (℃)",
+    "Blade / Thickness Check": "Pemeriksaan Bilah / Ketebalan",
+    "Machine Cleanliness": "Kebersihan Mesin",
+    "Safety Guards": "Pengadang Keselamatan",
+    "Good": "Baik",
+    "Needs Change": "Perlu Ditukar",
+    "Changed": "Telah Ditukar",
+    "Yes": "Ya",
+    "No": "Tidak",
     "Status": "Status",
     "Pass": "Lulus",
     "Fail": "Gagal",
     "N/A": "N/A",
-    "Submit Full Shift Log": "Hantar Log Syif Penuh",
-    "Saving Data...": "Menyimpan Data...",
+    "Submit Shift Log": "Hantar Log Syif",
+    "Saving...": "Menyimpan...",
     "Discrepancy Must Be Resolved": "Percanggahan Mesti Diselesaikan",
     "Mass Balance Verified": "Imbangan Jisim Disahkan",
     "Mass Balance Failed (Discrepancy > 2%)": "Imbangan Jisim Gagal (Percanggahan > 2%)",
     "Total Input": "Jumlah Input",
-    "Total Output + Scrap": "Jumlah Keluaran + Sisa",
+    "Total Output + Wastage": "Jumlah Keluaran + Sisa",
     "Variance": "Varians",
     "Error Margin": "Margin Ralat",
     "Reason for Discrepancy (Required for Override)": "Sebab Percanggahan (Wajib untuk Override)",
@@ -319,15 +395,36 @@ const dict = {
     "Incoming Goods": "Barang Masuk",
     "Print": "Cetak",
     "Exit": "Keluar",
-    "Daily Production Report": "Laporan Pengeluaran Harian",
-    "Operational Log & Analytics": "Log Operasi & Analitis",
-    "Draft Auto-Saved": "Draf Disimpan Secara Auto",
-    "Log beg secara berperingkat semasa ia dibungkus ke atas pallet.": "Log beg secara berperingkat semasa ia dibungkus ke atas pallet.",
-    "Load hoppers incrementally. Click '+ Add Another Material' when a new batch is added semasa syif.": "Muatkan corong secara berperingkat. Klik '+ Tambah Bahan Lain' apabila kumpulan baru ditambah semasa syif.",
     "Optional": "Pilihan",
-    "Material ID": "ID Bahan",
-    "Material Name": "Nama Bahan",
-    "bag": "beg"
+    "Evidence Photo (Optional)": "Gambar Bukti (Pilihan)",
+    "Tap to take photo or upload": "Ketik untuk mengambil gambar atau muat naik",
+    "bag": "beg",
+    "Mark Job as Complete": "Tandakan Kerja sebagai Selesai",
+    "Flag this order as fully packed and ready for shipping.": "Tandakan pesanan ini sebagai siap dibungkus dan sedia untuk penghantaran.",
+    "Ready to Ship Tracker": "Penjejak Sedia untuk Dihantar",
+    "Customer": "Pelanggan",
+    "Packing Details": "Butiran Pembungkusan",
+    "Packed Weight": "Berat Dibungkus",
+    "Pending Dispatch": "Penghantaran Tertunda",
+    "Container Logistics": "Logistik Kontena",
+    "Container": "Kontena",
+    "Arrival Date": "Tarikh Ketibaan",
+    "Laden Date": "Tarikh Muatan (Laden)",
+    "ETD PK Date": "Tarikh ETD PK",
+    "Inventory": "Inventori",
+    "Warehouse Overview": "Gambaran Keseluruhan Gudang",
+    "Raw Material Stock": "Stok Bahan Mentah",
+    "Finished Goods (Pending)": "Barang Siap (Tertunda)",
+    "Total Volume": "Jumlah Isipadu",
+    "Material": "Bahan",
+    "Incoming": "Masuk",
+    "Consumed": "Digunakan",
+    "Current Stock": "Stok Semasa",
+    "Purchase Requisition": "Permintaan Pembelian",
+    "Item Name": "Nama Item",
+    "Remarks": "Catatan",
+    "Resolve": "Selesaikan",
+    "Action": "Tindakan"
   }
 };
 
@@ -495,21 +592,26 @@ const SortableTable = ({ title, columns, data, onFlag, onRowClick, rowsPerPage =
   );
 };
 
-// QC Field Component
-const QCField = ({ label, name, statusName, formData, onChange, placeholder, t }) => (
-  <div className="flex flex-col sm:flex-row sm:items-end gap-3 p-3 bg-white rounded-md border border-slate-200 shadow-sm">
-    <div className="flex-1 min-w-0">
-      <label className="block text-sm font-medium text-slate-700 mb-1">{label}</label>
-      <input type="text" name={name} value={formData[name]} onChange={onChange} placeholder={placeholder} className="w-full p-2 border border-slate-300 rounded-lg text-base focus:ring-2 focus:ring-blue-500 outline-none" />
-    </div>
-    <div className="w-full sm:w-28 shrink-0">
-      <label className="block text-sm font-medium text-slate-700 mb-1 sm:hidden">{t("Status")}</label>
-      <select name={statusName} value={formData[statusName]} onChange={onChange} className="w-full p-2 border border-slate-300 rounded-lg text-base focus:outline-none font-medium">
-        <option className="text-emerald-600 font-semibold" value="Pass">{t("Pass")}</option>
-        <option className="text-red-600 font-semibold" value="Fail">{t("Fail")}</option>
-        <option className="text-slate-400" value="N/A">{t("N/A")}</option>
-      </select>
-    </div>
+// 3. Image Upload Field Component
+const ImageUploadField = ({ preview, onFileChange, onClear, disabled, t }) => (
+  <div className={`mt-3 mb-6 ${disabled ? 'opacity-50 pointer-events-none' : ''}`}>
+    <label className="block text-sm font-bold text-slate-700 mb-2">{t("Evidence Photo (Optional)")}</label>
+    {!preview ? (
+      <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-slate-300 border-dashed rounded-xl cursor-pointer bg-slate-50 hover:bg-slate-100 transition-colors">
+        <div className="flex flex-col items-center justify-center pt-5 pb-6">
+          <Camera className="w-8 h-8 text-slate-400 mb-2" />
+          <p className="text-sm text-slate-500 font-semibold">{t("Tap to take photo or upload")}</p>
+        </div>
+        <input type="file" accept="image/*" capture="environment" className="hidden" onChange={onFileChange} disabled={disabled} />
+      </label>
+    ) : (
+      <div className="relative w-full h-48 rounded-xl overflow-hidden border border-slate-200 shadow-sm bg-slate-900">
+        <img src={preview} alt="QC Evidence" className="w-full h-full object-contain" />
+        <button type="button" onClick={onClear} disabled={disabled} className="absolute top-2 right-2 bg-red-500 text-white p-2.5 rounded-lg shadow-md hover:bg-red-600 transition-colors active:scale-95">
+          <Trash2 size={16} />
+        </button>
+      </div>
+    )}
   </div>
 );
 
@@ -527,8 +629,9 @@ const LogDetailsBanner = ({ log, onClose, masterOrders = [] }) => {
   );
 
   let orderInfo = null;
-  if (['Extrusion', 'Cutting', 'Packing'].includes(log.type)) {
-    const order = masterOrders.find(o => o.jo === d[3]);
+  if (['Extrusion', 'Cutting', 'Packing', 'Quality Control'].includes(log.type)) {
+    const jobOrderTarget = log.type === 'Quality Control' ? d[3] : d[3];
+    const order = masterOrders.find(o => o.jo === jobOrderTarget);
     if (order) {
        let formattedDate = '-';
        if (order.date && order.date !== '-') {
@@ -616,6 +719,32 @@ const LogDetailsBanner = ({ log, onClose, masterOrders = [] }) => {
         <LabelValue label="Receiver" value={d[9]} />
       </>
     );
+  } else if (log.type === 'Quality Control') {
+    // Dynamic Evidence Link Extraction from Column 8
+    const detailsLines = d[7] ? d[7].toString().split('\n') : [];
+    const evidenceLine = detailsLines.find(l => l.startsWith('Evidence Photo:'));
+    const evidenceUrl = evidenceLine ? evidenceLine.replace('Evidence Photo:', '').trim() : null;
+
+    content = (
+      <>
+        {orderInfo}
+        <LabelValue label="Timestamp" value={fmtDate(d[0])} />
+        <div className="grid grid-cols-2 gap-4">
+          <LabelValue label="Machine" value={d[2] || 'N/A'} />
+          <LabelValue label="Job Order" value={d[3] || 'N/A'} />
+        </div>
+        <LabelValue label="Assessment Details" value={<pre className="whitespace-pre-wrap font-sans text-xs mt-1 bg-slate-50 p-3 rounded-lg border border-slate-200">{d[7]}</pre>} />
+        {evidenceUrl && (
+          <LabelValue label="Attached Evidence" value={
+            <a href={evidenceUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 mt-1 px-3 py-2 bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 transition-colors border border-blue-200">
+              <Camera size={14} /> View Evidence Photo
+            </a>
+          } />
+        )}
+        <LabelValue label="Remarks" value={d[6] || '-'} />
+        <LabelValue label="Inspector" value={d[8]} className="border-0 pb-0 mb-0" />
+      </>
+    );
   }
 
   return (
@@ -633,6 +762,24 @@ const LogDetailsBanner = ({ log, onClose, masterOrders = [] }) => {
   );
 };
 
+// QC Field Component
+const QCField = ({ label, name, statusName, formData, onChange, placeholder, t, disabled }) => (
+  <div className={`flex flex-col sm:flex-row sm:items-end gap-3 p-4 bg-white rounded-xl border border-slate-200 shadow-sm ${disabled ? 'opacity-70' : ''}`}>
+    <div className="flex-1 min-w-0">
+      <label className="block text-sm font-bold text-slate-700 mb-2">{label}</label>
+      <input type="text" name={name} value={formData[name]} onChange={onChange} placeholder={placeholder} disabled={disabled} className="w-full p-3 border border-slate-300 rounded-lg text-base focus:ring-2 focus:ring-blue-500 outline-none font-semibold disabled:bg-slate-50 transition-colors" />
+    </div>
+    <div className="w-full sm:w-32 shrink-0">
+      <label className="block text-sm font-bold text-slate-700 mb-2 sm:hidden">{t("Status")}</label>
+      <select name={statusName} value={formData[statusName]} onChange={onChange} disabled={disabled} className="w-full p-3 border border-slate-300 rounded-lg text-base focus:outline-none font-bold disabled:bg-slate-50 transition-colors">
+        <option className="text-emerald-600" value="Pass">{t("Pass")}</option>
+        <option className="text-red-600" value="Fail">{t("Fail")}</option>
+        <option className="text-slate-400" value="N/A">{t("N/A")}</option>
+      </select>
+    </div>
+  </div>
+);
+
 const STORAGE_KEY = 'dpr_draft_session';
 
 const getInitialFormData = (userProfile = null) => ({
@@ -641,17 +788,19 @@ const getInitialFormData = (userProfile = null) => ({
   supervisor: userProfile ? userProfile.name : '',
   machineId: '', jobOrder: '', inputRollWeight: '', extrusionMaterials: [], extrusionRolls: [], scrapEntries: [], 
   actualOutput: '', uom: 'kg', setupScrap: '', processScrap: '', rejections: '', plannedDowntime: '', unplannedDowntime: '', downtimeReason: '', discrepancyReason: '',
-  packingSize: '', packingUom: 'kg/bag', quantityPacked: '', palletWeight: '', bagWeights: [{ id: Date.now(), weight: '' }], dispatchQty: '', deliveryOrderNo: '',
+  packingSize: '', packingUom: 'kg/bag', quantityPacked: '', palletWeight: '', bagWeights: [{ id: Date.now(), weight: '' }], jobComplete: false, dispatchQty: '', deliveryOrderNo: '',
   restockMaterial: '', restockAmount: '', supplier: '', poNumber: '', batchNumber: '', location: '', incomingQualityCheck: 'Pass', qcNotes: '', incomingBatches: [],
+  qcMachineType: 'Extrusion', qcExtFilter: 'Good', qcExtPurged: 'Yes', qcCutTemp: '', qcCutTempStatus: 'Pass', qcCutMachineThickness: '', qcCutMachineThicknessStatus: 'Pass', qcMachineCleanliness: 'Pass', qcMachineSafety: 'Pass',
   qcExtThickness: '', qcExtThicknessStatus: 'Pass', qcExtWidth: '', qcExtWidthStatus: 'Pass', qcCutSeal: '', qcCutSealStatus: 'Pass', qcCutLength: '', qcCutLengthStatus: 'Pass',
-  qcPackBagWeight: '', qcPackBagWeightStatus: 'Pass', qcPackBagsPerPallet: '', qcPackBagsPerPalletStatus: 'Pass', qcPackTotalBags: '', qcPackTotalBagsStatus: 'Pass', qcPackTotalPallets: '', qcPackTotalPalletsStatus: 'Pass'
+  qcPackBagWeight: '', qcPackBagWeightStatus: 'Pass', qcPackBagsPerPallet: '', qcPackBagsPerPalletStatus: 'Pass', qcPackTotalBags: '', qcPackTotalBagsStatus: 'Pass', qcPackTotalPallets: '', qcPackTotalPalletsStatus: 'Pass',
+  reqItemName: '', reqQuantity: '', reqUom: 'pcs', reqCurrentStock: '', reqRemarks: ''
 });
 
 const defaultStats = { output: 0, prevOutput: 0, consumption: 0, prevConsumption: 0, wastage: 0, prevWastage: 0, units: 0, pallets: 0 };
 const defaultAnalytics = { daily: defaultStats, weekly: defaultStats, monthly: defaultStats, yearly: defaultStats };
 
 // YOUR GOOGLE SCRIPT URL HERE
-const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz2fYoNr-j0YlJDQAfODaEfnPtIEnu734yOnqgmN0K_OJiPFOey9FTR_r60w-FkfPKctA/exec';
+const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxFEEVu4-BsyeMsAjro8HxO-HkR-cchipPOQL_ETCIUujjB3gCt_q6Fmw8NfKIOtJAkAg/exec';
 
 const App = () => {
   const [language, setLanguage] = useState('en');
@@ -664,8 +813,13 @@ const App = () => {
 
   const [department, setDepartment] = useState('Dashboard'); 
   const [qcStage, setQcStage] = useState('Extrusion'); 
+  const [qcActiveForm, setQcActiveForm] = useState('product'); // Tracks which container is active
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [selectedLog, setSelectedLog] = useState(null); // For the detailed log banner
+  const [selectedLog, setSelectedLog] = useState(null); 
+
+  // --- Image Upload States ---
+  const [qcImageFile, setQcImageFile] = useState(null);
+  const [qcImagePreview, setQcImagePreview] = useState(null);
   
   const [formData, setFormData] = useState(() => {
     const saved = localStorage.getItem(STORAGE_KEY);
@@ -685,7 +839,7 @@ const App = () => {
   const [quickMaterialWeight, setQuickMaterialWeight] = useState('');
   const [quickScrapType, setQuickScrapType] = useState('setupScrap');
   const [quickScrapWeight, setQuickScrapWeight] = useState('');
-  const [quickPalletCount, setQuickPalletCount] = useState('1'); // New state for Incoming Goods mass entry
+  const [quickPalletCount, setQuickPalletCount] = useState('1'); 
 
   const [localHistory, setLocalHistory] = useState({ machineIds: [], batchNos: [], suppliers: [], downtimeReasons: [] });
 
@@ -720,11 +874,28 @@ const App = () => {
   const [analyticsPeriod, setAnalyticsPeriod] = useState('daily');
   const [analyticsDept, setAnalyticsDept] = useState('Extrusion');
   const [dashboardData, setDashboardData] = useState({ 
-    extrusion: [], cutting: [], packing: [], dispatch: [], incoming: [], qc: [],
+    extrusion: [], cutting: [], packing: [], dispatch: [], incoming: [], qc: [], containers: [], requisitions: [],
     masterOrders: [], joTotals: {},
     analytics: { Extrusion: defaultAnalytics, Cutting: defaultAnalytics, Packing: defaultAnalytics }
   });
   const [isFetchingDashboard, setIsFetchingDashboard] = useState(false);
+
+  // Function to manually toggle the Ready to Ship status from the Dashboard
+  const handleToggleReadyToShip = async (jo, isReady) => {
+    const loadToast = toast.loading(isReady ? "Marking as Ready to Ship..." : "Reverting status...");
+    try {
+      await fetch(GOOGLE_SCRIPT_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify({ action: 'toggleReadyToShip', jo, isReady })
+      });
+      toast.success("Order status updated!", { id: loadToast });
+      fetchDashboardData();
+    } catch (error) {
+      toast.error("Failed to update status.", { id: loadToast });
+    }
+  };
 
   const joSuggestions = useMemo(() => {
     if (!dashboardData?.masterOrders) return [];
@@ -760,10 +931,138 @@ const App = () => {
         extProgress: ((totals.extrusion || 0) / target) * 100,
         cutProgress: ((totals.cutting || 0) / target) * 100,
         packProgress: ((totals.packing || 0) / target) * 100,
-        lastUpdated: totals.lastUpdated || 0
+        lastUpdated: totals.lastUpdated || 0,
+        isReadyToShip: order.isReadyToShip || false
       };
     }).sort((a, b) => b.lastUpdated - a.lastUpdated || b.issueDateMs - a.issueDateMs);
   }, [dashboardData]);
+
+  const readyToShipData = useMemo(() => {
+    if (!dashboardData?.masterOrders || !dashboardData?.joTotals) return [];
+    return dashboardData.masterOrders.filter(order => {
+        if (!order.isReadyToShip) return false;
+        const totals = dashboardData.joTotals[order.jo];
+        if (!totals) return false;
+        // Only show orders that still have a meaningful amount pending dispatch (> 0.5kg)
+        // This completely eliminates floating-point ghost decimals keeping orders on the list
+        const pending = totals.packing - totals.dispatched;
+        return pending > 0.5; 
+    }).map(order => {
+        const totals = dashboardData.joTotals[order.jo];
+        return {
+            jo: order.jo,
+            customer: order.customer,
+            description: order.description,
+            dimension: order.dimension,
+            packingSize: totals.packingSize || '-',
+            packingUom: totals.packingUom || '-',
+            totalPackedWeight: totals.packing || 0,
+            totalPalletWeight: totals.palletWeight || 0,
+            pendingDispatch: totals.packing - totals.dispatched,
+            lastUpdated: totals.lastUpdated || 0
+        };
+    }).sort((a, b) => b.lastUpdated - a.lastUpdated);
+  }, [dashboardData]);
+
+  // Aggregator 1: Finished Goods currently sitting in Warehouse
+  const warehouseGoodsData = useMemo(() => {
+    if (!dashboardData?.masterOrders || !dashboardData?.joTotals) return [];
+    return dashboardData.masterOrders.filter(order => {
+        const totals = dashboardData.joTotals[order.jo];
+        if (!totals) return false;
+        const pending = totals.packing - totals.dispatched;
+        return pending > 0.5; // Only show items with meaningful weight packed but not dispatched
+    }).map(order => {
+        const totals = dashboardData.joTotals[order.jo];
+        return {
+            jo: order.jo,
+            customer: order.customer,
+            dimension: order.dimension,
+            pendingDispatch: totals.packing - totals.dispatched,
+            isReady: totals.isReadyToShip,
+            lastUpdated: totals.lastUpdated || 0
+        };
+    }).sort((a, b) => b.lastUpdated - a.lastUpdated);
+  }, [dashboardData]);
+
+  // Aggregator 2: Raw Material Groups (Incoming - Consumed)
+  const rawMaterialsSummary = useMemo(() => {
+    const summary = {};
+    
+    // 1. Sum up all incoming materials
+    (dashboardData?.incoming || []).forEach(row => {
+        const mat = row[2];
+        const amount = parseFloat(row[3]) || 0;
+        if (mat) {
+            if (!summary[mat]) summary[mat] = { incoming: 0, consumed: 0 };
+            summary[mat].incoming += amount;
+        }
+    });
+
+    // 2. Dynamically extract and subtract consumed materials from Extrusion logs
+    (dashboardData?.extrusion || []).forEach(row => {
+        const materialsList = String(row[5] || '');
+        const lines = materialsList.split('\n');
+        
+        lines.forEach(line => {
+            // Regex to parse the strictly formatted Material strings sent by the Extrusion logging function
+            // Example: "Batch: LDN3CY5 | ID: N/A | Name: CY - LDPE N3 | Input: 500 kg (500 kg)"
+            const nameMatch = line.match(/Name:\s*(.*?)\s*\|/);
+            const qtyMatch = line.match(/\(([\d.]+)\s*kg\)/);
+            
+            if (nameMatch && qtyMatch) {
+                const matName = nameMatch[1].trim();
+                const qty = parseFloat(qtyMatch[1]) || 0;
+                
+                if (!summary[matName]) summary[matName] = { incoming: 0, consumed: 0 };
+                summary[matName].consumed += qty;
+            }
+        });
+    });
+
+    // 3. Map to final array and calculate Current Stock
+    return Object.keys(summary).map(mat => {
+        const inc = summary[mat].incoming;
+        const con = summary[mat].consumed;
+        return { 
+            material: mat, 
+            incoming: inc, 
+            consumed: con, 
+            current: inc - con 
+        };
+    }).sort((a, b) => b.current - a.current);
+  }, [dashboardData]);
+
+  // Aggregator 3: Active Purchase Requisitions
+  const activeRequisitions = useMemo(() => {
+    if (!dashboardData?.requisitions) return [];
+    return dashboardData.requisitions.map(r => ({
+        timestamp: new Date(r[0]).getTime(),
+        date: r[1],
+        item: r[2],
+        qty: r[3],
+        uom: r[4],
+        stock: r[5],
+        remarks: r[6],
+        requester: r[7]
+    })).sort((a, b) => b.timestamp - a.timestamp);
+  }, [dashboardData]);
+
+  const handleResolveRequisition = async (timestamp) => {
+    const loadToast = toast.loading("Marking as resolved...");
+    try {
+      await fetch(GOOGLE_SCRIPT_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify({ action: 'resolveRequisition', timestamp })
+      });
+      toast.success("Requisition resolved!", { id: loadToast });
+      fetchDashboardData();
+    } catch (error) {
+      toast.error("Failed to update status.", { id: loadToast });
+    }
+  };
 
   const materialSuggestions = useMemo(() => Array.from(new Set((dashboardData?.incoming || []).map(row => row[2]))), [dashboardData]);
 
@@ -806,7 +1105,10 @@ const App = () => {
         setCurrentUser(result.user); setIsLoggedIn(true); setPinInput(''); setDepartment(result.user.department);
         const saved = localStorage.getItem(STORAGE_KEY);
         if (!saved) setFormData(getInitialFormData(result.user)); 
-        if (result.user.department === 'Quality Control') setQcStage('Extrusion');
+        if (result.user.department === 'Quality Control') {
+           setQcStage('Extrusion');
+           setQcActiveForm('machine');
+        }
         toast.success(`Welcome back, ${result.user.name}`, { icon: '👋' });
       } else toast.error(result.message || "Invalid PIN. Please try again.");
     } catch (error) { toast.error("Network error. Please check your connection."); } 
@@ -821,7 +1123,7 @@ const App = () => {
         <div className="flex gap-3 justify-end mt-2">
           <button onClick={() => toast.dismiss(t.id)} className="px-4 py-2 text-sm font-bold bg-slate-100 rounded-lg hover:bg-slate-200 transition-colors">Cancel</button>
           <button onClick={() => {
-            setIsLoggedIn(false); setCurrentUser(null); setDepartment('Dashboard'); localStorage.removeItem(STORAGE_KEY); setFormData(getInitialFormData());
+            setIsLoggedIn(false); setCurrentUser(null); setDepartment('Dashboard'); localStorage.removeItem(STORAGE_KEY); setFormData(getInitialFormData()); setQcImageFile(null); setQcImagePreview(null);
             toast.dismiss(t.id);
           }} className="px-4 py-2 text-sm font-bold bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors shadow-sm">Confirm Exit</button>
         </div>
@@ -829,7 +1131,41 @@ const App = () => {
     ), { duration: Infinity });
   };
 
-  const handleInputChange = (e) => setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    // Intercept specific fields and forcefully convert them to uppercase in the data payload
+    const autoCapitaliseFields = ['jobOrder', 'machineId', 'batchNumber', 'restockMaterial', 'poNumber', 'deliveryOrderNo', 'location', 'reqItemName'];
+    const finalValue = autoCapitaliseFields.includes(name) ? value.toUpperCase() : value;
+    setFormData(prev => ({ ...prev, [name]: finalValue }));
+  };
+
+  // Image Upload Handlers
+  const handleQcImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) { // 5MB limit to prevent Base64/GAS payload crash
+        toast.error("Image file is too large. Max size is 5MB.");
+        return;
+      }
+      setQcImageFile(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setQcImagePreview(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const clearQcImage = () => {
+    setQcImageFile(null);
+    setQcImagePreview(null);
+  };
+
+  // Resets image specifically when changing the active QC form tab
+  const handleQcFormSwitch = (formType) => {
+    setQcActiveForm(formType);
+    clearQcImage();
+  };
 
   // --- Auto Batch Generator & Incoming Goods Handlers ---
   const handleAutoBatch = () => {
@@ -842,17 +1178,14 @@ const App = () => {
     const matStr = formData.restockMaterial.toUpperCase();
     const supStr = (formData.supplier || '').toUpperCase();
 
-    // 1. Determine Prefix
     let prefix = 'LD'; // Default
     if (matStr.includes('HD')) prefix = 'HD';
     else if (matStr.includes('LL')) prefix = 'LL';
 
-    // 2. Extract Grade (Matches N1-N3, F6095, 5301, 0209SP, etc.)
     let grade = '';
     const gradeMatch = matStr.match(/(N[1-3]|F\d{3,}[A-Z]*|\d{4,}[A-Z]*)/);
     if (gradeMatch) grade = gradeMatch[1];
 
-    // 3. Extract Supplier Code
     let supplierCode = '';
     if (supStr.includes('ECO REPRO') || supStr === 'ER') supplierCode = 'ER';
     else if (supStr.includes('CY') || matStr.includes('CY')) supplierCode = 'CY';
@@ -861,7 +1194,6 @@ const App = () => {
 
     const baseCode = `${prefix}${grade}${supplierCode}`;
 
-    // 4. Find the highest existing increment in history
     const history = dashboardData.incoming || [];
     let maxIncrement = 0;
 
@@ -876,7 +1208,6 @@ const App = () => {
       }
     });
 
-    // 5. Generate N sequential batches
     const newBatches = [];
     for (let i = 1; i <= palletCount; i++) {
       newBatches.push({
@@ -886,12 +1217,8 @@ const App = () => {
       });
     }
 
-    setFormData(prev => ({
-      ...prev,
-      incomingBatches: [...(prev.incomingBatches || []), ...newBatches]
-    }));
-
-    setQuickPalletCount('1'); // Reset counter
+    setFormData(prev => ({ ...prev, incomingBatches: [...(prev.incomingBatches || []), ...newBatches] }));
+    setQuickPalletCount('1'); 
     toast.success(`Generated ${palletCount} batch(es) successfully!`, { icon: '✨' });
   };
 
@@ -984,7 +1311,7 @@ const App = () => {
     finally { setIsFetchingDashboard(false); }
   };
 
-  useEffect(() => { if (isLoggedIn && department === 'Dashboard') fetchDashboardData(); }, [department, isLoggedIn]);
+  useEffect(() => { if (isLoggedIn && (department === 'Dashboard' || department === 'Inventory')) fetchDashboardData(); }, [department, isLoggedIn]);
 
   const handleFlagSubmit = async () => {
     if (!flagData.reason) return toast.error("Please provide a reason.");
@@ -1011,7 +1338,30 @@ const App = () => {
     setIsSubmitting(true);
     const loadToast = toast.loading("Saving Shift Log to Database...");
     try {
-      const payload = { ...formData, department, massDiscrepancyKg: massBalance.discrepancyKg, massDiscrepancyPercent: massBalance.discrepancyPercent };
+      // Handle Base64 Image Conversion for Payload
+      let base64Data = null;
+      let mimeType = null;
+      let fileName = null;
+
+      if (qcImageFile && qcImagePreview) {
+        base64Data = qcImagePreview.split(',')[1];
+        mimeType = qcImageFile.type;
+        const ext = mimeType.split('/')[1] || 'png';
+        fileName = `QC_Evidence_${Date.now()}.${ext}`;
+      }
+
+      const resolvedQcStage = department === 'Quality Control' ? (qcActiveForm === 'machine' ? 'Machine Inspection' : qcStage) : qcStage;
+      const payload = { 
+        ...formData, 
+        department, 
+        qcStage: resolvedQcStage, 
+        massDiscrepancyKg: massBalance.discrepancyKg, 
+        massDiscrepancyPercent: massBalance.discrepancyPercent,
+        qcImageData: base64Data,
+        qcImageMimeType: mimeType,
+        qcImageName: fileName
+      };
+      
       await fetch(GOOGLE_SCRIPT_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(payload) });
       toast.success(`Shift log saved successfully! [${t(department)}]`, { id: loadToast });
       
@@ -1030,6 +1380,11 @@ const App = () => {
 
       localStorage.removeItem(STORAGE_KEY);
       setFormData(getInitialFormData(currentUser)); 
+      clearQcImage();
+      
+      // Instantly sync with the backend so the Ready to Ship Tracker (and Dashboard) updates live!
+      fetchDashboardData();
+      
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } catch (error) { toast.error("Network error: Could not connect to database.", { id: loadToast }); } 
     finally { setIsSubmitting(false); }
@@ -1048,11 +1403,18 @@ const App = () => {
 
   const handleScroll = (e) => {
     const currentScrollY = e.target.scrollTop;
-    if (currentScrollY > lastScrollY.current && currentScrollY > 50) {
+    
+    // Check if user has scrolled to the absolute bottom of the container (with a 20px threshold)
+    const isAtBottom = Math.ceil(currentScrollY + e.target.clientHeight) >= e.target.scrollHeight - 20;
+
+    if (isAtBottom) {
+      setIsFooterVisible(true);  // Always show footer when at the bottom
+    } else if (currentScrollY > lastScrollY.current && currentScrollY > 50) {
       setIsFooterVisible(false); // Scrolling down, hide footer
     } else {
       setIsFooterVisible(true);  // Scrolling up, show footer
     }
+    
     lastScrollY.current = currentScrollY;
   };
 
@@ -1088,7 +1450,7 @@ const App = () => {
 
       {/* --- FLAG MODAL --- */}
       {isFlagModalOpen && (
-        <div className="fixed inset-0 bg-black/60 z-[60] flex items-center justify-center p-4 backdrop-blur-sm">
+        <div className="fixed inset-0 bg-slate-900/60 z-[60] flex items-center justify-center p-4 backdrop-blur-sm">
           <div className="bg-white rounded-3xl shadow-xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in duration-200">
             <div className="flex justify-between items-center p-6 border-b border-slate-200 bg-slate-50">
               <div className="flex items-center gap-2 text-amber-600"><Flag size={24} className="fill-amber-600" /><h3 className="font-black text-lg">Flag Record Error</h3></div>
@@ -1131,13 +1493,15 @@ const App = () => {
         </div>
 
         <nav className="flex-1 overflow-y-auto p-4 space-y-2 custom-scrollbar">
-          {['Dashboard', 'Extrusion', 'Cutting', 'Packing', 'Dispatch', 'Quality Control', 'Incoming Goods'].map((dept) => (
+          {['Dashboard', 'Inventory', 'Purchase Requisition', 'Extrusion', 'Cutting', 'Packing', 'Dispatch', 'Quality Control', 'Incoming Goods'].map((dept) => (
             <button key={dept} onClick={() => { setDepartment(dept); setIsSidebarOpen(false); }} className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-xl text-base font-bold transition-all ${department === dept ? 'bg-blue-600 text-white shadow-md' : 'text-slate-400 hover:bg-slate-800 hover:text-white'}`}>
               {dept === 'Dashboard' && <BarChart3 size={20} />}
+              {dept === 'Inventory' && <Archive size={20} />}
+              {dept === 'Purchase Requisition' && <ShoppingCart size={20} />}
               {dept === 'Extrusion' && <Activity size={20} />}
               {dept === 'Packing' && <Package size={20} />}
               {dept === 'Quality Control' && <CheckCircle size={20} />}
-              {!['Dashboard', 'Extrusion', 'Packing', 'Quality Control'].includes(dept) && <ClipboardList size={20} />}
+              {!['Dashboard', 'Inventory', 'Purchase Requisition', 'Extrusion', 'Packing', 'Quality Control'].includes(dept) && <ClipboardList size={20} />}
               <span className="truncate">{t(dept)}</span>
             </button>
           ))}
@@ -1267,6 +1631,15 @@ const App = () => {
                   title="Live Order Tracker" data={activeOrdersData}
                   rowsPerPage={2}
                   columns={[
+                    { label: 'Status', dataIndex: 'isReadyToShip', type: 'boolean', render: (v, row) => (
+                      <button 
+                        onClick={() => handleToggleReadyToShip(row.jo, !v)}
+                        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-black transition-colors shadow-sm border ${v ? 'bg-emerald-50 text-emerald-600 border-emerald-200 hover:bg-emerald-100' : 'bg-white text-slate-400 border-slate-200 hover:bg-slate-50'}`}
+                        title="Click to toggle Ready to Ship status"
+                      >
+                        {v ? <><CheckCircle size={14} className="fill-emerald-100"/> Ready</> : 'Pending'}
+                      </button>
+                    )},
                     { label: 'Issue Date', dataIndex: 'issueDateMs', type: 'number', render: (_, row) => <span className="text-slate-500 font-bold whitespace-nowrap">{row.issueDateDisplay}</span> },
                     { label: 'J/O No.', dataIndex: 'jo', type: 'string', render: v => <span className="font-black text-slate-900 whitespace-nowrap text-base">{v}</span> },
                     { label: 'Order Details', dataIndex: 'customer', type: 'string', render: (v, row) => (
@@ -1355,6 +1728,116 @@ const App = () => {
               </div>
             </div>
 
+          ) : department === 'Inventory' ? (
+            <div className="space-y-6 md:space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                  <div>
+                    <h2 className="text-2xl sm:text-3xl font-black text-slate-800 tracking-tight">{t("Warehouse Overview")}</h2>
+                    <p className="text-sm font-bold text-slate-500 mt-1">Real-time inventory and stock levels</p>
+                  </div>
+                  <button onClick={fetchDashboardData} disabled={isFetchingDashboard} className="flex items-center justify-center gap-2 text-base font-black bg-white border border-slate-300 px-5 py-3 rounded-xl hover:bg-slate-50 transition-colors shadow-sm w-full sm:w-auto active:scale-95 text-slate-700">
+                    <RefreshCw size={18} className={isFetchingDashboard ? 'animate-spin text-blue-500' : 'text-slate-400'} /> Refresh Sync
+                  </button>
+                </div>
+
+                {/* Inventory Summary Cards */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-5 md:gap-6">
+                  <div className="bg-gradient-to-br from-blue-50 to-blue-100/50 p-6 md:p-8 rounded-2xl border border-blue-100 relative overflow-hidden group">
+                    <p className="text-[11px] md:text-xs font-black text-blue-500/80 uppercase tracking-widest mb-3">Total Raw Materials (Current)</p>
+                    <div className="flex items-end gap-3 relative z-10">
+                      <p className="text-4xl md:text-5xl font-black text-slate-800 tracking-tight">
+                        {rawMaterialsSummary.reduce((sum, item) => sum + item.current, 0).toFixed(0)} <span className="text-lg md:text-xl font-bold text-slate-500 tracking-normal">kg</span>
+                      </p>
+                    </div>
+                    <div className="mt-3 flex gap-4 text-xs font-bold text-blue-700/70 relative z-10">
+                        <span>In: {rawMaterialsSummary.reduce((sum, item) => sum + item.incoming, 0).toFixed(0)} kg</span>
+                        <span>Out: {rawMaterialsSummary.reduce((sum, item) => sum + item.consumed, 0).toFixed(0)} kg</span>
+                    </div>
+                    <Box className="absolute -right-6 -bottom-6 text-blue-500/10 transition-transform group-hover:scale-110 duration-500" size={120} />
+                  </div>
+                  <div className="bg-gradient-to-br from-amber-50 to-amber-100/50 p-6 md:p-8 rounded-2xl border border-amber-100 relative overflow-hidden group">
+                    <p className="text-[11px] md:text-xs font-black text-amber-600/80 uppercase tracking-widest mb-3">Finished Goods (Pending)</p>
+                    <div className="flex items-end gap-3 relative z-10">
+                      <p className="text-4xl md:text-5xl font-black text-slate-800 tracking-tight">
+                        {warehouseGoodsData.reduce((sum, item) => sum + item.pendingDispatch, 0).toFixed(0)} <span className="text-lg md:text-xl font-bold text-slate-500 tracking-normal">kg</span>
+                      </p>
+                    </div>
+                    <div className="mt-3 text-xs font-bold text-amber-700/70 relative z-10">
+                        Packed jobs awaiting physical dispatch
+                    </div>
+                    <Package className="absolute -right-6 -bottom-6 text-amber-500/10 transition-transform group-hover:scale-110 duration-500" size={120} />
+                  </div>
+                  <div className="bg-gradient-to-br from-indigo-50 to-indigo-100/50 p-6 md:p-8 rounded-2xl border border-indigo-100 relative overflow-hidden group">
+                    <p className="text-[11px] md:text-xs font-black text-indigo-500/80 uppercase tracking-widest mb-3">Active Logistics</p>
+                    <div className="flex items-end gap-3 relative z-10">
+                      <p className="text-4xl md:text-5xl font-black text-slate-800 tracking-tight">
+                        {dashboardData.containers?.length || 0} <span className="text-lg md:text-xl font-bold text-slate-500 tracking-normal">containers</span>
+                      </p>
+                    </div>
+                    <div className="mt-3 text-xs font-bold text-indigo-700/70 relative z-10">
+                        Scheduled shipping & arrivals
+                    </div>
+                    <Truck className="absolute -right-6 -bottom-6 text-indigo-500/10 transition-transform group-hover:scale-110 duration-500" size={120} />
+                  </div>
+                </div>
+
+                {/* Inventory Tables */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8 pb-8">
+                  <SortableTable 
+                    title={t("Raw Material Stock")} 
+                    data={rawMaterialsSummary}
+                    columns={[
+                      { label: t("Material"), dataIndex: 'material', type: 'string', render: v => <span className="font-bold text-slate-800">{v}</span> },
+                      { label: t("Incoming"), dataIndex: 'incoming', type: 'number', render: v => <span className="text-slate-500 font-semibold">{v.toFixed(1)}</span> },
+                      { label: t("Consumed"), dataIndex: 'consumed', type: 'number', render: v => <span className="text-slate-500 font-semibold">{v.toFixed(1)}</span> },
+                      { label: t("Current Stock"), dataIndex: 'current', type: 'number', render: v => <span className={`font-black ${v > 0 ? 'text-blue-700' : v < 0 ? 'text-red-500' : 'text-slate-400'}`}>{v.toFixed(1)} kg</span> }
+                    ]}
+                  />
+                  <SortableTable 
+                    title={t("Finished Goods (Pending)")} 
+                    data={warehouseGoodsData}
+                    columns={[
+                      { label: 'J/O No.', dataIndex: 'jo', type: 'string', render: (v, row) => (
+                        <div className="flex flex-col min-w-[120px]">
+                          <span className="font-black text-slate-900 text-base">{v}</span>
+                          <span className="text-xs font-bold text-slate-500 mt-0.5 truncate max-w-[150px]" title={row.customer}>{row.customer}</span>
+                        </div>
+                      )},
+                      { label: 'Details', dataIndex: 'dimension', type: 'string', render: v => <span className="inline-block bg-slate-100 text-slate-500 text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded border border-slate-200 w-fit truncate" title={v}>{v || '-'}</span> },
+                      { label: 'Pending', dataIndex: 'pendingDispatch', type: 'number', render: v => <span className="font-black text-amber-600 text-base">{v.toFixed(1)} kg</span> },
+                      { label: 'Status', dataIndex: 'isReady', type: 'boolean', render: v => (
+                          <span className={`px-2.5 py-1 rounded-md text-[10px] font-black uppercase tracking-wider border ${v ? 'bg-emerald-50 text-emerald-600 border-emerald-200' : 'bg-slate-50 text-slate-500 border-slate-200'}`}>
+                              {v ? 'Ready' : 'Packing'}
+                          </span>
+                      )}
+                    ]}
+                  />
+                </div>
+                
+                {/* Purchase Requisition Tracker inside Inventory */}
+                <div className="mt-6 md:mt-8">
+                  <SortableTable 
+                    title={t("Pending Purchase Requisitions")} 
+                    data={activeRequisitions}
+                    rowsPerPage={4}
+                    columns={[
+                      { label: t("Date"), dataIndex: 'timestamp', type: 'date', render: (_, r) => <span className="font-bold text-slate-600">{new Date(r.timestamp).toLocaleDateString('en-GB')}</span> },
+                      { label: t("Item Name"), dataIndex: 'item', type: 'string', render: v => <span className="font-black text-slate-900 text-base">{v}</span> },
+                      { label: t("Quantity"), dataIndex: 'qty', type: 'number', render: (v, r) => <span className="font-black text-blue-700 text-base">{v} <span className="text-xs">{r.uom}</span></span> },
+                      { label: t("Current Stock"), dataIndex: 'stock', type: 'number', render: (v, r) => <span className="font-bold text-amber-600">{v} <span className="text-xs">{r.uom}</span></span> },
+                      { label: t("Remarks"), dataIndex: 'remarks', type: 'string', render: v => <span className="text-slate-600 italic text-sm">{v}</span> },
+                      { label: t("Action"), dataIndex: 'timestamp', type: 'string', render: (v) => (
+                        <button 
+                          onClick={(e) => { e.stopPropagation(); handleResolveRequisition(v); }}
+                          className="px-4 py-2 bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-500 hover:text-white rounded-lg text-xs font-black transition-all shadow-sm active:scale-95 flex items-center gap-1.5"
+                        >
+                          <CheckCircle size={14}/> {t("Resolve")}
+                        </button>
+                      )}
+                    ]}
+                  />
+                </div>
+            </div>
           ) : (
             // ================= DATA ENTRY FORMS =================
             <form className="space-y-6 md:space-y-8 animate-in fade-in zoom-in-95 duration-300">
@@ -1365,6 +1848,7 @@ const App = () => {
                     {department === 'Extrusion' && <Activity className="text-blue-600" size={32} />}
                     {department === 'Packing' && <Package className="text-purple-600" size={32} />}
                     {department === 'Quality Control' && <CheckCircle className="text-emerald-600" size={32} />}
+                    {department === 'Purchase Requisition' && <ShoppingCart className="text-amber-500" size={32} />}
                     {department} Report
                   </h2>
                 </div>
@@ -1372,6 +1856,9 @@ const App = () => {
 
               {/* Section 1: Session Parameters */}
               <section className="bg-white p-5 md:p-8 rounded-3xl border border-slate-200 shadow-sm relative">
+                <div className="absolute top-5 md:top-8 right-5 md:right-8 flex items-center gap-2 bg-slate-50 text-slate-500 text-xs font-bold px-3 py-1.5 rounded-lg border border-slate-200">
+                  <CheckCircle size={14} className="text-emerald-500" /> {saveIndicator}
+                </div>
                 <h3 className="text-xl font-black text-slate-800 mb-6 flex items-center gap-2"><ClipboardList size={20} className="text-slate-400"/> {t("Session Parameters")}</h3>
                 
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
@@ -1379,7 +1866,7 @@ const App = () => {
                     <label className="block text-sm font-bold text-slate-700 mb-2">{t("Date")}</label>
                     <input type="date" name="date" value={formData.date} onChange={handleInputChange} required className="box-border block w-full appearance-none h-14 px-4 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none bg-slate-50 focus:bg-white transition-colors text-base font-bold" />
                   </div>
-                  {department !== 'Incoming Goods' && (
+                  {(department !== 'Incoming Goods' && department !== 'Purchase Requisition') && (
                     <div className="min-w-0">
                       <label className="block text-sm font-bold text-slate-700 mb-2">{t("Shift")}</label>
                       <select name="shift" value={formData.shift} onChange={handleInputChange} className="w-full h-14 px-4 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none bg-slate-50 focus:bg-white transition-colors text-base font-black">
@@ -1388,18 +1875,53 @@ const App = () => {
                       </select>
                     </div>
                   )}
-                  <div className={`min-w-0 ${department === 'Incoming Goods' ? 'sm:col-span-2 lg:col-span-3' : ''}`}>
+                  <div className={`min-w-0 ${(department === 'Incoming Goods' || department === 'Purchase Requisition') ? 'sm:col-span-2 lg:col-span-3' : ''}`}>
                     <label className="block text-sm font-bold text-slate-700 mb-2">{department === 'Incoming Goods' ? t('Receiver / Admin Name') : department === 'Quality Control' ? t('QC Inspector') : t('Operator / Supervisor')}</label>
                     <input type="text" name="supervisor" value={formData.supervisor} onChange={handleInputChange} required className="w-full h-14 px-4 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none bg-slate-50 focus:bg-white transition-colors text-base font-bold" />
                   </div>
-                  {(department === 'Extrusion' || department === 'Cutting' || department === 'Quality Control') && (
+                  {(department === 'Extrusion' || department === 'Cutting') && (
                     <div className="min-w-0">
                       <label className="block text-sm font-bold text-slate-700 mb-2">{t("Machine No.")}</label>
-                      <input type="text" name="machineId" value={formData.machineId} onChange={handleInputChange} required={department !== 'Quality Control'} placeholder={department === 'Extrusion' ? 'e.g. B1' : department === 'Cutting' ? 'e.g. C1' : 'e.g. M1'} className="w-full h-14 px-4 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none bg-slate-50 focus:bg-white uppercase transition-colors text-base font-black" list="machine-suggestions" />
+                      <input type="text" name="machineId" value={formData.machineId} onChange={handleInputChange} required placeholder={department === 'Extrusion' ? 'e.g. B1' : 'e.g. C1'} className="w-full h-14 px-4 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none bg-slate-50 focus:bg-white uppercase transition-colors text-base font-black" list="machine-suggestions" />
                     </div>
                   )}
                 </div>
               </section>
+
+              {/* PURCHASE REQUISITION FORM */}
+              {department === 'Purchase Requisition' && (
+                <section className="bg-white p-5 md:p-8 rounded-3xl border border-slate-200 shadow-sm max-w-3xl mx-auto">
+                  <h3 className="text-xl font-black text-slate-800 mb-6 flex items-center gap-2"><ShoppingCart size={22} className="text-amber-500"/> {t("Purchase Requisition")}</h3>
+                  <div className="space-y-5">
+                    <div className="min-w-0">
+                      <label className="block text-sm font-bold text-slate-700 mb-2">{t("Item Name")}</label>
+                      <input type="text" name="reqItemName" value={formData.reqItemName} onChange={handleInputChange} required placeholder="e.g. STRAPPING BAND, OPP TAPE..." className="w-full h-14 px-4 border border-slate-300 rounded-xl focus:ring-2 focus:ring-amber-500 outline-none uppercase font-black text-base" />
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                      <div className="flex gap-4">
+                        <div className="flex-1 min-w-0">
+                          <label className="block text-sm font-bold text-slate-700 mb-2">{t("Quantity")}</label>
+                          <input type="number" step="0.01" name="reqQuantity" value={formData.reqQuantity} onChange={handleInputChange} required className="w-full h-14 px-4 border border-slate-300 rounded-xl focus:ring-2 focus:ring-amber-500 outline-none font-black text-xl text-amber-600" />
+                        </div>
+                        <div className="w-24 shrink-0">
+                          <label className="block text-sm font-bold text-slate-700 mb-2">{t("UoM")}</label>
+                          <select name="reqUom" value={formData.reqUom} onChange={handleInputChange} className="w-full h-14 px-3 border border-slate-300 rounded-xl outline-none bg-white font-bold text-base">
+                            <option value="pcs">pcs</option><option value="box">box</option><option value="rolls">rolls</option><option value="kg">kg</option>
+                          </select>
+                        </div>
+                      </div>
+                      <div className="min-w-0">
+                        <label className="block text-sm font-bold text-slate-700 mb-2">{t("Current Stock")}</label>
+                        <input type="number" step="0.01" name="reqCurrentStock" value={formData.reqCurrentStock} onChange={handleInputChange} required className="w-full h-14 px-4 border border-slate-300 rounded-xl focus:ring-2 focus:ring-amber-500 outline-none font-bold text-base" />
+                      </div>
+                    </div>
+                    <div className="min-w-0">
+                      <label className="block text-sm font-bold text-slate-700 mb-2">{t("Remarks")}</label>
+                      <input type="text" name="reqRemarks" value={formData.reqRemarks} onChange={handleInputChange} placeholder="Urgency, size specifics, etc." className="w-full h-14 px-4 border border-slate-300 rounded-xl focus:ring-2 focus:ring-amber-500 outline-none font-semibold text-base" />
+                    </div>
+                  </div>
+                </section>
+              )}
 
               {/* MANUFACTURING DEPARTMENTS (Extrusion & Cutting) -> 2 Column Grid */}
               {(department === 'Extrusion' || department === 'Cutting') && (
@@ -1419,7 +1941,7 @@ const App = () => {
                         <h4 className="text-sm font-black text-slate-700 mb-4 tracking-wide">{t("Shift Accumulator (Materials)")}</h4>
                         <div className="flex flex-col gap-3 mb-5">
                           <div className="min-w-0">
-                            <input type="text" value={quickMaterialBatch} onChange={e => setQuickMaterialBatch(e.target.value)} className="w-full h-14 px-4 border border-slate-300 rounded-xl focus:ring-blue-500 outline-none text-base font-bold uppercase" placeholder="e.g. LDN1CY-2" list="batch-suggestions" />
+                            <input type="text" value={quickMaterialBatch} onChange={e => setQuickMaterialBatch(e.target.value.toUpperCase())} className="w-full h-14 px-4 border border-slate-300 rounded-xl focus:ring-blue-500 outline-none text-base font-bold uppercase" placeholder="e.g. LDN1CY-2" list="batch-suggestions" />
                           </div>
                           <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center">
                             <div className="flex min-w-0 sm:flex-1 gap-2">
@@ -1604,31 +2126,102 @@ const App = () => {
                         <PlusCircle size={18} /> Add Another Bag
                       </button>
                     </div>
+
+                    <div className={`mt-6 p-4 border-2 rounded-xl flex items-center justify-between cursor-pointer transition-all ${formData.jobComplete ? 'bg-emerald-50 border-emerald-500 ring-4 ring-emerald-50' : 'bg-white border-slate-200 hover:border-emerald-300'}`} onClick={() => setFormData(prev => ({...prev, jobComplete: !prev.jobComplete}))}>
+                      <div>
+                          <p className="font-black text-slate-800 text-sm">{t("Mark Job as Complete")}</p>
+                          <p className="text-xs font-semibold text-slate-500 mt-0.5">{t("Flag this order as fully packed and ready for shipping.")}</p>
+                      </div>
+                      <div className={`w-7 h-7 rounded-lg border-2 flex items-center justify-center transition-colors shrink-0 ${formData.jobComplete ? 'bg-emerald-500 border-emerald-500' : 'bg-slate-100 border-slate-300'}`}>
+                          {formData.jobComplete && <CheckCircle size={16} className="text-white" />}
+                      </div>
+                    </div>
                   </section>
                 </div>
               )}
 
-              {/* DISPATCH & INCOMING & QC */}
+              {/* DISPATCH & INCOMING */}
               {department === 'Dispatch' && (
-                <section className="bg-white p-5 md:p-8 rounded-3xl border border-slate-200 shadow-sm max-w-2xl mx-auto">
-                  <h3 className="text-xl font-black text-slate-800 mb-6 flex items-center gap-2"><Truck size={22} className="text-blue-500"/> {t("Dispatch / Shipping")}</h3>
-                  <div className="space-y-5">
-                    <div className="min-w-0">
-                      <label className="block text-sm font-bold text-slate-700 mb-2">{t("Job Order No.")}</label>
-                      <input type="text" name="jobOrder" value={formData.jobOrder} onChange={handleInputChange} required placeholder="e.g. 99-1" className="w-full h-14 px-4 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none uppercase font-black text-base" list="jo-suggestions" />
+                <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 md:gap-8 w-full items-start">
+                  
+                  {/* Left Column: Trackers (Span 2 Columns) */}
+                  <div className="xl:col-span-2">
+                    <SortableTable 
+                      title={t("Ready to Ship Tracker")} 
+                      data={readyToShipData}
+                      rowsPerPage={4}
+                      onRowClick={(row) => {
+                        setFormData(prev => ({...prev, jobOrder: row.jo, dispatchQty: row.pendingDispatch > 0 ? row.pendingDispatch.toFixed(2) : ''}));
+                        toast.success(`Selected ${row.jo} for Dispatch`, { icon: '📦' });
+                        window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+                      }}
+                      columns={[
+                        { label: 'Job Order', dataIndex: 'jo', type: 'string', render: (v, row) => (
+                          <div className="flex flex-col min-w-[120px]">
+                            <span className="font-black text-slate-900 text-base">{v}</span>
+                            <span className="text-xs font-bold text-slate-500 mt-0.5 truncate max-w-[150px]" title={row.customer}>{row.customer}</span>
+                          </div>
+                        )},
+                        { label: 'Details', dataIndex: 'description', type: 'string', render: (v, row) => (
+                          <div className="flex flex-col min-w-[150px] max-w-[200px]">
+                            <span className="text-slate-800 font-bold text-sm truncate" title={v}>{v || '-'}</span>
+                            <span className="inline-block mt-1.5 bg-slate-100 text-slate-500 text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded border border-slate-200 w-fit truncate" title={row.dimension}>{row.dimension || '-'}</span>
+                          </div>
+                        )},
+                        { label: 'Packing', dataIndex: 'packingSize', type: 'string', render: (v, row) => (
+                          <div className="flex items-center gap-1.5">
+                            <span className="font-black text-slate-700">{v}</span>
+                            <span className="text-xs font-bold text-slate-500">{row.packingUom}</span>
+                          </div>
+                        )},
+                        { label: 'Total Packed', dataIndex: 'totalPackedWeight', type: 'number', render: (v, row) => (
+                          <div className="flex flex-col">
+                            <span className="font-black text-emerald-700 text-base">{v.toFixed(1)} kg</span>
+                            <span className="text-[10px] font-black uppercase text-slate-400 mt-0.5">Pallets: {row.totalPalletWeight.toFixed(1)} kg</span>
+                          </div>
+                        )},
+                        { label: 'Pending', dataIndex: 'pendingDispatch', type: 'number', render: v => (
+                          <span className={`font-black text-base ${v > 0 ? 'text-amber-600' : 'text-slate-400'}`}>{v.toFixed(1)} kg</span>
+                        )}
+                      ]}
+                    />
+
+                    {/* Container Logistics Table */}
+                    <div className="mt-6 md:mt-8">
+                      <SortableTable 
+                        title={t("Container Logistics")} 
+                        data={dashboardData.containers || []}
+                        rowsPerPage={3}
+                        columns={[
+                          { label: t("Customer"), dataIndex: 0, type: 'string', render: v => <span className="font-bold text-slate-800">{v || '-'}</span> },
+                          { label: t("Container"), dataIndex: 1, type: 'string', render: v => <span className="font-black text-blue-700">{v || '-'}</span> },
+                          { label: t("Arrival Date"), dataIndex: 2, type: 'string', render: v => <span className="text-slate-600 font-bold">{v ? (isNaN(new Date(v).getTime()) ? String(v) : new Date(v).toLocaleDateString('en-GB')) : '-'}</span> },
+                          { label: t("Laden Date"), dataIndex: 3, type: 'string', render: v => <span className="text-slate-600 font-bold">{v ? (isNaN(new Date(v).getTime()) ? String(v) : new Date(v).toLocaleDateString('en-GB')) : '-'}</span> },
+                          { label: t("ETD PK Date"), dataIndex: 4, type: 'string', render: v => <span className="text-slate-600 font-bold">{v ? (isNaN(new Date(v).getTime()) ? String(v) : new Date(v).toLocaleDateString('en-GB')) : '-'}</span> }
+                        ]}
+                      />
                     </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                  </div>
+
+                  {/* Dispatch Submission Form (Sticky on Desktop) */}
+                  <section className="bg-white p-5 md:p-8 rounded-3xl border border-slate-200 shadow-sm flex flex-col xl:sticky xl:top-24">
+                    <h3 className="text-xl font-black text-slate-800 mb-6 flex items-center gap-2"><Truck size={22} className="text-blue-500"/> {t("Dispatch / Shipping")}</h3>
+                    <div className="space-y-5">
+                      <div className="min-w-0">
+                        <label className="block text-sm font-bold text-slate-700 mb-2">{t("Job Order No.")}</label>
+                        <input type="text" name="jobOrder" value={formData.jobOrder} onChange={handleInputChange} required placeholder="e.g. 99-1" className="w-full h-14 px-4 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none uppercase font-black text-base bg-slate-50 focus:bg-white transition-colors" list="jo-suggestions" />
+                      </div>
                       <div className="min-w-0">
                         <label className="block text-sm font-bold text-slate-700 mb-2">{t("Shipped Quantity (kg)")}</label>
-                        <input type="number" step="0.01" name="dispatchQty" value={formData.dispatchQty} onChange={handleInputChange} className="w-full h-14 px-4 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none font-black text-base" />
+                        <input type="number" step="0.01" name="dispatchQty" value={formData.dispatchQty} onChange={handleInputChange} className="w-full h-14 px-4 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none font-black text-xl text-blue-700" />
                       </div>
                       <div className="min-w-0">
                         <label className="block text-sm font-bold text-slate-700 mb-2">{t("Delivery Order (DO) / Invoice No.")}</label>
                         <input type="text" name="deliveryOrderNo" value={formData.deliveryOrderNo} onChange={handleInputChange} className="w-full h-14 px-4 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none font-semibold text-base" />
                       </div>
                     </div>
-                  </div>
-                </section>
+                  </section>
+                </div>
               )}
 
               {department === 'Incoming Goods' && (
@@ -1688,21 +2281,128 @@ const App = () => {
               )}
 
               {department === 'Quality Control' && (
-                <section className="bg-white p-5 md:p-8 rounded-3xl border border-slate-200 shadow-sm max-w-3xl mx-auto">
-                  <h3 className="text-xl font-black text-slate-800 mb-6 flex items-center gap-2"><CheckCircle size={22} className="text-emerald-500"/> {t("Quality Control Assessment")}</h3>
-                  <div className="flex flex-col sm:flex-row bg-slate-100 rounded-xl p-1.5 mb-8">
-                    {['Extrusion', 'Cutting', 'Packing'].map(stage => (
-                      <button key={stage} type="button" onClick={() => setQcStage(stage)} className={`flex-1 py-3 px-3 text-base font-black rounded-lg transition-all ${qcStage === stage ? 'bg-white text-blue-700 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>{t(stage)} QC</button>
-                    ))}
-                  </div>
-                  <div className="space-y-5">
-                    <div className="min-w-0"><label className="block text-sm font-bold text-slate-700 mb-2">Job Order No.</label><input type="text" name="jobOrder" value={formData.jobOrder} onChange={handleInputChange} required className="w-full h-14 px-4 border border-slate-300 rounded-xl outline-none font-black text-base uppercase" list="jo-suggestions" placeholder="e.g. 99-1" /></div>
-                    {qcStage === 'Extrusion' && (<><QCField label="Thickness Check (Microns)" name="qcExtThickness" statusName="qcExtThicknessStatus" formData={formData} onChange={handleInputChange} t={t} /><QCField label="Width Check (mm)" name="qcExtWidth" statusName="qcExtWidthStatus" formData={formData} onChange={handleInputChange} t={t} /></>)}
-                    {qcStage === 'Cutting' && (<><QCField label="Seal Integrity Assessment" name="qcCutSeal" statusName="qcCutSealStatus" formData={formData} onChange={handleInputChange} t={t} /><QCField label="Length Check (mm)" name="qcCutLength" statusName="qcCutLengthStatus" formData={formData} onChange={handleInputChange} t={t} /></>)}
-                    {qcStage === 'Packing' && (<><QCField label="Bag Weight Check (kg)" name="qcPackBagWeight" statusName="qcPackBagWeightStatus" formData={formData} onChange={handleInputChange} t={t} /><QCField label="Quantity Verified" name="qcPackTotalBags" statusName="qcPackTotalBagsStatus" formData={formData} onChange={handleInputChange} t={t} /></>)}
-                    <div className="pt-6 border-t border-slate-200 min-w-0"><label className="block text-sm font-bold text-slate-700 mb-2">Remarks</label><textarea name="qcNotes" value={formData.qcNotes} onChange={handleInputChange} rows="4" className="w-full p-4 border border-slate-300 rounded-xl outline-none text-base"></textarea></div>
-                  </div>
-                </section>
+                <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 md:gap-8 items-start w-full">
+                  
+                  {/* Container 1: Machine Inspection */}
+                  <section 
+                    onClick={() => handleQcFormSwitch('machine')}
+                    className={`bg-white p-5 md:p-8 rounded-3xl border-2 transition-all duration-300 shadow-sm flex flex-col ${qcActiveForm === 'machine' ? 'border-blue-500 ring-4 ring-blue-50' : 'border-slate-200 opacity-60 hover:opacity-100 cursor-pointer'}`}
+                  >
+                    <h3 className="text-xl font-black text-slate-800 mb-6 flex items-center gap-2">
+                      <Settings size={22} className={qcActiveForm === 'machine' ? 'text-blue-500' : 'text-slate-400'}/> 
+                      {t("Machine Inspection")}
+                    </h3>
+                    
+                    <div className="space-y-5 pointer-events-auto flex-1 flex flex-col">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 mb-5">
+                        <div className="min-w-0">
+                            <label className="block text-sm font-bold text-slate-700 mb-2">{t("Machine Type")}</label>
+                            <select name="qcMachineType" value={formData.qcMachineType} onChange={handleInputChange} disabled={qcActiveForm !== 'machine'} className="w-full h-14 px-4 border border-slate-300 rounded-xl outline-none bg-white font-bold text-base disabled:bg-slate-50 transition-colors">
+                                <option value="Extrusion">{t("Extrusion")}</option>
+                                <option value="Cutting">{t("Cutting")}</option>
+                            </select>
+                        </div>
+                        <div className="min-w-0">
+                            <label className="block text-sm font-bold text-slate-700 mb-2">{t("Machine No.")}</label>
+                            <input type="text" name="machineId" value={formData.machineId} onChange={handleInputChange} disabled={qcActiveForm !== 'machine'} className="w-full h-14 px-4 border border-slate-300 rounded-xl outline-none font-black text-base uppercase disabled:bg-slate-50 transition-colors" list="machine-suggestions" placeholder="e.g. B1 / C1" />
+                        </div>
+                      </div>
+
+                      {formData.qcMachineType === 'Extrusion' && (
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 mb-5">
+                          <div className="min-w-0">
+                              <label className="block text-sm font-bold text-slate-700 mb-2">{t("Filter Status")}</label>
+                              <select name="qcExtFilter" value={formData.qcExtFilter} onChange={handleInputChange} disabled={qcActiveForm !== 'machine'} className="w-full h-14 px-4 border border-slate-300 rounded-xl outline-none bg-white font-bold text-base disabled:bg-slate-50 transition-colors">
+                                  <option value="Good">{t("Good")}</option>
+                                  <option value="Needs Change">{t("Needs Change")}</option>
+                                  <option value="Changed">{t("Changed")}</option>
+                              </select>
+                          </div>
+                          <div className="min-w-0">
+                              <label className="block text-sm font-bold text-slate-700 mb-2">{t("Scrap Purged")}</label>
+                              <select name="qcExtPurged" value={formData.qcExtPurged} onChange={handleInputChange} disabled={qcActiveForm !== 'machine'} className="w-full h-14 px-4 border border-slate-300 rounded-xl outline-none bg-white font-bold text-base disabled:bg-slate-50 transition-colors">
+                                  <option value="Yes">{t("Yes")}</option>
+                                  <option value="No">{t("No")}</option>
+                                  <option value="N/A">{t("N/A")}</option>
+                              </select>
+                          </div>
+                        </div>
+                      )}
+                      
+                      {formData.qcMachineType === 'Cutting' && (
+                          <div className="space-y-5">
+                              <QCField label={t("Sealing Temperature (℃)")} name="qcCutTemp" statusName="qcCutTempStatus" formData={formData} onChange={handleInputChange} t={t} placeholder="e.g. 180" disabled={qcActiveForm !== 'machine'} />
+                              <QCField label={t("Blade / Thickness Check")} name="qcCutMachineThickness" statusName="qcCutMachineThicknessStatus" formData={formData} onChange={handleInputChange} t={t} placeholder="e.g. 0.05" disabled={qcActiveForm !== 'machine'} />
+                          </div>
+                      )}
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 mb-5">
+                          <div className="min-w-0">
+                              <label className="block text-sm font-bold text-slate-700 mb-2">{t("Machine Cleanliness")}</label>
+                              <select name="qcMachineCleanliness" value={formData.qcMachineCleanliness} onChange={handleInputChange} disabled={qcActiveForm !== 'machine'} className="w-full h-14 px-4 border border-slate-300 rounded-xl outline-none bg-white font-bold text-base disabled:bg-slate-50 transition-colors">
+                                  <option className="text-emerald-600" value="Pass">{t("Pass")}</option>
+                                  <option className="text-red-600" value="Fail">{t("Fail")}</option>
+                              </select>
+                          </div>
+                          <div className="min-w-0">
+                              <label className="block text-sm font-bold text-slate-700 mb-2">{t("Safety Guards")}</label>
+                              <select name="qcMachineSafety" value={formData.qcMachineSafety} onChange={handleInputChange} disabled={qcActiveForm !== 'machine'} className="w-full h-14 px-4 border border-slate-300 rounded-xl outline-none bg-white font-bold text-base disabled:bg-slate-50 transition-colors">
+                                  <option className="text-emerald-600" value="Pass">{t("Pass")}</option>
+                                  <option className="text-red-600" value="Fail">{t("Fail")}</option>
+                              </select>
+                          </div>
+                      </div>
+                      
+                      <div className="pt-6 border-t border-slate-200 mt-auto">
+                        <ImageUploadField preview={qcImagePreview} onFileChange={handleQcImageChange} onClear={clearQcImage} disabled={qcActiveForm !== 'machine'} t={t} />
+                        <label className="block text-sm font-bold text-slate-700 mb-2">{t("Overall QC Remarks / Issues Noted")}</label>
+                        <textarea name="qcNotes" value={formData.qcNotes} onChange={handleInputChange} disabled={qcActiveForm !== 'machine'} rows="3" className="w-full p-4 border border-slate-300 rounded-xl outline-none text-base disabled:bg-slate-50 transition-colors"></textarea>
+                      </div>
+                    </div>
+                  </section>
+
+                  {/* Container 2: Product QC */}
+                  <section 
+                    onClick={() => handleQcFormSwitch('product')}
+                    className={`bg-white p-5 md:p-8 rounded-3xl border-2 transition-all duration-300 shadow-sm flex flex-col ${qcActiveForm === 'product' ? 'border-emerald-500 ring-4 ring-emerald-50' : 'border-slate-200 opacity-60 hover:opacity-100 cursor-pointer'}`}
+                  >
+                    <h3 className="text-xl font-black text-slate-800 mb-6 flex items-center gap-2">
+                      <CheckCircle size={22} className={qcActiveForm === 'product' ? 'text-emerald-500' : 'text-slate-400'}/> 
+                      {t("Quality Control Assessment")}
+                    </h3>
+                    
+                    <div className="flex flex-col sm:flex-row bg-slate-100 rounded-xl p-1.5 mb-8 pointer-events-auto">
+                      {['Extrusion', 'Cutting', 'Packing'].map(stage => (
+                        <button key={stage} type="button" onClick={() => {setQcStage(stage); handleQcFormSwitch('product');}} className={`flex-1 py-3 px-3 text-base font-black rounded-lg transition-all ${qcStage === stage && qcActiveForm === 'product' ? 'bg-white text-emerald-700 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>{t(stage)} QC</button>
+                      ))}
+                    </div>
+
+                    <div className="space-y-5 pointer-events-auto flex-1 flex flex-col">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 mb-5">
+                        <div className="min-w-0 sm:col-span-2">
+                            <label className="block text-sm font-bold text-slate-700 mb-2">Job Order No.</label>
+                            <input type="text" name="jobOrder" value={formData.jobOrder} onChange={handleInputChange} required={qcActiveForm === 'product'} disabled={qcActiveForm !== 'product'} className="w-full h-14 px-4 border border-slate-300 rounded-xl outline-none font-black text-base uppercase disabled:bg-slate-50 transition-colors" list="jo-suggestions" placeholder="e.g. 99-1" />
+                        </div>
+                        {qcStage !== 'Packing' && (
+                          <div className="min-w-0 sm:col-span-2">
+                              <label className="block text-sm font-bold text-slate-700 mb-2">{t("Machine No.")}</label>
+                              <input type="text" name="machineId" value={formData.machineId} onChange={handleInputChange} disabled={qcActiveForm !== 'product'} required={qcActiveForm === 'product' && qcStage !== 'Packing'} className="w-full h-14 px-4 border border-slate-300 rounded-xl outline-none font-black text-base uppercase disabled:bg-slate-50 transition-colors" list="machine-suggestions" placeholder="e.g. B1 / C1" />
+                          </div>
+                        )}
+                      </div>
+
+                      {qcStage === 'Extrusion' && (<><QCField label={t("Thickness Check (Microns)")} name="qcExtThickness" statusName="qcExtThicknessStatus" formData={formData} onChange={handleInputChange} t={t} disabled={qcActiveForm !== 'product'} /><QCField label={t("Width Check (mm)")} name="qcExtWidth" statusName="qcExtWidthStatus" formData={formData} onChange={handleInputChange} t={t} disabled={qcActiveForm !== 'product'} /></>)}
+                      {qcStage === 'Cutting' && (<><QCField label={t("Seal Integrity Assessment")} name="qcCutSeal" statusName="qcCutSealStatus" formData={formData} onChange={handleInputChange} t={t} disabled={qcActiveForm !== 'product'} /><QCField label={t("Length Check (mm)")} name="qcCutLength" statusName="qcCutLengthStatus" formData={formData} onChange={handleInputChange} t={t} disabled={qcActiveForm !== 'product'} /></>)}
+                      {qcStage === 'Packing' && (<><QCField label={t("Packing Size (Bag Weight - kg)")} name="qcPackBagWeight" statusName="qcPackBagWeightStatus" formData={formData} onChange={handleInputChange} t={t} disabled={qcActiveForm !== 'product'} /><QCField label={t("Total Bags Verified")} name="qcPackTotalBags" statusName="qcPackTotalBagsStatus" formData={formData} onChange={handleInputChange} t={t} disabled={qcActiveForm !== 'product'} /></>)}
+                      
+                      <div className="pt-6 border-t border-slate-200 mt-auto">
+                        <ImageUploadField preview={qcImagePreview} onFileChange={handleQcImageChange} onClear={clearQcImage} disabled={qcActiveForm !== 'product'} t={t} />
+                        <label className="block text-sm font-bold text-slate-700 mb-2">{t("Overall QC Remarks / Issues Noted")}</label>
+                        <textarea name="qcNotes" value={formData.qcNotes} onChange={handleInputChange} disabled={qcActiveForm !== 'product'} rows="3" className="w-full p-4 border border-slate-300 rounded-xl outline-none text-base disabled:bg-slate-50 transition-colors"></textarea>
+                      </div>
+                    </div>
+                  </section>
+                </div>
               )}
 
               {/* Downtime (Only for Manufacturing) */}
@@ -1735,10 +2435,12 @@ const App = () => {
         </div>
 
         {/* STICKY FOOTER ACTION BAR */}
-        {department !== 'Dashboard' && (
+        {department !== 'Dashboard' && department !== 'Inventory' && (
           <div className={`fixed bottom-0 right-0 w-full md:w-[calc(100%-18rem)] bg-white/95 backdrop-blur-md border-t border-slate-200 p-4 shadow-[0_-10px_30px_-5px_rgba(0,0,0,0.1)] z-40 flex flex-col sm:flex-row justify-between items-center gap-3 sm:gap-4 px-4 md:px-8 transition-transform duration-300 ${!isFooterVisible || isSidebarOpen ? 'translate-y-full' : 'translate-y-0'}`}>
             <div className="flex flex-col text-center sm:text-left text-sm w-full sm:w-auto">
-              <span className="font-black text-slate-800 tracking-tight text-base">{t(department)} Report</span>
+              <span className="font-black text-slate-800 tracking-tight text-base">
+                {department === 'Quality Control' ? (qcActiveForm === 'machine' ? 'Machine Inspection' : 'Product QC Report') : `${t(department)} Report`}
+              </span>
               <span className="text-slate-500 text-[11px] uppercase tracking-widest font-bold flex items-center justify-center sm:justify-start gap-1.5 mt-0.5"><CheckCircle size={14} className="text-emerald-500"/> {saveIndicator}</span>
             </div>
             
@@ -1752,7 +2454,8 @@ const App = () => {
             >
               <Save size={20} /> 
               {isSubmitting ? t('Saving...') : 
-               (massBalance.isFailed && !formData.discrepancyReason && ['Extrusion', 'Cutting'].includes(department)) ? t('Discrepancy Must Be Resolved') : t('Submit Shift Log')}
+               (massBalance.isFailed && !formData.discrepancyReason && ['Extrusion', 'Cutting'].includes(department)) ? t('Discrepancy Must Be Resolved') : 
+               (department === 'Quality Control' ? `Submit ${qcActiveForm === 'machine' ? 'Machine Inspection' : 'Product QC'}` : t('Submit Log'))}
             </button>
           </div>
         )}
