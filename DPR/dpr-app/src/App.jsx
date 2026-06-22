@@ -385,12 +385,11 @@ const InlineEdit = ({ value, onSave, suffix = "kg", className = "" }) => {
 };
 
 // 2. Sortable, Filterable & Paginated Table Component
-const SortableTable = ({ title, columns, data, onFlag }) => {
+const SortableTable = ({ title, columns, data, onFlag, onRowClick, rowsPerPage = 5 }) => {
   const [filter, setFilter] = useState('');
   const [sortCol, setSortCol] = useState(0); 
   const [sortDesc, setSortDesc] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
-  const rowsPerPage = 5;
 
   const filteredData = useMemo(() => {
     if (!data) return [];
@@ -419,8 +418,8 @@ const SortableTable = ({ title, columns, data, onFlag }) => {
     setCurrentPage(1);
   }, [filter, sortCol, sortDesc]);
 
-  const totalPages = Math.ceil(sortedData.length / rowsPerPage) || 1;
-  const paginatedData = sortedData.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage);
+  const totalPages = rowsPerPage > 0 ? Math.ceil(sortedData.length / rowsPerPage) || 1 : 1;
+  const paginatedData = rowsPerPage > 0 ? sortedData.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage) : sortedData;
 
   const handleSort = (index) => {
     if (sortCol === index) setSortDesc(!sortDesc);
@@ -440,12 +439,12 @@ const SortableTable = ({ title, columns, data, onFlag }) => {
         </div>
       </div>
       
-      <div className="overflow-x-auto p-0 flex-1">
-        <table className="w-full text-left whitespace-nowrap">
-          <thead className="text-xs text-slate-500 bg-slate-100/80 uppercase border-b border-slate-200 font-bold">
+      <div className={`p-0 flex-1 ${rowsPerPage === 0 ? 'max-h-[500px] overflow-auto custom-scrollbar' : 'overflow-x-auto'}`}>
+        <table className="w-full text-left whitespace-nowrap relative">
+          <thead className="text-xs text-slate-500 bg-slate-100/90 backdrop-blur-sm uppercase border-b border-slate-200 font-bold sticky top-0 z-10">
             <tr>
               {columns.map((col, i) => (
-                <th key={i} onClick={() => col.sortable !== false && handleSort(i)} className={`px-5 py-3 cursor-pointer hover:bg-slate-200 transition-colors ${col.sortable !== false ? 'select-none' : ''}`}>
+                <th key={i} onClick={() => col.sortable !== false && handleSort(i)} className={`px-5 py-3 cursor-pointer hover:bg-slate-200/80 transition-colors ${col.sortable !== false ? 'select-none' : ''}`}>
                   <div className="flex items-center gap-1.5">
                     {col.label}
                     {sortCol === i ? (sortDesc ? <ChevronDown size={14} className="text-blue-600"/> : <ChevronUp size={14} className="text-blue-600"/>) : <span className="w-3.5" />}
@@ -457,7 +456,7 @@ const SortableTable = ({ title, columns, data, onFlag }) => {
           </thead>
           <tbody>
             {paginatedData.length > 0 ? paginatedData.map((row, i) => (
-              <tr key={i} className="border-b border-slate-100 last:border-0 hover:bg-blue-50/30 transition-colors text-sm">
+              <tr key={i} onClick={() => onRowClick && onRowClick(row)} className={`border-b border-slate-100 last:border-0 hover:bg-blue-50/30 transition-colors text-sm ${onRowClick ? 'cursor-pointer' : ''}`}>
                 {columns.map((col, j) => (
                   <td key={j} className="px-5 py-3.5 text-slate-700">
                     {col.render ? col.render(row[col.dataIndex], row) : row[col.dataIndex]}
@@ -465,7 +464,7 @@ const SortableTable = ({ title, columns, data, onFlag }) => {
                 ))}
                 {onFlag && (
                   <td className="px-5 py-3.5 text-center">
-                    <button onClick={() => onFlag(row)} className="text-slate-400 hover:text-amber-600 transition-colors bg-white border border-slate-200 p-2 rounded-lg shadow-sm active:scale-95" title="Flag Error"><Flag size={16}/></button>
+                    <button onClick={(e) => { e.stopPropagation(); onFlag(row); }} className="text-slate-400 hover:text-amber-600 transition-colors bg-white border border-slate-200 p-2 rounded-lg shadow-sm active:scale-95" title="Flag Error"><Flag size={16}/></button>
                   </td>
                 )}
               </tr>
@@ -474,47 +473,169 @@ const SortableTable = ({ title, columns, data, onFlag }) => {
         </table>
       </div>
 
-      <div className="bg-slate-50 border-t border-slate-200 px-5 py-3 flex items-center justify-between">
-        <span className="text-sm text-slate-500 font-medium hidden sm:block">Page {currentPage} of {totalPages}</span>
-        <span className="text-sm text-slate-500 font-medium sm:hidden">{currentPage} / {totalPages}</span>
-        <div className="flex items-center gap-2">
-          <button 
-            onClick={() => setCurrentPage(p => Math.max(1, p - 1))} 
-            disabled={currentPage === 1}
-            className="px-4 py-2 text-sm font-bold bg-white border border-slate-300 rounded-lg hover:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors active:scale-95"
-          >
-            Prev
-          </button>
-          <button 
-            onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))} 
-            disabled={currentPage === totalPages}
-            className="px-4 py-2 text-sm font-bold bg-white border border-slate-300 rounded-lg hover:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors active:scale-95"
-          >
-            Next
-          </button>
+      {rowsPerPage > 0 && (
+        <div className="bg-slate-50 border-t border-slate-200 px-5 py-3 flex items-center justify-between">
+          <span className="text-sm text-slate-500 font-medium hidden sm:block">Page {currentPage} of {totalPages}</span>
+          <span className="text-sm text-slate-500 font-medium sm:hidden">{currentPage} / {totalPages}</span>
+          <div className="flex items-center gap-2">
+            <button 
+              onClick={() => setCurrentPage(p => Math.max(1, p - 1))} 
+              disabled={currentPage === 1}
+              className="px-4 py-2 text-sm font-bold bg-white border border-slate-300 rounded-lg hover:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors active:scale-95"
+            >
+              Prev
+            </button>
+            <button 
+              onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))} 
+              disabled={currentPage === totalPages}
+              className="px-4 py-2 text-sm font-bold bg-white border border-slate-300 rounded-lg hover:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors active:scale-95"
+            >
+              Next
+            </button>
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 };
 
 // QC Field Component
 const QCField = ({ label, name, statusName, formData, onChange, placeholder, t }) => (
-  <div className="flex flex-col sm:flex-row sm:items-end gap-3 p-4 bg-white rounded-xl border border-slate-200 shadow-sm">
+  <div className="flex flex-col sm:flex-row sm:items-end gap-3 p-3 bg-white rounded-md border border-slate-200 shadow-sm">
     <div className="flex-1 min-w-0">
-      <label className="block text-sm font-bold text-slate-700 mb-2">{label}</label>
-      <input type="text" name={name} value={formData[name]} onChange={onChange} placeholder={placeholder} className="w-full p-3 border border-slate-300 rounded-lg text-base focus:ring-2 focus:ring-blue-500 outline-none font-semibold" />
+      <label className="block text-sm font-medium text-slate-700 mb-1">{label}</label>
+      <input type="text" name={name} value={formData[name]} onChange={onChange} placeholder={placeholder} className="w-full p-2 border border-slate-300 rounded-lg text-base focus:ring-2 focus:ring-blue-500 outline-none" />
     </div>
-    <div className="w-full sm:w-32 shrink-0">
-      <label className="block text-sm font-bold text-slate-700 mb-2 sm:hidden">{t("Status")}</label>
-      <select name={statusName} value={formData[statusName]} onChange={onChange} className="w-full p-3 border border-slate-300 rounded-lg text-base focus:outline-none font-bold">
-        <option className="text-emerald-600" value="Pass">{t("Pass")}</option>
-        <option className="text-red-600" value="Fail">{t("Fail")}</option>
+    <div className="w-full sm:w-28 shrink-0">
+      <label className="block text-sm font-medium text-slate-700 mb-1 sm:hidden">{t("Status")}</label>
+      <select name={statusName} value={formData[statusName]} onChange={onChange} className="w-full p-2 border border-slate-300 rounded-lg text-base focus:outline-none font-medium">
+        <option className="text-emerald-600 font-semibold" value="Pass">{t("Pass")}</option>
+        <option className="text-red-600 font-semibold" value="Fail">{t("Fail")}</option>
         <option className="text-slate-400" value="N/A">{t("N/A")}</option>
       </select>
     </div>
   </div>
 );
+
+// Log Details Banner Component
+const LogDetailsBanner = ({ log, onClose, masterOrders = [] }) => {
+  if (!log) return null;
+  const d = log.data;
+  const fmtDate = (val) => new Date(val).toLocaleString('en-GB', { dateStyle: 'short', timeStyle: 'short' });
+  
+  const LabelValue = ({label, value, className = ""}) => (
+    <div className={`flex flex-col border-b border-slate-100 pb-2 mb-2 ${className}`}>
+      <span className="text-[10px] uppercase tracking-wider font-bold text-slate-400">{label}</span>
+      <span className="font-semibold text-slate-800 text-sm mt-0.5">{value || '-'}</span>
+    </div>
+  );
+
+  let orderInfo = null;
+  if (['Extrusion', 'Cutting', 'Packing'].includes(log.type)) {
+    const order = masterOrders.find(o => o.jo === d[3]);
+    if (order) {
+       let formattedDate = '-';
+       if (order.date && order.date !== '-') {
+         const dt = new Date(order.date);
+         if (!isNaN(dt.getTime())) formattedDate = dt.toLocaleDateString('en-GB');
+       }
+       orderInfo = (
+         <div className="mb-4 bg-blue-50/40 p-4 rounded-xl border border-blue-100/60 shadow-sm">
+            <h4 className="text-[10px] font-black text-blue-600 mb-3 uppercase tracking-wider flex items-center gap-1.5"><ClipboardList size={14} /> Job Order Reference</h4>
+            <div className="grid grid-cols-2 gap-x-4 gap-y-2">
+              <LabelValue label="Customer" value={order.customer} className="border-b-blue-100/50" />
+              <LabelValue label="Issue Date" value={formattedDate} className="border-b-blue-100/50" />
+              <div className="col-span-2"><LabelValue label="Description" value={order.description} className="border-b-blue-100/50" /></div>
+              <div className="col-span-2"><LabelValue label="Size / Dimension" value={order.dimension} className="border-0 pb-0 mb-0" /></div>
+            </div>
+         </div>
+       );
+    }
+  }
+
+  let content = null;
+  if (log.type === 'Extrusion') {
+    content = (
+      <>
+        {orderInfo}
+        <LabelValue label="Timestamp" value={fmtDate(d[0])} />
+        <div className="grid grid-cols-2 gap-4">
+          <LabelValue label="Job Order" value={d[3]} />
+          <LabelValue label="Machine" value={d[4]} />
+          <LabelValue label="Output" value={`${d[6]} ${d[7]}`} />
+          <LabelValue label="Discrepancy" value={`${d[10]}%`} />
+        </div>
+        <LabelValue label="Materials" value={<pre className="whitespace-pre-wrap font-sans text-xs mt-1 bg-slate-50 p-2.5 rounded-lg border border-slate-200">{d[5]}</pre>} />
+        <div className="grid grid-cols-2 gap-4">
+          <LabelValue label="Setup Wastage" value={`${d[8] || 0} kg`} />
+          <LabelValue label="Process Wastage" value={`${d[9] || 0} kg`} />
+        </div>
+        <LabelValue label="Supervisor" value={d[11]} className="border-0 pb-0 mb-0" />
+      </>
+    );
+  } else if (log.type === 'Cutting') {
+    content = (
+      <>
+        {orderInfo}
+        <LabelValue label="Timestamp" value={fmtDate(d[0])} />
+        <div className="grid grid-cols-2 gap-4">
+          <LabelValue label="Job Order" value={d[3]} />
+          <LabelValue label="Machine" value={d[4]} />
+          <LabelValue label="Input Weight" value={`${parseFloat(d[5]) || 0} kg`} />
+          <LabelValue label="Output" value={`${d[6]} ${d[7]}`} />
+          <LabelValue label="Setup Wastage" value={`${d[8] || 0} kg`} />
+          <LabelValue label="Process Wastage" value={`${d[9] || 0} kg`} />
+          <LabelValue label="Discrepancy" value={`${d[10]}%`} />
+        </div>
+        <LabelValue label="Supervisor" value={d[11]} className="border-0 pb-0 mb-0" />
+      </>
+    );
+  } else if (log.type === 'Packing') {
+    content = (
+      <>
+        {orderInfo}
+        <LabelValue label="Timestamp" value={fmtDate(d[0])} />
+        <div className="grid grid-cols-2 gap-4">
+          <LabelValue label="Job Order" value={d[3]} />
+          <LabelValue label="Quantity" value={`${d[6]} (${d[4]} ${d[5]})`} />
+          <LabelValue label="Pallet Weight" value={`${d[7] || 0} kg`} />
+        </div>
+        <LabelValue label="Bag Weights" value={<span className="text-xs bg-slate-50 p-2 rounded block mt-1 leading-relaxed border border-slate-200">{d[8] || 'N/A'}</span>} />
+        <LabelValue label="Supervisor" value={d[9]} className="border-0 pb-0 mb-0" />
+      </>
+    );
+  } else if (log.type === 'Incoming Goods') {
+    content = (
+      <>
+        <LabelValue label="Timestamp" value={fmtDate(d[0])} />
+        <LabelValue label="Material" value={d[2]} />
+        <div className="grid grid-cols-2 gap-4">
+          <LabelValue label="Amount" value={`${d[3]} kg`} />
+          <LabelValue label="Supplier" value={d[4]} />
+          <LabelValue label="Batch No" value={d[5]} />
+          <LabelValue label="PO Number" value={d[6]} />
+          <LabelValue label="Location" value={d[7]} />
+          <LabelValue label="Condition" value={d[8]} />
+        </div>
+        <LabelValue label="Receiver" value={d[9]} />
+      </>
+    );
+  }
+
+  return (
+    <div className="fixed inset-0 z-[70] flex items-end sm:items-center justify-center bg-slate-900/40 backdrop-blur-sm p-0 sm:p-5 animate-in fade-in duration-200" onClick={onClose}>
+      <div className="bg-white w-full sm:max-w-md rounded-t-3xl sm:rounded-2xl shadow-2xl overflow-hidden animate-in slide-in-from-bottom-full sm:slide-in-from-bottom-8 duration-300" onClick={e => e.stopPropagation()}>
+        <div className="px-5 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+          <h3 className="font-black text-slate-800">{log.type} Record Details</h3>
+          <button onClick={onClose} className="p-1.5 bg-slate-200 rounded-full hover:bg-slate-300 text-slate-600 transition-colors"><X size={16}/></button>
+        </div>
+        <div className="p-5 max-h-[70vh] overflow-y-auto">
+          {content}
+        </div>
+      </div>
+    </div>
+  );
+};
 
 const STORAGE_KEY = 'dpr_draft_session';
 
@@ -548,6 +669,7 @@ const App = () => {
   const [department, setDepartment] = useState('Dashboard'); 
   const [qcStage, setQcStage] = useState('Extrusion'); 
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [selectedLog, setSelectedLog] = useState(null); // For the detailed log banner
   
   const [formData, setFormData] = useState(() => {
     const saved = localStorage.getItem(STORAGE_KEY);
@@ -661,6 +783,8 @@ const App = () => {
 
   const [massBalance, setMassBalance] = useState({ totalInput: 0, totalAccounted: 0, discrepancyKg: 0, discrepancyPercent: 0, isFailed: false });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isFooterVisible, setIsFooterVisible] = useState(true);
+  const lastScrollY = useRef(0);
 
   // Live Mass Balance Integrity Evaluation
   useEffect(() => {
@@ -844,11 +968,21 @@ const App = () => {
   const trendConsumption = calculateTrend(currentAnalytics.consumption, currentAnalytics.prevConsumption);
   const trendWastage = calculateTrend(currentAnalytics.wastage, currentAnalytics.prevWastage);
 
+  const handleScroll = (e) => {
+    const currentScrollY = e.target.scrollTop;
+    if (currentScrollY > lastScrollY.current && currentScrollY > 50) {
+      setIsFooterVisible(false); // Scrolling down, hide footer
+    } else {
+      setIsFooterVisible(true);  // Scrolling up, show footer
+    }
+    lastScrollY.current = currentScrollY;
+  };
+
   if (!isLoggedIn) {
     return (
-      <div className="min-h-screen bg-slate-900 flex items-center justify-center p-5 relative">
+      <div className="min-h-screen bg-slate-900 flex items-center justify-center p-4 relative">
         <Toaster />
-        <div className="absolute top-5 right-5"><button onClick={() => setLanguage(l => l === 'en' ? 'bn' : l === 'bn' ? 'ms' : 'en')} className="flex items-center gap-2 text-slate-300 hover:text-white bg-slate-800 px-5 py-2.5 rounded-full text-base font-bold transition-colors border border-slate-700 shadow-sm"><Globe size={18} /> {language === 'en' ? 'বাংলা' : language === 'bn' ? 'Bahasa Melayu' : 'English'}</button></div>
+        <div className="absolute top-4 right-4"><button onClick={() => setLanguage(l => l === 'en' ? 'bn' : l === 'bn' ? 'ms' : 'en')} className="flex items-center gap-2 text-slate-300 hover:text-white bg-slate-800 px-4 py-2 rounded-full text-sm font-medium transition-colors border border-slate-700 shadow-sm"><Globe size={16} /> {language === 'en' ? 'বাংলা' : language === 'bn' ? 'Bahasa Melayu' : 'English'}</button></div>
         <div className="max-w-md w-full bg-white rounded-3xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-300">
           <div className="bg-slate-800 p-10 text-center border-b border-slate-700">
             <div className="w-20 h-20 bg-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-5 shadow-[0_0_20px_rgba(37,99,235,0.4)]"><Lock size={40} className="text-white" /></div>
@@ -871,9 +1005,12 @@ const App = () => {
     <div className="min-h-screen bg-slate-100 flex flex-col md:flex-row font-sans text-slate-800">
       <Toaster />
 
+      {/* --- LOG DETAILS MODAL (BANNER) --- */}
+      <LogDetailsBanner log={selectedLog} onClose={() => setSelectedLog(null)} masterOrders={dashboardData?.masterOrders || []} />
+
       {/* --- FLAG MODAL --- */}
       {isFlagModalOpen && (
-        <div className="fixed inset-0 bg-slate-900/60 z-[60] flex items-center justify-center p-5 backdrop-blur-sm">
+        <div className="fixed inset-0 bg-black/60 z-[60] flex items-center justify-center p-4 backdrop-blur-sm">
           <div className="bg-white rounded-3xl shadow-xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in duration-200">
             <div className="flex justify-between items-center p-6 border-b border-slate-200 bg-slate-50">
               <div className="flex items-center gap-2 text-amber-600"><Flag size={24} className="fill-amber-600" /><h3 className="font-black text-lg">Flag Record Error</h3></div>
@@ -953,7 +1090,7 @@ const App = () => {
       )}
 
       {/* --- MAIN CONTENT AREA --- */}
-      <main className="flex-1 flex flex-col min-w-0 h-screen overflow-y-auto bg-slate-100/50 relative pb-32 md:pb-24">
+      <main className="flex-1 flex flex-col min-w-0 h-screen overflow-y-auto bg-slate-100/50 relative pb-32 md:pb-24" onScroll={handleScroll}>
         
         {/* Mobile Header */}
         <header className="md:hidden bg-white border-b border-slate-200 p-4 sticky top-0 z-30 flex justify-between items-center shadow-sm">
@@ -1050,6 +1187,7 @@ const App = () => {
               <div className="pb-2">
                 <SortableTable 
                   title="Live Order Tracker" data={activeOrdersData}
+                  rowsPerPage={5}
                   columns={[
                     { label: 'Issue Date', dataIndex: 'issueDateMs', type: 'number', render: (_, row) => <span className="text-slate-500 font-bold whitespace-nowrap">{row.issueDateDisplay}</span> },
                     { label: 'J/O No.', dataIndex: 'jo', type: 'string', render: v => <span className="font-black text-slate-900 whitespace-nowrap text-base">{v}</span> },
@@ -1102,6 +1240,7 @@ const App = () => {
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8 pb-8">
                 <SortableTable 
                   title="Latest Extrusion Runs" data={dashboardData.extrusion} onFlag={(r) => {setFlagData({department: 'Extrusion', date: new Date(r[1]).toLocaleDateString('en-GB'), jobOrder: r[3], reason: ''}); setIsFlagModalOpen(true);}}
+                  onRowClick={(r) => setSelectedLog({ type: 'Extrusion', data: r })}
                   columns={[
                     { label: 'Date', dataIndex: 1, type: 'date', render: d => new Date(d).toLocaleDateString('en-GB') },
                     { label: 'Job Order', dataIndex: 3, type: 'string', render: v => <span className="font-bold text-slate-900">{v}</span> },
@@ -1110,6 +1249,7 @@ const App = () => {
                 />
                 <SortableTable 
                   title="Latest Cutting Logs" data={dashboardData.cutting} onFlag={(r) => {setFlagData({department: 'Cutting', date: new Date(r[1]).toLocaleDateString('en-GB'), jobOrder: r[3], reason: ''}); setIsFlagModalOpen(true);}}
+                  onRowClick={(r) => setSelectedLog({ type: 'Cutting', data: r })}
                   columns={[
                     { label: 'Date', dataIndex: 1, type: 'date', render: d => new Date(d).toLocaleDateString('en-GB') },
                     { label: 'Job Order', dataIndex: 3, type: 'string', render: v => <span className="font-bold text-slate-900">{v}</span> },
@@ -1118,6 +1258,7 @@ const App = () => {
                 />
                 <SortableTable 
                   title="Latest Packing Logs" data={dashboardData.packing} onFlag={(r) => {setFlagData({department: 'Packing', date: new Date(r[1]).toLocaleDateString('en-GB'), jobOrder: r[3], reason: ''}); setIsFlagModalOpen(true);}}
+                  onRowClick={(r) => setSelectedLog({ type: 'Packing', data: r })}
                   columns={[
                     { label: 'Date', dataIndex: 1, type: 'date', render: d => new Date(d).toLocaleDateString('en-GB') },
                     { label: 'Job Order', dataIndex: 3, type: 'string', render: v => <span className="font-bold text-slate-900">{v}</span> },
@@ -1126,6 +1267,7 @@ const App = () => {
                 />
                 <SortableTable 
                   title="Incoming Materials" data={dashboardData.incoming} onFlag={(r) => {setFlagData({department: 'Incoming Goods', date: new Date(r[1]).toLocaleDateString('en-GB'), jobOrder: r[2], reason: ''}); setIsFlagModalOpen(true);}}
+                  onRowClick={(r) => setSelectedLog({ type: 'Incoming Goods', data: r })}
                   columns={[
                     { label: 'Date', dataIndex: 1, type: 'date', render: d => new Date(d).toLocaleDateString('en-GB') },
                     { label: 'Material', dataIndex: 2, type: 'string', render: v => <span className="font-bold text-slate-900">{v}</span> },
@@ -1152,9 +1294,6 @@ const App = () => {
 
               {/* Section 1: Session Parameters */}
               <section className="bg-white p-5 md:p-8 rounded-3xl border border-slate-200 shadow-sm relative">
-                <div className="absolute top-5 md:top-8 right-5 md:right-8 flex items-center gap-2 bg-slate-50 text-slate-500 text-xs font-bold px-3 py-1.5 rounded-lg border border-slate-200">
-                  <CheckCircle size={14} className="text-emerald-500" /> {saveIndicator}
-                </div>
                 <h3 className="text-xl font-black text-slate-800 mb-6 flex items-center gap-2"><ClipboardList size={20} className="text-slate-400"/> {t("Session Parameters")}</h3>
                 
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
@@ -1489,7 +1628,7 @@ const App = () => {
 
         {/* STICKY FOOTER ACTION BAR */}
         {department !== 'Dashboard' && (
-          <div className="fixed bottom-0 right-0 w-full md:w-[calc(100%-18rem)] bg-white/95 backdrop-blur-md border-t border-slate-200 p-4 shadow-[0_-10px_30px_-5px_rgba(0,0,0,0.1)] z-50 flex flex-col sm:flex-row justify-between items-center gap-3 sm:gap-4 px-4 md:px-8">
+          <div className={`fixed bottom-0 right-0 w-full md:w-[calc(100%-18rem)] bg-white/95 backdrop-blur-md border-t border-slate-200 p-4 shadow-[0_-10px_30px_-5px_rgba(0,0,0,0.1)] z-40 flex flex-col sm:flex-row justify-between items-center gap-3 sm:gap-4 px-4 md:px-8 transition-transform duration-300 ${!isFooterVisible || isSidebarOpen ? 'translate-y-full' : 'translate-y-0'}`}>
             <div className="flex flex-col text-center sm:text-left text-sm w-full sm:w-auto">
               <span className="font-black text-slate-800 tracking-tight text-base">{t(department)} Report</span>
               <span className="text-slate-500 text-[11px] uppercase tracking-widest font-bold flex items-center justify-center sm:justify-start gap-1.5 mt-0.5"><CheckCircle size={14} className="text-emerald-500"/> {saveIndicator}</span>
