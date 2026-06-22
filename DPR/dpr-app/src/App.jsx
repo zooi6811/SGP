@@ -4,7 +4,7 @@ import {
   Package, Truck, ArrowDownToLine, PlusCircle, Trash2, CheckCircle, BarChart3, 
   Activity, RefreshCw, Flag, TrendingUp, X, Search, PackageCheck, Layers, 
   Lock, LogOut, UserCircle, Globe, Menu, ChevronUp, ChevronDown, Edit2, Camera,
-  Archive, ShoppingCart
+  Archive, ShoppingCart, CalendarDays, Zap
 } from 'lucide-react';
 import toast, { Toaster } from 'react-hot-toast';
 
@@ -146,7 +146,28 @@ const dict = {
     "Item Name": "Item Name",
     "Remarks": "Remarks",
     "Resolve": "Resolve",
-    "Action": "Action"
+    "Action": "Action",
+    "Job Schedule": "Job Schedule",
+    "Job Schedule & Overview": "Job Schedule & Overview",
+    "Pending Extrusion": "Pending Extrusion",
+    "Pending Cutting": "Pending Cutting",
+    "Pending Packing": "Pending Packing",
+    "Left to run": "Left to run",
+    "Left to cut": "Left to cut",
+    "Left to pack": "Left to pack",
+    "Run Date": "Run Date",
+    "Target": "Target",
+    "Unscheduled": "Unscheduled",
+    "Job Order Overview": "Job Order Overview",
+    "Scheduled Run Date": "Scheduled Run Date",
+    "Assigned Machine": "Assigned Machine",
+    "Extrusion Pending": "Extrusion Pending",
+    "Cutting Pending": "Cutting Pending",
+    "Packing Pending": "Packing Pending",
+    "Shift Schedule": "Shift Schedule",
+    "Shift Target": "Shift Target",
+    "Auto-Schedule Jobs": "Auto-Schedule Jobs",
+    "Urgency": "Urgency"
   },
   bn: {
     "Production Hub": "উৎপাদন হাব",
@@ -285,7 +306,28 @@ const dict = {
     "Item Name": "আইটেমের নাম",
     "Remarks": "মন্তব্য",
     "Resolve": "সমাধান করুন",
-    "Action": "অ্যাকশন"
+    "Action": "অ্যাকশন",
+    "Job Schedule": "কাজের সময়সূচী",
+    "Job Schedule & Overview": "কাজের সময়সূচী এবং ওভারভিউ",
+    "Pending Extrusion": "অপেক্ষমাণ এক্সট্রুশন",
+    "Pending Cutting": "অপেক্ষমাণ কাটিং",
+    "Pending Packing": "অপেক্ষমাণ প্যাকিং",
+    "Left to run": "বাকি রান",
+    "Left to cut": "বাকি কাট",
+    "Left to pack": "বাকি প্যাক",
+    "Run Date": "রান তারিখ",
+    "Target": "লক্ষ্য",
+    "Unscheduled": "অনির্ধারিত",
+    "Job Order Overview": "জব অর্ডার ওভারভিউ",
+    "Scheduled Run Date": "নির্ধারিত রান তারিখ",
+    "Assigned Machine": "বরাদ্দকৃত মেশিন",
+    "Extrusion Pending": "এক্সট্রুশন অপেক্ষমাণ",
+    "Cutting Pending": "কাটিং অপেক্ষমাণ",
+    "Packing Pending": "প্যাকিং অপেক্ষমাণ",
+    "Shift Schedule": "শিফট শিডিউল",
+    "Shift Target": "শিফট টার্গেট",
+    "Auto-Schedule Jobs": "অটো-শিডিউল জবস",
+    "Urgency": "জরুরী"
   },
   ms: {
     "Production Hub": "Pusat Pengeluaran",
@@ -424,8 +466,56 @@ const dict = {
     "Item Name": "Nama Item",
     "Remarks": "Catatan",
     "Resolve": "Selesaikan",
-    "Action": "Tindakan"
+    "Action": "Tindakan",
+    "Job Schedule": "Jadual Kerja",
+    "Job Schedule & Overview": "Jadual Kerja & Gambaran Keseluruhan",
+    "Pending Extrusion": "Penyemperitan Tertunda",
+    "Pending Cutting": "Pemotongan Tertunda",
+    "Pending Packing": "Pembungkusan Tertunda",
+    "Left to run": "Baki untuk dijalankan",
+    "Left to cut": "Baki untuk dipotong",
+    "Left to pack": "Baki untuk dibungkus",
+    "Run Date": "Tarikh Larian",
+    "Target": "Sasaran",
+    "Unscheduled": "Tidak Dijadualkan",
+    "Job Order Overview": "Gambaran Keseluruhan Pesanan Kerja",
+    "Scheduled Run Date": "Tarikh Larian Dijadualkan",
+    "Assigned Machine": "Mesin Ditugaskan",
+    "Extrusion Pending": "Penyemperitan Tertunda",
+    "Cutting Pending": "Pemotongan Tertunda",
+    "Packing Pending": "Pembungkusan Tertunda",
+    "Shift Schedule": "Jadual Syif",
+    "Shift Target": "Sasaran Syif",
+    "Auto-Schedule Jobs": "Jadual Auto",
+    "Urgency": "Kecemasan"
   }
+};
+
+// --- CONFIGURATION ENGINE ---
+// Manage all production constraints and routing logic here instead of inside the algorithm
+const SCHEDULING_CONFIG = {
+  capacities: {
+    extrusion: { default: 3000, 'B6': 3000 },
+    cutting: { defaultKg: 3000, defaultPcs: 4000, 'C5_pcs': 4000 },
+    packing: { kg: 6750, pcs: 45000 } // Approx 450 bags/shift
+  },
+  concurrency: {
+    // Pipeline Variables for Concurrent Manufacturing (Just-In-Time)
+    rollWeightKg: 180,               // Standard weight of a roll before it is moved to cutting
+    transitTimeMins: 30,             // Time needed to weigh, QA, and move the roll to the next machine
+    packBatchPcs: 150,               // Target pcs needed to trigger the packing team to start
+    packBatchKg: 50                  // Target kg needed to trigger the packing team to start (if order is in kg)
+  },
+  extrusionRoutingRules: [
+    // The algorithm evaluates these top-to-bottom. It will use the first rule that matches.
+    { material: 'HDPE', minWidth: 700, maxWidth: Infinity, machines: ['B8'] },
+    { material: 'HDPE', minWidth: 0, maxWidth: 699.99, machines: ['B1', 'B8'] },
+    { material: 'LDPE', minWidth: 1800.01, maxWidth: Infinity, machines: ['B6'] },
+    { material: 'LDPE', minWidth: 1200, maxWidth: 1800, machines: ['B4', 'B5'] },
+    { material: 'LDPE', minWidth: 700, maxWidth: 1199.99, machines: ['B9', 'B4', 'B5'] },
+    { material: 'LDPE', minWidth: 0, maxWidth: 699.99, machines: ['B2', 'B9'] }
+  ],
+  defaultExtrusionMachines: ['B1','B2','B3','B4','B5','B6','B7','B8','B9']
 };
 
 // --- REUSABLE COMPONENTS ---
@@ -653,7 +743,33 @@ const LogDetailsBanner = ({ log, onClose, masterOrders = [] }) => {
   }
 
   let content = null;
-  if (log.type === 'Extrusion') {
+  if (log.type === 'Job Overview') {
+    const o = log.data;
+    content = (
+      <>
+        <div className="mb-4 bg-blue-50/40 p-4 rounded-xl border border-blue-100/60 shadow-sm">
+          <h4 className="text-[10px] font-black text-blue-600 mb-3 uppercase tracking-wider flex items-center gap-1.5"><ClipboardList size={14} /> Job Order Overview</h4>
+          <div className="grid grid-cols-2 gap-x-4 gap-y-2">
+            <LabelValue label="Job Order No." value={o.jo} className="border-b-blue-100/50" />
+            <LabelValue label="Customer" value={o.customer} className="border-b-blue-100/50" />
+            <LabelValue label="Issue Date" value={o.issueDateDisplay} className="border-b-blue-100/50" />
+            <LabelValue label="Target" value={o.target} className="border-b-blue-100/50" />
+            <div className="col-span-2"><LabelValue label="Description" value={o.description} className="border-b-blue-100/50" /></div>
+            <div className="col-span-2"><LabelValue label="Size / Dimension" value={o.dimension} className="border-0 pb-0 mb-0" /></div>
+          </div>
+        </div>
+        <div className="grid grid-cols-2 gap-4">
+          <LabelValue label="Scheduled Run Date" value={o.runDateDisplay} />
+          <LabelValue label="Assigned Machine" value={o.schedMachine} />
+        </div>
+        <div className="grid grid-cols-3 gap-4 mt-2">
+          <LabelValue label="Extrusion Pending" value={`${(o.extPending || 0).toFixed(1)} kg`} className={(o.extPending || 0) > 0 ? "text-blue-600" : "text-emerald-600"} />
+          {o.requiresCutting ? <LabelValue label="Cutting Pending" value={`${(o.cutPending || 0).toFixed(1)} kg`} className={(o.cutPending || 0) > 0 ? "text-amber-600" : "text-emerald-600"} /> : <LabelValue label="Cutting" value="N/A" />}
+          <LabelValue label="Packing Pending" value={`${(o.packPending || 0).toFixed(1)} kg`} className={(o.packPending || 0) > 0 ? "text-purple-600" : "text-emerald-600"} />
+        </div>
+      </>
+    );
+  } else if (log.type === 'Extrusion') {
     content = (
       <>
         {orderInfo}
@@ -710,16 +826,23 @@ const LogDetailsBanner = ({ log, onClose, masterOrders = [] }) => {
         <LabelValue label="Material" value={d[2]} />
         <div className="grid grid-cols-2 gap-4">
           <LabelValue label="Amount" value={`${d[3]} kg`} />
-          <LabelValue label="Supplier" value={d[4]} />
-          <LabelValue label="Batch No" value={d[5]} />
-          <LabelValue label="PO Number" value={d[6]} />
-          <LabelValue label="Location" value={d[7]} />
-          <LabelValue label="Condition" value={d[8]} />
-        </div>
-        <LabelValue label="Receiver" value={d[9]} />
-      </>
-    );
-  } else if (log.type === 'Quality Control') {
+        <LabelValue label="Supplier" value={d[4]} />
+        <LabelValue label="Batch No" value={d[5]} />
+        <LabelValue label="PO Number" value={d[6]} />
+        <LabelValue label="Location" value={d[7]} />
+        <LabelValue label="Condition" value={d[8]} />
+      </div>
+      <LabelValue label="Receiver" value={d[9]} />
+      {d[10] && d[10].toString().startsWith('http') && (
+        <LabelValue label="Attached Evidence" value={
+          <a href={d[10]} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 mt-1 px-3 py-2 bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 transition-colors border border-blue-200">
+            <Camera size={14} /> View Evidence Photo
+          </a>
+        } className="border-0 pb-0 mb-0 mt-2" />
+      )}
+    </>
+  );
+} else if (log.type === 'Quality Control') {
     // Dynamic Evidence Link Extraction from Column 8
     const detailsLines = d[7] ? d[7].toString().split('\n') : [];
     const evidenceLine = detailsLines.find(l => l.startsWith('Evidence Photo:'));
@@ -800,7 +923,7 @@ const defaultStats = { output: 0, prevOutput: 0, consumption: 0, prevConsumption
 const defaultAnalytics = { daily: defaultStats, weekly: defaultStats, monthly: defaultStats, yearly: defaultStats };
 
 // YOUR GOOGLE SCRIPT URL HERE
-const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxFEEVu4-BsyeMsAjro8HxO-HkR-cchipPOQL_ETCIUujjB3gCt_q6Fmw8NfKIOtJAkAg/exec';
+const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyM2vaERlbEX1sziKs8I8q1X1vogpi5WR38MJ7Z2H6wA9iamBOmSFBVPuEaB5-mAt2RbQ/exec';
 
 const App = () => {
   const [language, setLanguage] = useState('en');
@@ -814,12 +937,13 @@ const App = () => {
   const [department, setDepartment] = useState('Dashboard'); 
   const [qcStage, setQcStage] = useState('Extrusion'); 
   const [qcActiveForm, setQcActiveForm] = useState('product'); // Tracks which container is active
+  const [scheduleTab, setScheduleTab] = useState('Extrusion'); // Tracks active job schedule tab
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [selectedLog, setSelectedLog] = useState(null); 
 
   // --- Image Upload States ---
-  const [qcImageFile, setQcImageFile] = useState(null);
-  const [qcImagePreview, setQcImagePreview] = useState(null);
+  const [evidenceImageFile, setEvidenceImageFile] = useState(null);
+  const [evidenceImagePreview, setEvidenceImagePreview] = useState(null);
   
   const [formData, setFormData] = useState(() => {
     const saved = localStorage.getItem(STORAGE_KEY);
@@ -874,11 +998,128 @@ const App = () => {
   const [analyticsPeriod, setAnalyticsPeriod] = useState('daily');
   const [analyticsDept, setAnalyticsDept] = useState('Extrusion');
   const [dashboardData, setDashboardData] = useState({ 
-    extrusion: [], cutting: [], packing: [], dispatch: [], incoming: [], qc: [], containers: [], requisitions: [],
+    extrusion: [], cutting: [], packing: [], dispatch: [], incoming: [], qc: [], containers: [], requisitions: [], schedule: [],
     masterOrders: [], joTotals: {},
     analytics: { Extrusion: defaultAnalytics, Cutting: defaultAnalytics, Packing: defaultAnalytics }
   });
   const [isFetchingDashboard, setIsFetchingDashboard] = useState(false);
+
+  // 1. Process Master Schedule into 12-Hour Shifts
+  const processedSchedule = useMemo(() => {
+    if (!dashboardData?.schedule) return [];
+    
+    let expanded = [];
+    let machineAvailability = {};
+
+    const sortedOriginal = [...dashboardData.schedule].sort((a, b) => {
+      // Safe DD/MM/YYYY Parsing
+      const parseDate = (dStr) => {
+         const parts = String(dStr).split('/');
+         if (parts.length === 3) return new Date(`${parts[2]}-${parts[1]}-${parts[0]}T00:00:00`).getTime();
+         return new Date(dStr).getTime();
+      };
+      return parseDate(a[0]) - parseDate(b[0]);
+    });
+
+    sortedOriginal.forEach(row => {
+      const runDateStr = row[0];
+      const jo = String(row[1] || '').trim();
+      const machine = String(row[2] || '').trim().toUpperCase();
+      const details = String(row[3] || '').trim();
+      const targetStr = String(row[4] || '').trim().toUpperCase();
+      
+      if (!runDateStr || runDateStr === '-') return; 
+      
+      let targetQty = parseFloat(targetStr) || 0;
+      let isPcs = targetStr.includes('PCS');
+      let unit = isPcs ? 'PCS' : 'KG';
+
+      // Advanced Machine Constraints (12-hour shifts) parsed from Configuration Engine
+      let capacity = 3000; 
+      if (machine.startsWith('B')) {
+        capacity = SCHEDULING_CONFIG.capacities.extrusion[machine] || SCHEDULING_CONFIG.capacities.extrusion.default;
+      } else if (machine.startsWith('C')) {
+        capacity = (machine === 'C5' && isPcs) ? SCHEDULING_CONFIG.capacities.cutting['C5_pcs'] : (isPcs ? SCHEDULING_CONFIG.capacities.cutting.defaultPcs : SCHEDULING_CONFIG.capacities.cutting.defaultKg);
+      } else if (machine.startsWith('P')) {
+        capacity = isPcs ? SCHEDULING_CONFIG.capacities.packing.pcs : SCHEDULING_CONFIG.capacities.packing.kg; 
+      }
+
+      // Safe Date Parsing for Initial Assignment
+      let reqDateMs = 0;
+      const parts = String(runDateStr).split('/');
+      if (parts.length === 3) reqDateMs = new Date(`${parts[2]}-${parts[1]}-${parts[0]}T00:00:00`).getTime();
+      else reqDateMs = new Date(runDateStr).getTime();
+      if (isNaN(reqDateMs)) reqDateMs = Date.now();
+
+      // Ensure machine timeline starts at requested date, or later if already busy
+      if (!machineAvailability[machine] || machineAvailability[machine].dateMs < reqDateMs) {
+        machineAvailability[machine] = { dateMs: reqDateMs, shift: 'AM' };
+      }
+
+      let remaining = targetQty;
+      
+      // Fallback for orders without numeric targets
+      if (remaining <= 0) {
+        expanded.push({
+            jo, machine, details, originalTarget: targetStr,
+            runDateMs: machineAvailability[machine].dateMs,
+            runDateDisplay: new Date(machineAvailability[machine].dateMs).toLocaleDateString('en-GB'),
+            shift: machineAvailability[machine].shift,
+            allocatedTarget: targetStr || 'N/A'
+        });
+        machineAvailability[machine].shift = machineAvailability[machine].shift === 'AM' ? 'PM' : 'AM';
+        if (machineAvailability[machine].shift === 'AM') machineAvailability[machine].dateMs += 86400000;
+        return;
+      }
+
+      // Split large targets iteratively across shifts
+      while (remaining > 0.5) { // 0.5 threshold to drop float ghosting
+        let allocate = Math.min(remaining, capacity);
+        
+        expanded.push({
+            jo, machine, details, originalTarget: targetStr,
+            runDateMs: machineAvailability[machine].dateMs,
+            runDateDisplay: new Date(machineAvailability[machine].dateMs).toLocaleDateString('en-GB'),
+            shift: machineAvailability[machine].shift,
+            allocatedTarget: `${allocate.toFixed(0)} ${unit}`
+        });
+
+        remaining -= allocate;
+
+        // Advance 12-hour block
+        if (machineAvailability[machine].shift === 'AM') {
+            machineAvailability[machine].shift = 'PM';
+        } else {
+            machineAvailability[machine].shift = 'AM';
+            machineAvailability[machine].dateMs += 86400000; // Move to next day AM
+        }
+      }
+    });
+
+    // Final sorting: Machine -> Date -> Shift
+    return expanded.sort((a, b) => {
+      if (a.machine !== b.machine) return a.machine.localeCompare(b.machine);
+      if (a.runDateMs !== b.runDateMs) return a.runDateMs - b.runDateMs;
+      return a.shift === 'AM' ? -1 : 1;
+    });
+  }, [dashboardData.schedule]);
+
+  // 2. Build Start-Date Dictionary from expanded schedule
+  const scheduleMap = useMemo(() => {
+    const map = {};
+    processedSchedule.forEach(row => {
+      const jo = row.jo;
+      if (!map[jo]) map[jo] = { extrusion: null, cutting: null, packing: null, general: null };
+      
+      const schedObj = { runDateMs: row.runDateMs, runDateDisplay: row.runDateDisplay, machine: row.machine };
+      
+      if (row.machine.startsWith('B') && !map[jo].extrusion) map[jo].extrusion = schedObj;
+      else if (row.machine.startsWith('C') && !map[jo].cutting) map[jo].cutting = schedObj;
+      else if (row.machine.startsWith('P') && !map[jo].packing) map[jo].packing = schedObj;
+      else if (!map[jo].general) map[jo].general = schedObj;
+    });
+    return map;
+  }, [processedSchedule]);
 
   // Function to manually toggle the Ready to Ship status from the Dashboard
   const handleToggleReadyToShip = async (jo, isReady) => {
@@ -897,6 +1138,22 @@ const App = () => {
     }
   };
 
+  const handleUrgencyChange = async (jo, newUrgency) => {
+    const loadToast = toast.loading(`Updating urgency...`);
+    try {
+      await fetch(GOOGLE_SCRIPT_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify({ action: 'updateUrgency', jo, urgency: newUrgency })
+      });
+      toast.success("Urgency level updated!", { id: loadToast });
+      fetchDashboardData();
+    } catch (e) {
+      toast.error("Failed to update urgency.", { id: loadToast });
+    }
+  };
+
   const joSuggestions = useMemo(() => {
     if (!dashboardData?.masterOrders) return [];
     const currentInput = (formData.jobOrder || '').toLowerCase();
@@ -908,7 +1165,7 @@ const App = () => {
     if (!dashboardData?.masterOrders || !dashboardData?.joTotals) return [];
     return dashboardData.masterOrders.map(order => {
       const totals = dashboardData.joTotals[order.jo] || { extrusion: 0, cutting: 0, packing: 0, lastUpdated: 0 };
-      const target = order.targetQty || 1; 
+      const target = parseFloat(order.targetQty) || 1; 
       
       let parsedDate = 0;
       let displayDate = '-';
@@ -931,6 +1188,11 @@ const App = () => {
         extProgress: ((totals.extrusion || 0) / target) * 100,
         cutProgress: ((totals.cutting || 0) / target) * 100,
         packProgress: ((totals.packing || 0) / target) * 100,
+        extPending: Math.max(0, target - (totals.extrusion || 0)),
+        cutPending: Math.max(0, target - (totals.cutting || 0)),
+        packPending: Math.max(0, target - (totals.packing || 0)),
+        requiresCutting: order.requiresCutting,
+        urgency: order.urgency || 5, // Fallback to 5
         lastUpdated: totals.lastUpdated || 0,
         isReadyToShip: order.isReadyToShip || false
       };
@@ -1005,8 +1267,6 @@ const App = () => {
         const lines = materialsList.split('\n');
         
         lines.forEach(line => {
-            // Regex to parse the strictly formatted Material strings sent by the Extrusion logging function
-            // Example: "Batch: LDN3CY5 | ID: N/A | Name: CY - LDPE N3 | Input: 500 kg (500 kg)"
             const nameMatch = line.match(/Name:\s*(.*?)\s*\|/);
             const qtyMatch = line.match(/\(([\d.]+)\s*kg\)/);
             
@@ -1061,6 +1321,240 @@ const App = () => {
       fetchDashboardData();
     } catch (error) {
       toast.error("Failed to update status.", { id: loadToast });
+    }
+  };
+
+  // Job Schedule specific filters
+  const extSchedule = useMemo(() => processedSchedule.filter(r => r.machine.startsWith('B')), [processedSchedule]);
+  const cutSchedule = useMemo(() => processedSchedule.filter(r => r.machine.startsWith('C')), [processedSchedule]);
+  const packSchedule = useMemo(() => processedSchedule.filter(r => r.machine.startsWith('P')), [processedSchedule]);
+
+  // Job Schedule & Overview Extractors (Enriched with Scheduling Data)
+  const pendingExtrusion = useMemo(() => {
+    return activeOrdersData.filter(o => o.extPending > 0.5).map(o => {
+        const sched = scheduleMap[o.jo]?.extrusion || scheduleMap[o.jo]?.general || {};
+        return { ...o, runDateMs: sched.runDateMs || 9999999999999, runDateDisplay: sched.runDateDisplay || t("Unscheduled"), schedMachine: sched.machine || '-' };
+    }).sort((a, b) => a.runDateMs - b.runDateMs || b.extPending - a.extPending);
+  }, [activeOrdersData, scheduleMap]);
+
+  const pendingCutting = useMemo(() => {
+    return activeOrdersData.filter(o => o.requiresCutting && o.cutPending > 0.5).map(o => {
+        const sched = scheduleMap[o.jo]?.cutting || scheduleMap[o.jo]?.general || {};
+        return { ...o, runDateMs: sched.runDateMs || 9999999999999, runDateDisplay: sched.runDateDisplay || t("Unscheduled"), schedMachine: sched.machine || '-' };
+    }).sort((a, b) => a.runDateMs - b.runDateMs || b.cutPending - a.cutPending);
+  }, [activeOrdersData, scheduleMap]);
+
+  const pendingPacking = useMemo(() => {
+    return activeOrdersData.filter(o => o.packPending > 0.5).map(o => {
+        const sched = scheduleMap[o.jo]?.packing || scheduleMap[o.jo]?.general || {};
+        return { ...o, runDateMs: sched.runDateMs || 9999999999999, runDateDisplay: sched.runDateDisplay || t("Unscheduled"), schedMachine: sched.machine || '-' };
+    }).sort((a, b) => a.runDateMs - b.runDateMs || b.packPending - a.packPending);
+  }, [activeOrdersData, scheduleMap]);
+
+  // --- AUTO SCHEDULE ENGINE ---
+  const handleAutoSchedule = async () => {
+    const loadToast = toast.loading("Syncing latest data & generating schedule...");
+    try {
+        // 1. Fetch fresh data first to prevent the algorithm from "learning" from stale React cache
+        const response = await fetch(`${GOOGLE_SCRIPT_URL}?t=${new Date().getTime()}`);
+        const result = await response.json();
+        if (result.status !== 'success') throw new Error("Sync failed");
+        
+        const freshDashboardData = result.data;
+        
+        // 2. Re-build the schedule map from the fresh data so overrides are respected but deletions are caught
+        const freshScheduleMap = {};
+        (freshDashboardData.schedule || []).forEach(row => {
+            const jo = String(row[1] || '').trim();
+            const machine = String(row[2] || '').trim().toUpperCase();
+            if (!freshScheduleMap[jo]) freshScheduleMap[jo] = { extrusion: null, cutting: null, packing: null, general: null };
+            const schedObj = { machine };
+            if (machine.startsWith('B')) freshScheduleMap[jo].extrusion = schedObj;
+            else if (machine.startsWith('C')) freshScheduleMap[jo].cutting = schedObj;
+            else if (machine.startsWith('P')) freshScheduleMap[jo].packing = schedObj;
+            else freshScheduleMap[jo].general = schedObj;
+        });
+
+        const jobs = activeOrdersData.filter(o => o.urgency !== 6); 
+        const sortedJobs = [...jobs].sort((a, b) => (a.urgency || 5) - (b.urgency || 5) || a.issueDateMs - b.issueDateMs);
+
+        const now = new Date();
+        now.setHours(8, 0, 0, 0); 
+        if (new Date().getHours() >= 20) now.setDate(now.getDate() + 1); 
+        const startTime = now.getTime();
+
+        const machines = {
+            ext: ['B1','B2','B3','B4','B5','B6','B7','B8','B9'].map(id => ({ id, freeAt: startTime })),
+            cut: ['C1','C2','C3','C4','C5','C6','C7'].map(id => ({ id, freeAt: startTime })),
+            pack: ['P'].map(id => ({ id, freeAt: startTime })) // Single packing team instead of P1/P2/P3
+        };
+
+        const newSchedule = [];
+        const pipelineReadyTimes = {}; // Replaces jobFinishTimes to track concurrent roll availability
+
+        // EXTRUSION (Smart-Assignment & Rule-Based Routing)
+        sortedJobs.filter(o => o.extPending > 0.5).forEach(job => {
+            
+            // 1. Intelligently Extract Width & Material for Machine Routing
+            let widthMm = 0;
+            if (job.dimension && job.dimension !== '-') {
+                // Bulletproof regex: grabs the first number regardless of leading quotes or spaces
+                const match = String(job.dimension).match(/(\d+(?:\.\d+)?)/);
+                if (match) {
+                    let val = parseFloat(match[1]);
+                    // Auto-convert inches to mm if quotes or "inch" are detected
+                    if (String(job.dimension).includes('"') || String(job.dimension).toLowerCase().includes('inch')) {
+                        val = val * 25.4; 
+                    }
+                    widthMm = val;
+                }
+            }
+
+            const isHDPE = job.description && (job.description.toUpperCase().includes('HDPE') || job.description.toUpperCase().includes('HD '));
+            let allowedMachines = SCHEDULING_CONFIG.defaultExtrusionMachines;
+
+            // Apply routing rules dynamically from the Configuration Engine
+            if (widthMm > 0) {
+                const matchedRule = SCHEDULING_CONFIG.extrusionRoutingRules.find(r => 
+                    (isHDPE ? r.material === 'HDPE' : r.material === 'LDPE') &&
+                    widthMm >= r.minWidth && widthMm <= r.maxWidth
+                );
+                
+                if (matchedRule) {
+                    allowedMachines = matchedRule.machines;
+                }
+            }
+
+            // Check if supervisor already assigned a specific machine in the fresh Google Sheet data
+            const existingMachine = freshScheduleMap[job.jo]?.extrusion?.machine || freshScheduleMap[job.jo]?.general?.machine;
+            let m;
+            
+            if (existingMachine && machines.ext.find(mx => mx.id === existingMachine)) {
+                // Force it to use the manually assigned machine
+                m = machines.ext.find(mx => mx.id === existingMachine);
+            } else {
+                // Filter down to ONLY the allowed machines, and find the earliest free one
+                let eligibleMachines = machines.ext.filter(mx => allowedMachines.includes(mx.id));
+                if (eligibleMachines.length === 0) eligibleMachines = machines.ext; // Absolute fallback
+                
+                eligibleMachines.sort((a, b) => a.freeAt - b.freeAt);
+                m = eligibleMachines[0];
+            }
+            
+            const startMs = m.freeAt;
+            
+            newSchedule.push([
+                new Date(startMs).toLocaleDateString('en-GB'),
+                job.jo,
+                m.id,
+                `${job.description || '-'} (${job.dimension || '-'})`,
+                job.target
+            ]);
+            
+            // Draw capacities from Configuration Engine
+            const capacity = SCHEDULING_CONFIG.capacities.extrusion[m.id] || SCHEDULING_CONFIG.capacities.extrusion.default;
+            const shifts = Math.ceil(job.extPending / capacity);
+            
+            // CONCURRENCY CALCULATION: How long does it take to push out ONE roll?
+            const shiftDurationMs = 12 * 60 * 60 * 1000;
+            const timeToFirstRollMs = (SCHEDULING_CONFIG.concurrency.rollWeightKg / capacity) * shiftDurationMs;
+            const transitMs = SCHEDULING_CONFIG.concurrency.transitTimeMins * 60 * 1000;
+            
+            if (!pipelineReadyTimes[job.jo]) pipelineReadyTimes[job.jo] = {};
+            // The material is available for Cutting the moment the first roll is done + transit time
+            pipelineReadyTimes[job.jo].extToCut = startMs + timeToFirstRollMs + transitMs;
+            
+            // Block the Extrusion machine for the total order duration
+            m.freeAt += shifts * shiftDurationMs;
+        });
+
+        // CUTTING (Smart-Assignment)
+        sortedJobs.filter(o => o.requiresCutting && o.cutPending > 0.5).forEach(job => {
+            const existingMachine = freshScheduleMap[job.jo]?.cutting?.machine || freshScheduleMap[job.jo]?.general?.machine;
+            let m;
+
+            if (existingMachine && machines.cut.find(mx => mx.id === existingMachine)) {
+                m = machines.cut.find(mx => mx.id === existingMachine);
+            } else {
+                machines.cut.sort((a, b) => a.freeAt - b.freeAt);
+                m = machines.cut[0];
+            }
+
+            // Start when the Machine is free OR when the first Extrusion roll arrives (whichever is later)
+            const extFirstRollArrives = pipelineReadyTimes[job.jo]?.extToCut || startTime;
+            const startMs = Math.max(m.freeAt, extFirstRollArrives);
+            
+            newSchedule.push([
+                new Date(startMs).toLocaleDateString('en-GB'),
+                job.jo,
+                m.id,
+                `${job.description || '-'} (${job.dimension || '-'})`,
+                job.target
+            ]);
+            
+            // Draw capacities from Configuration Engine
+            const isPcs = job.target.toUpperCase().includes('PCS');
+            const capacity = (m.id === 'C5' && isPcs) 
+                  ? SCHEDULING_CONFIG.capacities.cutting['C5_pcs'] 
+                  : (isPcs ? SCHEDULING_CONFIG.capacities.cutting.defaultPcs : SCHEDULING_CONFIG.capacities.cutting.defaultKg);
+                  
+            const shiftDurationMs = 12 * 60 * 60 * 1000;
+            const shifts = Math.ceil(job.cutPending / capacity);
+            
+            // CONCURRENCY CALCULATION: How long does it take to cut the first batch?
+            const packTriggerQty = isPcs ? SCHEDULING_CONFIG.concurrency.packBatchPcs : SCHEDULING_CONFIG.concurrency.packBatchKg;
+            const timeToFirstBatchMs = (packTriggerQty / capacity) * shiftDurationMs;
+            const transitMs = SCHEDULING_CONFIG.concurrency.transitTimeMins * 60 * 1000;
+            
+            if (!pipelineReadyTimes[job.jo]) pipelineReadyTimes[job.jo] = {};
+            // Material is available for Packing the moment the first cut batch is done + transit time
+            pipelineReadyTimes[job.jo].cutToPack = startMs + timeToFirstBatchMs + transitMs;
+            
+            // Block the Cutting machine for the total order duration
+            m.freeAt = startMs + (shifts * shiftDurationMs);
+        });
+
+        // PACKING (Smart-Assignment)
+        sortedJobs.filter(o => o.packPending > 0.5).forEach(job => {
+            const existingMachine = freshScheduleMap[job.jo]?.packing?.machine || freshScheduleMap[job.jo]?.general?.machine;
+            let m;
+
+            if (existingMachine && machines.pack.find(mx => mx.id === existingMachine)) {
+                m = machines.pack.find(mx => mx.id === existingMachine);
+            } else {
+                machines.pack.sort((a, b) => a.freeAt - b.freeAt);
+                m = machines.pack[0];
+            }
+
+            // Start Packing when the team is free OR when the first Cut/Extruded batch arrives
+            const firstBatchArrives = job.requiresCutting ? (pipelineReadyTimes[job.jo]?.cutToPack || startTime) : (pipelineReadyTimes[job.jo]?.extToCut || startTime);
+            const startMs = Math.max(m.freeAt, firstBatchArrives);
+            
+            newSchedule.push([
+                new Date(startMs).toLocaleDateString('en-GB'),
+                job.jo,
+                m.id,
+                `${job.description || '-'} (${job.dimension || '-'})`,
+                job.target
+            ]);
+            
+            // Draw capacities from Configuration Engine
+            const capacity = job.target.toUpperCase().includes('PCS') ? SCHEDULING_CONFIG.capacities.packing.pcs : SCHEDULING_CONFIG.capacities.packing.kg;
+            const shifts = Math.ceil(job.packPending / capacity);
+            m.freeAt = startMs + (shifts * 12 * 60 * 60 * 1000);
+        });
+
+        await fetch(GOOGLE_SCRIPT_URL, {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify({ action: 'updateSchedule', schedule: newSchedule })
+        });
+
+        toast.success("Schedule optimized & saved!", { id: loadToast });
+        fetchDashboardData();
+    } catch (error) {
+        toast.error("Auto-scheduling failed.", { id: loadToast });
     }
   };
 
@@ -1123,7 +1617,7 @@ const App = () => {
         <div className="flex gap-3 justify-end mt-2">
           <button onClick={() => toast.dismiss(t.id)} className="px-4 py-2 text-sm font-bold bg-slate-100 rounded-lg hover:bg-slate-200 transition-colors">Cancel</button>
           <button onClick={() => {
-            setIsLoggedIn(false); setCurrentUser(null); setDepartment('Dashboard'); localStorage.removeItem(STORAGE_KEY); setFormData(getInitialFormData()); setQcImageFile(null); setQcImagePreview(null);
+            setIsLoggedIn(false); setCurrentUser(null); setDepartment('Dashboard'); localStorage.removeItem(STORAGE_KEY); setFormData(getInitialFormData()); setEvidenceImageFile(null); setEvidenceImagePreview(null);
             toast.dismiss(t.id);
           }} className="px-4 py-2 text-sm font-bold bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors shadow-sm">Confirm Exit</button>
         </div>
@@ -1140,31 +1634,31 @@ const App = () => {
   };
 
   // Image Upload Handlers
-  const handleQcImageChange = (e) => {
+  const handleEvidenceImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      if (file.size > 5 * 1024 * 1024) { // 5MB limit to prevent Base64/GAS payload crash
+      if (file.size > 5 * 1024 * 1024) { 
         toast.error("Image file is too large. Max size is 5MB.");
         return;
       }
-      setQcImageFile(file);
+      setEvidenceImageFile(file);
       const reader = new FileReader();
       reader.onloadend = () => {
-        setQcImagePreview(reader.result);
+        setEvidenceImagePreview(reader.result);
       };
       reader.readAsDataURL(file);
     }
   };
 
-  const clearQcImage = () => {
-    setQcImageFile(null);
-    setQcImagePreview(null);
+  const clearEvidenceImage = () => {
+    setEvidenceImageFile(null);
+    setEvidenceImagePreview(null);
   };
 
   // Resets image specifically when changing the active QC form tab
   const handleQcFormSwitch = (formType) => {
     setQcActiveForm(formType);
-    clearQcImage();
+    clearEvidenceImage();
   };
 
   // --- Auto Batch Generator & Incoming Goods Handlers ---
@@ -1311,7 +1805,7 @@ const App = () => {
     finally { setIsFetchingDashboard(false); }
   };
 
-  useEffect(() => { if (isLoggedIn && (department === 'Dashboard' || department === 'Inventory')) fetchDashboardData(); }, [department, isLoggedIn]);
+  useEffect(() => { if (isLoggedIn && (department === 'Dashboard' || department === 'Inventory' || department === 'Job Schedule')) fetchDashboardData(); }, [department, isLoggedIn]);
 
   const handleFlagSubmit = async () => {
     if (!flagData.reason) return toast.error("Please provide a reason.");
@@ -1343,11 +1837,11 @@ const App = () => {
       let mimeType = null;
       let fileName = null;
 
-      if (qcImageFile && qcImagePreview) {
-        base64Data = qcImagePreview.split(',')[1];
-        mimeType = qcImageFile.type;
+      if (evidenceImageFile && evidenceImagePreview) {
+        base64Data = evidenceImagePreview.split(',')[1];
+        mimeType = evidenceImageFile.type;
         const ext = mimeType.split('/')[1] || 'png';
-        fileName = `QC_Evidence_${Date.now()}.${ext}`;
+        fileName = `Evidence_${department.replace(/\s+/g, '_')}_${Date.now()}.${ext}`;
       }
 
       const resolvedQcStage = department === 'Quality Control' ? (qcActiveForm === 'machine' ? 'Machine Inspection' : qcStage) : qcStage;
@@ -1357,9 +1851,9 @@ const App = () => {
         qcStage: resolvedQcStage, 
         massDiscrepancyKg: massBalance.discrepancyKg, 
         massDiscrepancyPercent: massBalance.discrepancyPercent,
-        qcImageData: base64Data,
-        qcImageMimeType: mimeType,
-        qcImageName: fileName
+        evidenceImageData: base64Data,
+        evidenceImageMimeType: mimeType,
+        evidenceImageName: fileName
       };
       
       await fetch(GOOGLE_SCRIPT_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(payload) });
@@ -1380,7 +1874,7 @@ const App = () => {
 
       localStorage.removeItem(STORAGE_KEY);
       setFormData(getInitialFormData(currentUser)); 
-      clearQcImage();
+      clearEvidenceImage();
       
       // Instantly sync with the backend so the Ready to Ship Tracker (and Dashboard) updates live!
       fetchDashboardData();
@@ -1493,15 +1987,16 @@ const App = () => {
         </div>
 
         <nav className="flex-1 overflow-y-auto p-4 space-y-2 custom-scrollbar">
-          {['Dashboard', 'Inventory', 'Purchase Requisition', 'Extrusion', 'Cutting', 'Packing', 'Dispatch', 'Quality Control', 'Incoming Goods'].map((dept) => (
+          {['Dashboard', 'Job Schedule', 'Inventory', 'Purchase Requisition', 'Extrusion', 'Cutting', 'Packing', 'Dispatch', 'Quality Control', 'Incoming Goods'].map((dept) => (
             <button key={dept} onClick={() => { setDepartment(dept); setIsSidebarOpen(false); }} className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-xl text-base font-bold transition-all ${department === dept ? 'bg-blue-600 text-white shadow-md' : 'text-slate-400 hover:bg-slate-800 hover:text-white'}`}>
               {dept === 'Dashboard' && <BarChart3 size={20} />}
+              {dept === 'Job Schedule' && <CalendarDays size={20} />}
               {dept === 'Inventory' && <Archive size={20} />}
               {dept === 'Purchase Requisition' && <ShoppingCart size={20} />}
               {dept === 'Extrusion' && <Activity size={20} />}
               {dept === 'Packing' && <Package size={20} />}
               {dept === 'Quality Control' && <CheckCircle size={20} />}
-              {!['Dashboard', 'Inventory', 'Purchase Requisition', 'Extrusion', 'Packing', 'Quality Control'].includes(dept) && <ClipboardList size={20} />}
+              {!['Dashboard', 'Job Schedule', 'Inventory', 'Purchase Requisition', 'Extrusion', 'Packing', 'Quality Control'].includes(dept) && <ClipboardList size={20} />}
               <span className="truncate">{t(dept)}</span>
             </button>
           ))}
@@ -1726,6 +2221,235 @@ const App = () => {
                   ]}
                 />
               </div>
+            </div>
+
+          ) : department === 'Job Schedule' ? (
+            <div className="space-y-6 md:space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                  <div>
+                    <h2 className="text-2xl sm:text-3xl font-black text-slate-800 tracking-tight">{t("Job Schedule & Overview")}</h2>
+                    <p className="text-sm font-bold text-slate-500 mt-1">Master schedule and departmental backlog</p>
+                  </div>
+                  <div className="flex gap-2 w-full sm:w-auto">
+                      <button onClick={handleAutoSchedule} className="flex-1 sm:flex-none flex items-center justify-center gap-2 text-sm font-black bg-indigo-600 text-white px-5 py-3 rounded-xl hover:bg-indigo-700 transition-colors shadow-sm active:scale-95">
+                          <Zap size={16} /> {t("Auto-Schedule Jobs")}
+                      </button>
+                      <button onClick={fetchDashboardData} disabled={isFetchingDashboard} className="flex-1 sm:flex-none flex items-center justify-center gap-2 text-sm font-black bg-white border border-slate-300 px-5 py-3 rounded-xl hover:bg-slate-50 transition-colors shadow-sm active:scale-95 text-slate-700">
+                          <RefreshCw size={16} className={isFetchingDashboard ? 'animate-spin text-blue-500' : 'text-slate-400'} /> Refresh
+                      </button>
+                  </div>
+               </div>
+
+               {/* Departmental Tab Switcher */}
+               <div className="flex flex-col sm:flex-row bg-slate-200/60 p-1.5 rounded-2xl w-full max-w-md mx-auto sm:mx-0 shadow-inner">
+                 {['Extrusion', 'Cutting', 'Packing'].map(tab => (
+                   <button 
+                     key={tab} 
+                     onClick={() => setScheduleTab(tab)} 
+                     className={`flex-1 py-3 px-4 text-base font-black rounded-xl transition-all duration-300 ${scheduleTab === tab ? 'bg-white text-blue-700 shadow-md transform scale-[1.02]' : 'text-slate-500 hover:text-slate-700 hover:bg-slate-200'}`}
+                   >
+                     {t(tab)}
+                   </button>
+                 ))}
+               </div>
+
+               {/* Departmental Schedule View */}
+               <div className="mt-4 grid grid-cols-1 gap-6 md:gap-8">
+                 {scheduleTab === 'Extrusion' && (
+                   <>
+                     <SortableTable 
+                       title={`${t("Extrusion")} - ${t("Shift Schedule")}`}
+                       data={extSchedule}
+                       rowsPerPage={6}
+                       onRowClick={(row) => setSelectedLog({ type: 'Job Overview', data: activeOrdersData.find(o => o.jo === row.jo) || { jo: row.jo, customer: 'Unknown', description: row.details, target: row.originalTarget, extPending: 0, cutPending: 0, packPending: 0, runDateDisplay: row.runDateDisplay, schedMachine: row.machine } })}
+                       columns={[
+                         { label: t("Run Date"), dataIndex: 'runDateMs', type: 'number', render: (_, r) => <span className="font-bold text-slate-700 whitespace-nowrap">{r.runDateDisplay}</span> },
+                         { label: t("Shift"), dataIndex: 'shift', type: 'string', render: v => <span className={`px-2 py-1 rounded-md text-[10px] font-black uppercase tracking-wider ${v === 'AM' ? 'bg-amber-100 text-amber-700' : 'bg-indigo-100 text-indigo-700'}`}>{v}</span> },
+                         { label: t("Machine"), dataIndex: 'machine', type: 'string', render: v => <span className="font-black text-slate-800 bg-slate-100 px-2 py-1 rounded-md">{v}</span> },
+                         { label: t("Job Order"), dataIndex: 'jo', type: 'string', render: v => <span className="font-black text-blue-700 text-base">{v}</span> },
+                         { label: t("Details"), dataIndex: 'details', type: 'string', render: v => <span className="text-sm font-semibold text-slate-600 truncate max-w-[200px] block" title={v}>{v}</span> },
+                         { label: t("Shift Target"), dataIndex: 'allocatedTarget', type: 'string', render: v => <span className="font-black text-emerald-600 whitespace-nowrap">{v}</span> }
+                       ]}
+                     />
+                     <SortableTable 
+                       title={`${t("Extrusion")} - ${t("Pending Extrusion")} (Backlog)`}
+                       data={pendingExtrusion}
+                       rowsPerPage={6}
+                       onRowClick={(row) => setSelectedLog({ type: 'Job Overview', data: row })}
+                       columns={[
+                         { label: t("Urgency"), dataIndex: 'urgency', type: 'number', render: (v, r) => (
+                             <select
+                               value={v || 5}
+                               onClick={e => e.stopPropagation()}
+                               onChange={e => handleUrgencyChange(r.jo, parseInt(e.target.value))}
+                               className={`bg-transparent outline-none cursor-pointer font-black text-xs border-b-2 pb-0.5 ${
+                                 v === 1 ? 'text-rose-600 border-rose-600' :
+                                 v === 2 ? 'text-orange-500 border-orange-500' :
+                                 v === 3 ? 'text-amber-500 border-amber-500' :
+                                 v === 4 ? 'text-blue-500 border-blue-500' :
+                                 v === 5 ? 'text-emerald-500 border-emerald-500' :
+                                 'text-slate-400 border-slate-400'
+                               }`}
+                             >
+                               <option value={1}>1 - CRITICAL</option>
+                               <option value={2}>2 - HIGH</option>
+                               <option value={3}>3 - NORMAL</option>
+                               <option value={4}>4 - LOW</option>
+                               <option value={5}>5 - WHENEVER</option>
+                               <option value={6}>6 - IGNORE</option>
+                             </select>
+                         )},
+                         { label: t("Start Date"), dataIndex: 'runDateMs', type: 'number', render: (_, r) => <span className={`font-bold whitespace-nowrap ${r.runDateDisplay === t("Unscheduled") ? 'text-slate-400 italic' : 'text-blue-700'}`}>{r.runDateDisplay}</span> },
+                         { label: t("Job Order"), dataIndex: 'jo', type: 'string', render: (v, r) => (
+                           <div className="flex flex-col min-w-[120px]">
+                             <span className="font-black text-slate-900 text-base">{v}</span>
+                             <span className="text-xs font-bold text-slate-500 mt-0.5 truncate max-w-[150px]" title={r.customer}>{r.customer}</span>
+                           </div>
+                         )},
+                         { label: t("Details"), dataIndex: 'dimension', type: 'string', render: (v, r) => (
+                           <div className="flex flex-col min-w-[150px] max-w-[200px]">
+                             <span className="text-slate-800 font-bold text-sm truncate" title={r.description}>{r.description || '-'}</span>
+                             <span className="inline-block mt-1.5 bg-slate-100 text-slate-500 text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded border border-slate-200 w-fit truncate" title={v}>{v || '-'}</span>
+                           </div>
+                         )},
+                         { label: t("Machine"), dataIndex: 'schedMachine', type: 'string', render: v => <span className="font-black text-slate-700">{v}</span> },
+                         { label: t("Total Target"), dataIndex: 'target', type: 'string', render: v => <span className="font-bold text-slate-600 whitespace-nowrap">{v}</span> },
+                         { label: t("Left to run"), dataIndex: 'extPending', type: 'number', render: v => <span className="font-black text-blue-600 text-base whitespace-nowrap">{v.toFixed(1)} kg</span> }
+                       ]}
+                     />
+                   </>
+                 )}
+
+                 {scheduleTab === 'Cutting' && (
+                   <>
+                     <SortableTable 
+                       title={`${t("Cutting")} - ${t("Shift Schedule")}`}
+                       data={cutSchedule}
+                       rowsPerPage={6}
+                       onRowClick={(row) => setSelectedLog({ type: 'Job Overview', data: activeOrdersData.find(o => o.jo === row.jo) || { jo: row.jo, customer: 'Unknown', description: row.details, target: row.originalTarget, extPending: 0, cutPending: 0, packPending: 0, runDateDisplay: row.runDateDisplay, schedMachine: row.machine } })}
+                       columns={[
+                         { label: t("Run Date"), dataIndex: 'runDateMs', type: 'number', render: (_, r) => <span className="font-bold text-slate-700 whitespace-nowrap">{r.runDateDisplay}</span> },
+                         { label: t("Shift"), dataIndex: 'shift', type: 'string', render: v => <span className={`px-2 py-1 rounded-md text-[10px] font-black uppercase tracking-wider ${v === 'AM' ? 'bg-amber-100 text-amber-700' : 'bg-indigo-100 text-indigo-700'}`}>{v}</span> },
+                         { label: t("Machine"), dataIndex: 'machine', type: 'string', render: v => <span className="font-black text-slate-800 bg-slate-100 px-2 py-1 rounded-md">{v}</span> },
+                         { label: t("Job Order"), dataIndex: 'jo', type: 'string', render: v => <span className="font-black text-emerald-700 text-base">{v}</span> },
+                         { label: t("Details"), dataIndex: 'details', type: 'string', render: v => <span className="text-sm font-semibold text-slate-600 truncate max-w-[200px] block" title={v}>{v}</span> },
+                         { label: t("Shift Target"), dataIndex: 'allocatedTarget', type: 'string', render: v => <span className="font-black text-emerald-600 whitespace-nowrap">{v}</span> }
+                       ]}
+                     />
+                     <SortableTable 
+                       title={`${t("Cutting")} - ${t("Pending Cutting")} (Backlog)`}
+                       data={pendingCutting}
+                       rowsPerPage={6}
+                       onRowClick={(row) => setSelectedLog({ type: 'Job Overview', data: row })}
+                       columns={[
+                         { label: t("Urgency"), dataIndex: 'urgency', type: 'number', render: (v, r) => (
+                             <select
+                               value={v || 5}
+                               onClick={e => e.stopPropagation()}
+                               onChange={e => handleUrgencyChange(r.jo, parseInt(e.target.value))}
+                               className={`bg-transparent outline-none cursor-pointer font-black text-xs border-b-2 pb-0.5 ${
+                                 v === 1 ? 'text-rose-600 border-rose-600' :
+                                 v === 2 ? 'text-orange-500 border-orange-500' :
+                                 v === 3 ? 'text-amber-500 border-amber-500' :
+                                 v === 4 ? 'text-blue-500 border-blue-500' :
+                                 v === 5 ? 'text-emerald-500 border-emerald-500' :
+                                 'text-slate-400 border-slate-400'
+                               }`}
+                             >
+                               <option value={1}>1 - CRITICAL</option>
+                               <option value={2}>2 - HIGH</option>
+                               <option value={3}>3 - NORMAL</option>
+                               <option value={4}>4 - LOW</option>
+                               <option value={5}>5 - WHENEVER</option>
+                               <option value={6}>6 - IGNORE</option>
+                             </select>
+                         )},
+                         { label: t("Start Date"), dataIndex: 'runDateMs', type: 'number', render: (_, r) => <span className={`font-bold whitespace-nowrap ${r.runDateDisplay === t("Unscheduled") ? 'text-slate-400 italic' : 'text-emerald-700'}`}>{r.runDateDisplay}</span> },
+                         { label: t("Job Order"), dataIndex: 'jo', type: 'string', render: (v, r) => (
+                           <div className="flex flex-col min-w-[120px]">
+                             <span className="font-black text-slate-900 text-base">{v}</span>
+                             <span className="text-xs font-bold text-slate-500 mt-0.5 truncate max-w-[150px]" title={r.customer}>{r.customer}</span>
+                           </div>
+                         )},
+                         { label: t("Details"), dataIndex: 'dimension', type: 'string', render: (v, r) => (
+                           <div className="flex flex-col min-w-[150px] max-w-[200px]">
+                             <span className="text-slate-800 font-bold text-sm truncate" title={r.description}>{r.description || '-'}</span>
+                             <span className="inline-block mt-1.5 bg-slate-100 text-slate-500 text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded border border-slate-200 w-fit truncate" title={v}>{v || '-'}</span>
+                           </div>
+                         )},
+                         { label: t("Machine"), dataIndex: 'schedMachine', type: 'string', render: v => <span className="font-black text-slate-700">{v}</span> },
+                         { label: t("Total Target"), dataIndex: 'target', type: 'string', render: v => <span className="font-bold text-slate-600 whitespace-nowrap">{v}</span> },
+                         { label: t("Left to cut"), dataIndex: 'cutPending', type: 'number', render: v => <span className="font-black text-emerald-600 text-base whitespace-nowrap">{v.toFixed(1)} kg</span> }
+                       ]}
+                     />
+                   </>
+                 )}
+
+                 {scheduleTab === 'Packing' && (
+                   <>
+                     <SortableTable 
+                       title={`${t("Packing")} - ${t("Shift Schedule")}`}
+                       data={packSchedule}
+                       rowsPerPage={6}
+                       onRowClick={(row) => setSelectedLog({ type: 'Job Overview', data: activeOrdersData.find(o => o.jo === row.jo) || { jo: row.jo, customer: 'Unknown', description: row.details, target: row.originalTarget, extPending: 0, cutPending: 0, packPending: 0, runDateDisplay: row.runDateDisplay, schedMachine: row.machine } })}
+                       columns={[
+                         { label: t("Run Date"), dataIndex: 'runDateMs', type: 'number', render: (_, r) => <span className="font-bold text-slate-700 whitespace-nowrap">{r.runDateDisplay}</span> },
+                         { label: t("Shift"), dataIndex: 'shift', type: 'string', render: v => <span className={`px-2 py-1 rounded-md text-[10px] font-black uppercase tracking-wider ${v === 'AM' ? 'bg-amber-100 text-amber-700' : 'bg-indigo-100 text-indigo-700'}`}>{v}</span> },
+                         { label: t("Machine"), dataIndex: 'machine', type: 'string', render: v => <span className="font-black text-slate-800 bg-slate-100 px-2 py-1 rounded-md">{v}</span> },
+                         { label: t("Job Order"), dataIndex: 'jo', type: 'string', render: v => <span className="font-black text-purple-700 text-base">{v}</span> },
+                         { label: t("Details"), dataIndex: 'details', type: 'string', render: v => <span className="text-sm font-semibold text-slate-600 truncate max-w-[200px] block" title={v}>{v}</span> },
+                         { label: t("Shift Target"), dataIndex: 'allocatedTarget', type: 'string', render: v => <span className="font-black text-emerald-600 whitespace-nowrap">{v}</span> }
+                       ]}
+                     />
+                     <SortableTable 
+                       title={`${t("Packing")} - ${t("Pending Packing")} (Backlog)`}
+                       data={pendingPacking}
+                       rowsPerPage={6}
+                       onRowClick={(row) => setSelectedLog({ type: 'Job Overview', data: row })}
+                       columns={[
+                         { label: t("Urgency"), dataIndex: 'urgency', type: 'number', render: (v, r) => (
+                             <select
+                               value={v || 5}
+                               onClick={e => e.stopPropagation()}
+                               onChange={e => handleUrgencyChange(r.jo, parseInt(e.target.value))}
+                               className={`bg-transparent outline-none cursor-pointer font-black text-xs border-b-2 pb-0.5 ${
+                                 v === 1 ? 'text-rose-600 border-rose-600' :
+                                 v === 2 ? 'text-orange-500 border-orange-500' :
+                                 v === 3 ? 'text-amber-500 border-amber-500' :
+                                 v === 4 ? 'text-blue-500 border-blue-500' :
+                                 v === 5 ? 'text-emerald-500 border-emerald-500' :
+                                 'text-slate-400 border-slate-400'
+                               }`}
+                             >
+                               <option value={1}>1 - CRITICAL</option>
+                               <option value={2}>2 - HIGH</option>
+                               <option value={3}>3 - NORMAL</option>
+                               <option value={4}>4 - LOW</option>
+                               <option value={5}>5 - WHENEVER</option>
+                               <option value={6}>6 - IGNORE</option>
+                             </select>
+                         )},
+                         { label: t("Start Date"), dataIndex: 'runDateMs', type: 'number', render: (_, r) => <span className={`font-bold whitespace-nowrap ${r.runDateDisplay === t("Unscheduled") ? 'text-slate-400 italic' : 'text-purple-700'}`}>{r.runDateDisplay}</span> },
+                         { label: t("Job Order"), dataIndex: 'jo', type: 'string', render: (v, r) => (
+                           <div className="flex flex-col min-w-[120px]">
+                             <span className="font-black text-slate-900 text-base">{v}</span>
+                             <span className="text-xs font-bold text-slate-500 mt-0.5 truncate max-w-[150px]" title={r.customer}>{r.customer}</span>
+                           </div>
+                         )},
+                         { label: t("Details"), dataIndex: 'dimension', type: 'string', render: (v, r) => (
+                           <div className="flex flex-col min-w-[150px] max-w-[200px]">
+                             <span className="text-slate-800 font-bold text-sm truncate" title={r.description}>{r.description || '-'}</span>
+                             <span className="inline-block mt-1.5 bg-slate-100 text-slate-500 text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded border border-slate-200 w-fit truncate" title={v}>{v || '-'}</span>
+                           </div>
+                         )},
+                         { label: t("Machine"), dataIndex: 'schedMachine', type: 'string', render: v => <span className="font-black text-slate-700">{v}</span> },
+                         { label: t("Total Target"), dataIndex: 'target', type: 'string', render: v => <span className="font-bold text-slate-600 whitespace-nowrap">{v}</span> },
+                         { label: t("Left to pack"), dataIndex: 'packPending', type: 'number', render: v => <span className="font-black text-purple-600 text-base whitespace-nowrap">{v.toFixed(1)} kg</span> }
+                       ]}
+                     />
+                   </>
+                 )}
+               </div>
             </div>
 
           ) : department === 'Inventory' ? (
@@ -2220,6 +2944,10 @@ const App = () => {
                         <input type="text" name="deliveryOrderNo" value={formData.deliveryOrderNo} onChange={handleInputChange} className="w-full h-14 px-4 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none font-semibold text-base" />
                       </div>
                     </div>
+                    
+                    <div className="pt-6 border-t border-slate-200 mt-6">
+                      <ImageUploadField preview={evidenceImagePreview} onFileChange={handleEvidenceImageChange} onClear={clearEvidenceImage} t={t} />
+                    </div>
                   </section>
                 </div>
               )}
@@ -2276,6 +3004,10 @@ const App = () => {
                         ))}
                       </div>
                     )}
+                  </div>
+
+                  <div className="pt-6 border-t border-slate-200 mt-6">
+                    <ImageUploadField preview={evidenceImagePreview} onFileChange={handleEvidenceImageChange} onClear={clearEvidenceImage} t={t} />
                   </div>
                 </section>
               )}
@@ -2354,7 +3086,7 @@ const App = () => {
                       </div>
                       
                       <div className="pt-6 border-t border-slate-200 mt-auto">
-                        <ImageUploadField preview={qcImagePreview} onFileChange={handleQcImageChange} onClear={clearQcImage} disabled={qcActiveForm !== 'machine'} t={t} />
+                        <ImageUploadField preview={evidenceImagePreview} onFileChange={handleEvidenceImageChange} onClear={clearEvidenceImage} disabled={qcActiveForm !== 'machine'} t={t} />
                         <label className="block text-sm font-bold text-slate-700 mb-2">{t("Overall QC Remarks / Issues Noted")}</label>
                         <textarea name="qcNotes" value={formData.qcNotes} onChange={handleInputChange} disabled={qcActiveForm !== 'machine'} rows="3" className="w-full p-4 border border-slate-300 rounded-xl outline-none text-base disabled:bg-slate-50 transition-colors"></textarea>
                       </div>
@@ -2396,7 +3128,7 @@ const App = () => {
                       {qcStage === 'Packing' && (<><QCField label={t("Packing Size (Bag Weight - kg)")} name="qcPackBagWeight" statusName="qcPackBagWeightStatus" formData={formData} onChange={handleInputChange} t={t} disabled={qcActiveForm !== 'product'} /><QCField label={t("Total Bags Verified")} name="qcPackTotalBags" statusName="qcPackTotalBagsStatus" formData={formData} onChange={handleInputChange} t={t} disabled={qcActiveForm !== 'product'} /></>)}
                       
                       <div className="pt-6 border-t border-slate-200 mt-auto">
-                        <ImageUploadField preview={qcImagePreview} onFileChange={handleQcImageChange} onClear={clearQcImage} disabled={qcActiveForm !== 'product'} t={t} />
+                        <ImageUploadField preview={evidenceImagePreview} onFileChange={handleEvidenceImageChange} onClear={clearEvidenceImage} disabled={qcActiveForm !== 'product'} t={t} />
                         <label className="block text-sm font-bold text-slate-700 mb-2">{t("Overall QC Remarks / Issues Noted")}</label>
                         <textarea name="qcNotes" value={formData.qcNotes} onChange={handleInputChange} disabled={qcActiveForm !== 'product'} rows="3" className="w-full p-4 border border-slate-300 rounded-xl outline-none text-base disabled:bg-slate-50 transition-colors"></textarea>
                       </div>
@@ -2435,7 +3167,7 @@ const App = () => {
         </div>
 
         {/* STICKY FOOTER ACTION BAR */}
-        {department !== 'Dashboard' && department !== 'Inventory' && (
+        {department !== 'Dashboard' && department !== 'Inventory' && department !== 'Job Schedule' && (
           <div className={`fixed bottom-0 right-0 w-full md:w-[calc(100%-18rem)] bg-white/95 backdrop-blur-md border-t border-slate-200 p-4 shadow-[0_-10px_30px_-5px_rgba(0,0,0,0.1)] z-40 flex flex-col sm:flex-row justify-between items-center gap-3 sm:gap-4 px-4 md:px-8 transition-transform duration-300 ${!isFooterVisible || isSidebarOpen ? 'translate-y-full' : 'translate-y-0'}`}>
             <div className="flex flex-col text-center sm:text-left text-sm w-full sm:w-auto">
               <span className="font-black text-slate-800 tracking-tight text-base">
