@@ -167,7 +167,10 @@ const dict = {
     "Shift Schedule": "Shift Schedule",
     "Shift Target": "Shift Target",
     "Auto-Schedule Jobs": "Auto-Schedule Jobs",
-    "Urgency": "Urgency"
+    "Urgency": "Urgency",
+    "Ready to Run Tracker": "Ready to Run Tracker",
+    "Ready to Cut Tracker": "Ready to Cut Tracker",
+    "Ready to Pack Tracker": "Ready to Pack Tracker"
   },
   bn: {
     "Production Hub": "উৎপাদন হাব",
@@ -327,7 +330,10 @@ const dict = {
     "Shift Schedule": "শিফট শিডিউল",
     "Shift Target": "শিফট টার্গেট",
     "Auto-Schedule Jobs": "অটো-শিডিউল জবস",
-    "Urgency": "জরুরী"
+    "Urgency": "জরুরী",
+    "Ready to Run Tracker": "রান করার জন্য প্রস্তুত ট্র্যাকার",
+    "Ready to Cut Tracker": "কাটার জন্য প্রস্তুত ট্র্যাকার",
+    "Ready to Pack Tracker": "প্যাক করার জন্য প্রস্তুত ট্র্যাকার"
   },
   ms: {
     "Production Hub": "Pusat Pengeluaran",
@@ -487,7 +493,10 @@ const dict = {
     "Shift Schedule": "Jadual Syif",
     "Shift Target": "Sasaran Syif",
     "Auto-Schedule Jobs": "Jadual Auto",
-    "Urgency": "Kecemasan"
+    "Urgency": "Kecemasan",
+    "Ready to Run Tracker": "Penjejak Sedia untuk Dijalankan",
+    "Ready to Cut Tracker": "Penjejak Sedia untuk Dipotong",
+    "Ready to Pack Tracker": "Penjejak Sedia untuk Dibungkus"
   }
 };
 
@@ -568,7 +577,7 @@ const InlineEdit = ({ value, onSave, suffix = "kg", className = "" }) => {
 };
 
 // 2. Sortable, Filterable & Paginated Table Component
-const SortableTable = ({ title, columns, data, onFlag, onRowClick, rowsPerPage = 5 }) => {
+const SortableTable = ({ title, columns, data, onFlag, onRowClick, rowsPerPage = 5, showCompletedToggle = false, showCompleted = false, setShowCompleted = null }) => {
   const [filter, setFilter] = useState('');
   const [sortCol, setSortCol] = useState(0); 
   const [sortDesc, setSortDesc] = useState(true);
@@ -579,9 +588,18 @@ const SortableTable = ({ title, columns, data, onFlag, onRowClick, rowsPerPage =
     return data.filter(row => {
       if (!row) return false;
       const cells = Array.isArray(row) ? row : Object.values(row);
-      return cells.some(cell => cell != null && String(cell).toLowerCase().includes((filter || '').toLowerCase()));
+      const matchesSearch = cells.some(cell => cell != null && String(cell).toLowerCase().includes((filter || '').toLowerCase()));
+      
+      if (!matchesSearch) return false;
+      
+      // If it's a completed job, we hide it UNLESS the user checked 'showCompleted' OR is actively searching for it
+      if (showCompletedToggle && row.isCompleted && !showCompleted && !filter) {
+        return false;
+      }
+      
+      return true;
     });
-  }, [data, filter]);
+  }, [data, filter, showCompletedToggle, showCompleted]);
 
   const sortedData = useMemo(() => {
     return [...filteredData].sort((a, b) => {
@@ -612,7 +630,20 @@ const SortableTable = ({ title, columns, data, onFlag, onRowClick, rowsPerPage =
   return (
     <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col h-full">
       <div className="bg-slate-50 px-5 py-4 border-b border-slate-200 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-        <h3 className="font-bold text-slate-800 text-base">{title}</h3>
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+          <h3 className="font-bold text-slate-800 text-base">{title}</h3>
+          {showCompletedToggle && setShowCompleted && (
+            <label className="flex items-center gap-2 text-sm font-semibold text-slate-600 cursor-pointer bg-white px-3 py-1.5 rounded-lg border border-slate-200 shadow-sm hover:bg-slate-50 transition-colors">
+              <input 
+                type="checkbox" 
+                checked={showCompleted} 
+                onChange={e => setShowCompleted(e.target.checked)}
+                className="rounded border-slate-300 text-blue-600 focus:ring-blue-500 w-4 h-4 cursor-pointer"
+              />
+              Show Completed Jobs
+            </label>
+          )}
+        </div>
         <div className="relative w-full sm:w-auto">
           <input 
             type="text" placeholder="Search records..." value={filter} onChange={e => setFilter(e.target.value)}
@@ -639,7 +670,7 @@ const SortableTable = ({ title, columns, data, onFlag, onRowClick, rowsPerPage =
           </thead>
           <tbody>
             {paginatedData.length > 0 ? paginatedData.map((row, i) => (
-              <tr key={i} onClick={() => onRowClick && onRowClick(row)} className={`border-b border-slate-100 last:border-0 hover:bg-blue-50/30 transition-colors text-sm ${onRowClick ? 'cursor-pointer' : ''}`}>
+              <tr key={i} onClick={() => onRowClick && onRowClick(row)} className={`border-b border-slate-100 last:border-0 hover:bg-blue-50/30 transition-colors text-sm ${onRowClick ? 'cursor-pointer' : ''} ${row.isCompleted ? 'opacity-50 bg-slate-50 grayscale-[50%]' : ''}`}>
                 {columns.map((col, j) => (
                   <td key={j} className="px-5 py-3.5 text-slate-700">
                     {col.render ? col.render(row[col.dataIndex], row) : row[col.dataIndex]}
@@ -923,7 +954,7 @@ const defaultStats = { output: 0, prevOutput: 0, consumption: 0, prevConsumption
 const defaultAnalytics = { daily: defaultStats, weekly: defaultStats, monthly: defaultStats, yearly: defaultStats };
 
 // YOUR GOOGLE SCRIPT URL HERE
-const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyM2vaERlbEX1sziKs8I8q1X1vogpi5WR38MJ7Z2H6wA9iamBOmSFBVPuEaB5-mAt2RbQ/exec';
+const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwN-C9qBtAcngf47KULzbBoqmJwahILr1Qkf7WTGRzfp7iUCtWxSXEhETlwVQJ7iNdvWg/exec';
 
 const App = () => {
   const [language, setLanguage] = useState('en');
@@ -940,6 +971,9 @@ const App = () => {
   const [scheduleTab, setScheduleTab] = useState('Extrusion'); // Tracks active job schedule tab
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [selectedLog, setSelectedLog] = useState(null); 
+
+  const [searchTerm, setSearchTerm] = useState('');
+  const [showCompleted, setShowCompleted] = useState(false); // New state for toggling visibility
 
   // --- Image Upload States ---
   const [evidenceImageFile, setEvidenceImageFile] = useState(null);
@@ -1121,16 +1155,37 @@ const App = () => {
     return map;
   }, [processedSchedule]);
 
-  // Function to manually toggle the Ready to Ship status from the Dashboard
-  const handleToggleReadyToShip = async (jo, isReady) => {
-    const loadToast = toast.loading(isReady ? "Marking as Ready to Ship..." : "Reverting status...");
+  // Single function to cycle the status sequentially
+  const handleCycleStatus = async (order) => {
+    const loadToast = toast.loading("Updating status...");
     try {
-      await fetch(GOOGLE_SCRIPT_URL, {
-        method: 'POST',
-        mode: 'no-cors',
-        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-        body: JSON.stringify({ action: 'toggleReadyToShip', jo, isReady })
-      });
+      const isSystemReady = (order.packedQty - order.dispatchedQty) > 0.5;
+      const isCurrentlyCompleted = order.isCompleted;
+      const isCurrentlyReady = !isCurrentlyCompleted && (isSystemReady || order.isReadyToShip);
+
+      if (isCurrentlyCompleted) {
+        // Completed -> Pending (Reset both flags)
+        await fetch(GOOGLE_SCRIPT_URL, {
+          method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({ action: 'toggleCompleted', jo: order.jo, isCompleted: false })
+        });
+        await fetch(GOOGLE_SCRIPT_URL, {
+          method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({ action: 'toggleReadyToShip', jo: order.jo, isReady: false })
+        });
+      } else if (isCurrentlyReady) {
+        // Ready -> Completed
+        await fetch(GOOGLE_SCRIPT_URL, {
+          method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({ action: 'toggleCompleted', jo: order.jo, isCompleted: true })
+        });
+      } else {
+        // Pending -> Ready
+        await fetch(GOOGLE_SCRIPT_URL, {
+          method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({ action: 'toggleReadyToShip', jo: order.jo, isReady: true })
+        });
+      }
       toast.success("Order status updated!", { id: loadToast });
       fetchDashboardData();
     } catch (error) {
@@ -1164,7 +1219,7 @@ const App = () => {
   const activeOrdersData = useMemo(() => {
     if (!dashboardData?.masterOrders || !dashboardData?.joTotals) return [];
     return dashboardData.masterOrders.map(order => {
-      const totals = dashboardData.joTotals[order.jo] || { extrusion: 0, cutting: 0, packing: 0, lastUpdated: 0 };
+      const totals = dashboardData.joTotals[order.jo] || { extrusion: 0, cutting: 0, packing: 0, dispatched: 0, lastUpdated: 0 };
       const target = parseFloat(order.targetQty) || 1; 
       
       let parsedDate = 0;
@@ -1194,7 +1249,10 @@ const App = () => {
         requiresCutting: order.requiresCutting,
         urgency: order.urgency || 5, // Fallback to 5
         lastUpdated: totals.lastUpdated || 0,
-        isReadyToShip: order.isReadyToShip || false
+        isReadyToShip: order.isReadyToShip || false,
+        isCompleted: order.isCompleted || false,
+        packedQty: totals.packing || 0,
+        dispatchedQty: totals.dispatched || 0
       };
     }).sort((a, b) => b.lastUpdated - a.lastUpdated || b.issueDateMs - a.issueDateMs);
   }, [dashboardData]);
@@ -1202,15 +1260,34 @@ const App = () => {
   const readyToShipData = useMemo(() => {
     if (!dashboardData?.masterOrders || !dashboardData?.joTotals) return [];
     return dashboardData.masterOrders.filter(order => {
-        if (!order.isReadyToShip) return false;
-        const totals = dashboardData.joTotals[order.jo];
-        if (!totals) return false;
-        // Only show orders that still have a meaningful amount pending dispatch (> 0.5kg)
-        // This completely eliminates floating-point ghost decimals keeping orders on the list
-        const pending = totals.packing - totals.dispatched;
-        return pending > 0.5; 
+        if (order.isCompleted) return false; 
+        
+        const totals = dashboardData.joTotals[order.jo] || {};
+        const packed = totals.packing || 0;
+        const dispatched = totals.dispatched || 0;
+        
+        // Automated: If we have physically packed items waiting, it's Ready.
+        const isSystemReady = (packed - dispatched) > 0.5;
+        const isManuallyReady = order.isReadyToShip;
+
+        // Will show up if EITHER system detects it OR supervisor manually toggled it
+        return isSystemReady || isManuallyReady; 
     }).map(order => {
-        const totals = dashboardData.joTotals[order.jo];
+        const totals = dashboardData.joTotals[order.jo] || {};
+        const packed = totals.packing || 0;
+        const dispatched = totals.dispatched || 0;
+        const target = parseFloat(order.targetQty) || 1; 
+
+        // Calculate pending physically
+        let pending = packed - dispatched;
+        
+        // Fallback for manual overrides: if nothing is physically packed yet, fallback to target quantity
+        if (pending <= 0 && order.isReadyToShip) {
+            pending = target - dispatched;
+        }
+        
+        pending = Math.max(0, pending);
+
         return {
             jo: order.jo,
             customer: order.customer,
@@ -1218,9 +1295,9 @@ const App = () => {
             dimension: order.dimension,
             packingSize: totals.packingSize || '-',
             packingUom: totals.packingUom || '-',
-            totalPackedWeight: totals.packing || 0,
+            totalPackedWeight: packed,
             totalPalletWeight: totals.palletWeight || 0,
-            pendingDispatch: totals.packing - totals.dispatched,
+            pendingDispatch: pending,
             lastUpdated: totals.lastUpdated || 0
         };
     }).sort((a, b) => b.lastUpdated - a.lastUpdated);
@@ -1898,15 +1975,22 @@ const App = () => {
   const handleScroll = (e) => {
     const currentScrollY = e.target.scrollTop;
     
-    // Check if user has scrolled to the absolute bottom of the container (with a 20px threshold)
+    // Prevent iOS Safari "rubber band" bounce from erratically hiding/showing the button
+    if (currentScrollY <= 0) {
+      setIsFooterVisible(true);
+      lastScrollY.current = currentScrollY;
+      return;
+    }
+
+    // Check if user has scrolled to the absolute bottom of the container
     const isAtBottom = Math.ceil(currentScrollY + e.target.clientHeight) >= e.target.scrollHeight - 20;
 
     if (isAtBottom) {
       setIsFooterVisible(true);  // Always show footer when at the bottom
-    } else if (currentScrollY > lastScrollY.current && currentScrollY > 50) {
-      setIsFooterVisible(false); // Scrolling down, hide footer
-    } else {
-      setIsFooterVisible(true);  // Scrolling up, show footer
+    } else if (currentScrollY > lastScrollY.current + 5 && currentScrollY > 50) {
+      setIsFooterVisible(false); // Scrolling down (with a 5px threshold to ignore micro-scrolls)
+    } else if (currentScrollY < lastScrollY.current - 5) {
+      setIsFooterVisible(true);  // Scrolling up
     }
     
     lastScrollY.current = currentScrollY;
@@ -1914,7 +1998,7 @@ const App = () => {
 
   if (!isLoggedIn) {
     return (
-      <div className="min-h-screen bg-slate-900 flex items-center justify-center p-4 relative">
+      <div className="min-h-[100dvh] bg-slate-900 flex items-center justify-center p-4 relative">
         <Toaster />
         <div className="absolute top-4 right-4"><button onClick={() => setLanguage(l => l === 'en' ? 'bn' : l === 'bn' ? 'ms' : 'en')} className="flex items-center gap-2 text-slate-300 hover:text-white bg-slate-800 px-4 py-2 rounded-full text-sm font-medium transition-colors border border-slate-700 shadow-sm"><Globe size={16} /> {language === 'en' ? 'বাংলা' : language === 'bn' ? 'Bahasa Melayu' : 'English'}</button></div>
         <div className="max-w-md w-full bg-white rounded-3xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-300">
@@ -1936,7 +2020,7 @@ const App = () => {
   }
 
   return (
-    <div className="min-h-screen bg-slate-100 flex flex-col md:flex-row font-sans text-slate-800">
+    <div className="min-h-[100dvh] bg-slate-100 flex flex-col md:flex-row font-sans text-slate-800">
       <Toaster />
 
       {/* --- LOG DETAILS MODAL (BANNER) --- */}
@@ -2027,7 +2111,7 @@ const App = () => {
       )}
 
       {/* --- MAIN CONTENT AREA --- */}
-      <main className="flex-1 flex flex-col min-w-0 h-screen overflow-y-auto bg-slate-100/50 relative pb-32 md:pb-24" onScroll={handleScroll}>
+      <main className="flex-1 flex flex-col min-w-0 h-[100dvh] md:h-screen overflow-y-auto bg-slate-100/50 relative pb-32 md:pb-24" onScroll={handleScroll}>
         
         {/* Mobile Header */}
         <header className="md:hidden bg-white border-b border-slate-200 p-4 sticky top-0 z-30 flex justify-between items-center shadow-sm">
@@ -2125,16 +2209,38 @@ const App = () => {
                 <SortableTable 
                   title="Live Order Tracker" data={activeOrdersData}
                   rowsPerPage={2}
+                  showCompletedToggle={true}
+                  showCompleted={showCompleted}
+                  setShowCompleted={setShowCompleted}
                   columns={[
-                    { label: 'Status', dataIndex: 'isReadyToShip', type: 'boolean', render: (v, row) => (
-                      <button 
-                        onClick={() => handleToggleReadyToShip(row.jo, !v)}
-                        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-black transition-colors shadow-sm border ${v ? 'bg-emerald-50 text-emerald-600 border-emerald-200 hover:bg-emerald-100' : 'bg-white text-slate-400 border-slate-200 hover:bg-slate-50'}`}
-                        title="Click to toggle Ready to Ship status"
-                      >
-                        {v ? <><CheckCircle size={14} className="fill-emerald-100"/> Ready</> : 'Pending'}
-                      </button>
-                    )},
+                    { label: 'Status', dataIndex: 'isReadyToShip', type: 'boolean', render: (v, row) => {
+                      const readyBalance = row.packedQty - row.dispatchedQty;
+                      const isSystemReady = readyBalance > 0.5;
+                      
+                      let displayStatus = "Pending";
+                      let statusClasses = "bg-slate-100 text-slate-500 border-slate-200 hover:bg-slate-200";
+                      let readyIcon = <Clock size={12} className="text-slate-500"/>;
+
+                      if (row.isCompleted) {
+                        displayStatus = "Completed";
+                        statusClasses = "bg-slate-200 text-slate-500 border-slate-300 hover:bg-slate-300";
+                        readyIcon = <CheckCircle size={12} className="fill-slate-400 text-white"/>;
+                      } else if (isSystemReady || row.isReadyToShip) {
+                        displayStatus = "Ready";
+                        statusClasses = "bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100";
+                        readyIcon = <CheckCircle size={12} className="fill-emerald-200 text-emerald-600"/>;
+                      }
+
+                      return (
+                        <button 
+                          onClick={(e) => { e.stopPropagation(); handleCycleStatus(row); }}
+                          className={`flex items-center justify-center gap-1 px-2 py-1 rounded text-[10px] sm:text-[11px] font-black border transition-all active:scale-95 w-max shadow-sm whitespace-nowrap ${statusClasses}`}
+                          title="Click to cycle status: Pending -> Ready -> Completed"
+                        >
+                          {readyIcon} {displayStatus}
+                        </button>
+                      );
+                    }},
                     { label: 'Issue Date', dataIndex: 'issueDateMs', type: 'number', render: (_, row) => <span className="text-slate-500 font-bold whitespace-nowrap">{row.issueDateDisplay}</span> },
                     { label: 'J/O No.', dataIndex: 'jo', type: 'string', render: v => <span className="font-black text-slate-900 whitespace-nowrap text-base">{v}</span> },
                     { label: 'Order Details', dataIndex: 'customer', type: 'string', render: (v, row) => (
@@ -2580,9 +2686,6 @@ const App = () => {
 
               {/* Section 1: Session Parameters */}
               <section className="bg-white p-5 md:p-8 rounded-3xl border border-slate-200 shadow-sm relative">
-                <div className="absolute top-5 md:top-8 right-5 md:right-8 flex items-center gap-2 bg-slate-50 text-slate-500 text-xs font-bold px-3 py-1.5 rounded-lg border border-slate-200">
-                  <CheckCircle size={14} className="text-emerald-500" /> {saveIndicator}
-                </div>
                 <h3 className="text-xl font-black text-slate-800 mb-6 flex items-center gap-2"><ClipboardList size={20} className="text-slate-400"/> {t("Session Parameters")}</h3>
                 
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
@@ -2612,40 +2715,99 @@ const App = () => {
                 </div>
               </section>
 
-              {/* PURCHASE REQUISITION FORM */}
-              {department === 'Purchase Requisition' && (
-                <section className="bg-white p-5 md:p-8 rounded-3xl border border-slate-200 shadow-sm max-w-3xl mx-auto">
-                  <h3 className="text-xl font-black text-slate-800 mb-6 flex items-center gap-2"><ShoppingCart size={22} className="text-amber-500"/> {t("Purchase Requisition")}</h3>
-                  <div className="space-y-5">
-                    <div className="min-w-0">
-                      <label className="block text-sm font-bold text-slate-700 mb-2">{t("Item Name")}</label>
-                      <input type="text" name="reqItemName" value={formData.reqItemName} onChange={handleInputChange} required placeholder="e.g. STRAPPING BAND, OPP TAPE..." className="w-full h-14 px-4 border border-slate-300 rounded-xl focus:ring-2 focus:ring-amber-500 outline-none uppercase font-black text-base" />
-                    </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                      <div className="flex gap-4">
-                        <div className="flex-1 min-w-0">
-                          <label className="block text-sm font-bold text-slate-700 mb-2">{t("Quantity")}</label>
-                          <input type="number" step="0.01" name="reqQuantity" value={formData.reqQuantity} onChange={handleInputChange} required className="w-full h-14 px-4 border border-slate-300 rounded-xl focus:ring-2 focus:ring-amber-500 outline-none font-black text-xl text-amber-600" />
+              {/* --- DEPARTMENTAL AUTO-FILL TRACKERS --- */}
+              {department === 'Extrusion' && pendingExtrusion.length > 0 && (
+                <div className="animate-in fade-in slide-in-from-top-4 duration-500 mb-2">
+                  <SortableTable 
+                    title={t("Ready to Run Tracker")}
+                    data={pendingExtrusion}
+                    rowsPerPage={3}
+                    onRowClick={(row) => {
+                      setFormData(prev => ({...prev, jobOrder: row.jo, machineId: row.schedMachine !== '-' ? row.schedMachine : prev.machineId}));
+                      toast.success(`Auto-filled Job: ${row.jo}`, { icon: '⚡' });
+                      window.scrollTo({ top: document.body.scrollHeight / 2, behavior: 'smooth' });
+                    }}
+                    columns={[
+                      { label: t("Job Order"), dataIndex: 'jo', type: 'string', render: (v, r) => (
+                        <div className="flex flex-col min-w-[120px]">
+                          <span className="font-black text-slate-900 text-base">{v}</span>
+                          <span className="text-xs font-bold text-slate-500 mt-0.5 truncate max-w-[150px]" title={r.customer}>{r.customer}</span>
                         </div>
-                        <div className="w-24 shrink-0">
-                          <label className="block text-sm font-bold text-slate-700 mb-2">{t("UoM")}</label>
-                          <select name="reqUom" value={formData.reqUom} onChange={handleInputChange} className="w-full h-14 px-3 border border-slate-300 rounded-xl outline-none bg-white font-bold text-base">
-                            <option value="pcs">pcs</option><option value="box">box</option><option value="rolls">rolls</option><option value="kg">kg</option>
-                          </select>
+                      )},
+                      { label: t("Details"), dataIndex: 'dimension', type: 'string', render: (v, r) => (
+                        <div className="flex flex-col min-w-[150px] max-w-[200px]">
+                          <span className="text-slate-800 font-bold text-sm truncate" title={r.description}>{r.description || '-'}</span>
+                          <span className="inline-block mt-1.5 bg-slate-100 text-slate-500 text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded border border-slate-200 w-fit truncate" title={v}>{v || '-'}</span>
                         </div>
-                      </div>
-                      <div className="min-w-0">
-                        <label className="block text-sm font-bold text-slate-700 mb-2">{t("Current Stock")}</label>
-                        <input type="number" step="0.01" name="reqCurrentStock" value={formData.reqCurrentStock} onChange={handleInputChange} required className="w-full h-14 px-4 border border-slate-300 rounded-xl focus:ring-2 focus:ring-amber-500 outline-none font-bold text-base" />
-                      </div>
-                    </div>
-                    <div className="min-w-0">
-                      <label className="block text-sm font-bold text-slate-700 mb-2">{t("Remarks")}</label>
-                      <input type="text" name="reqRemarks" value={formData.reqRemarks} onChange={handleInputChange} placeholder="Urgency, size specifics, etc." className="w-full h-14 px-4 border border-slate-300 rounded-xl focus:ring-2 focus:ring-amber-500 outline-none font-semibold text-base" />
-                    </div>
-                  </div>
-                </section>
+                      )},
+                      { label: t("Machine"), dataIndex: 'schedMachine', type: 'string', render: v => <span className="font-black text-slate-700 bg-slate-100 px-2 py-1 rounded-md">{v}</span> },
+                      { label: t("Left to run"), dataIndex: 'extPending', type: 'number', render: v => <span className="font-black text-blue-600 text-base whitespace-nowrap">{v.toFixed(1)} kg</span> }
+                    ]}
+                  />
+                </div>
               )}
+
+              {department === 'Cutting' && pendingCutting.length > 0 && (
+                <div className="animate-in fade-in slide-in-from-top-4 duration-500 mb-2">
+                  <SortableTable 
+                    title={t("Ready to Cut Tracker")}
+                    data={pendingCutting}
+                    rowsPerPage={3}
+                    onRowClick={(row) => {
+                      setFormData(prev => ({...prev, jobOrder: row.jo, machineId: row.schedMachine !== '-' ? row.schedMachine : prev.machineId}));
+                      toast.success(`Auto-filled Job: ${row.jo}`, { icon: '✂️' });
+                      window.scrollTo({ top: document.body.scrollHeight / 2, behavior: 'smooth' });
+                    }}
+                    columns={[
+                      { label: t("Job Order"), dataIndex: 'jo', type: 'string', render: (v, r) => (
+                        <div className="flex flex-col min-w-[120px]">
+                          <span className="font-black text-slate-900 text-base">{v}</span>
+                          <span className="text-xs font-bold text-slate-500 mt-0.5 truncate max-w-[150px]" title={r.customer}>{r.customer}</span>
+                        </div>
+                      )},
+                      { label: t("Details"), dataIndex: 'dimension', type: 'string', render: (v, r) => (
+                        <div className="flex flex-col min-w-[150px] max-w-[200px]">
+                          <span className="text-slate-800 font-bold text-sm truncate" title={r.description}>{r.description || '-'}</span>
+                          <span className="inline-block mt-1.5 bg-slate-100 text-slate-500 text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded border border-slate-200 w-fit truncate" title={v}>{v || '-'}</span>
+                        </div>
+                      )},
+                      { label: t("Machine"), dataIndex: 'schedMachine', type: 'string', render: v => <span className="font-black text-slate-700 bg-slate-100 px-2 py-1 rounded-md">{v}</span> },
+                      { label: t("Left to cut"), dataIndex: 'cutPending', type: 'number', render: v => <span className="font-black text-emerald-600 text-base whitespace-nowrap">{v.toFixed(1)} kg</span> }
+                    ]}
+                  />
+                </div>
+              )}
+
+              {department === 'Packing' && pendingPacking.length > 0 && (
+                <div className="animate-in fade-in slide-in-from-top-4 duration-500 mb-2">
+                  <SortableTable 
+                    title={t("Ready to Pack Tracker")}
+                    data={pendingPacking}
+                    rowsPerPage={3}
+                    onRowClick={(row) => {
+                      setFormData(prev => ({...prev, jobOrder: row.jo}));
+                      toast.success(`Auto-filled Job: ${row.jo}`, { icon: '📦' });
+                      window.scrollTo({ top: document.body.scrollHeight / 2, behavior: 'smooth' });
+                    }}
+                    columns={[
+                      { label: t("Job Order"), dataIndex: 'jo', type: 'string', render: (v, r) => (
+                        <div className="flex flex-col min-w-[120px]">
+                          <span className="font-black text-slate-900 text-base">{v}</span>
+                          <span className="text-xs font-bold text-slate-500 mt-0.5 truncate max-w-[150px]" title={r.customer}>{r.customer}</span>
+                        </div>
+                      )},
+                      { label: t("Details"), dataIndex: 'dimension', type: 'string', render: (v, r) => (
+                        <div className="flex flex-col min-w-[150px] max-w-[200px]">
+                          <span className="text-slate-800 font-bold text-sm truncate" title={r.description}>{r.description || '-'}</span>
+                          <span className="inline-block mt-1.5 bg-slate-100 text-slate-500 text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded border border-slate-200 w-fit truncate" title={v}>{v || '-'}</span>
+                        </div>
+                      )},
+                      { label: t("Left to pack"), dataIndex: 'packPending', type: 'number', render: v => <span className="font-black text-purple-600 text-base whitespace-nowrap">{v.toFixed(1)} kg</span> }
+                    ]}
+                  />
+                </div>
+              )}
+              {/* --- END TRACKERS --- */}
 
               {/* MANUFACTURING DEPARTMENTS (Extrusion & Cutting) -> 2 Column Grid */}
               {(department === 'Extrusion' || department === 'Cutting') && (
@@ -2684,14 +2846,14 @@ const App = () => {
                         
                         <div className="space-y-2 max-h-52 overflow-y-auto pr-1 custom-scrollbar">
                           {formData.extrusionMaterials.map((mat) => (
-                            <div key={mat.id} className="flex justify-between items-center bg-white p-3.5 rounded-xl border border-slate-200 shadow-sm group">
-                              <div className="min-w-0 flex-1 pr-2">
+                            <div key={mat.id} className="flex justify-between items-center bg-white p-3 sm:p-3.5 rounded-xl border border-slate-200 shadow-sm group gap-2">
+                              <div className="min-w-0 flex-1">
                                 <div className="font-black text-slate-800 text-sm truncate">{mat.materialId !== 'N/A' ? mat.materialId : (mat.materialName !== 'N/A' ? mat.materialName : 'Unknown')}</div>
                                 <div className="text-[11px] text-slate-500 font-bold mt-0.5 truncate">Batch: {mat.batchNo}</div>
                               </div>
-                              <div className="flex items-center gap-3 shrink-0">
+                              <div className="flex items-center gap-2 sm:gap-3 shrink-0">
                                 <InlineEdit value={mat.quantity} onSave={(val) => updateMaterialQuantity(mat.id, val)} suffix="kg" />
-                                <button type="button" onClick={() => handleRemoveMaterial(mat.id)} className="text-slate-300 hover:text-red-500 p-2 bg-slate-50 hover:bg-red-50 rounded-lg transition-colors"><Trash2 size={18}/></button>
+                                <button type="button" onClick={() => handleRemoveMaterial(mat.id)} className="text-slate-300 hover:text-red-500 p-1.5 sm:p-2 bg-slate-50 hover:bg-red-50 rounded-lg transition-colors"><Trash2 size={16}/></button>
                               </div>
                             </div>
                           ))}
@@ -2722,11 +2884,11 @@ const App = () => {
                         </div>
                         <div className="space-y-2 max-h-48 overflow-y-auto pr-1 custom-scrollbar">
                           {formData.extrusionRolls.map((roll, i) => (
-                            <div key={roll.id} className="flex justify-between items-center bg-white p-3.5 rounded-xl border border-emerald-100 shadow-sm group">
-                              <span className="text-slate-600 font-bold text-sm">Roll {i + 1}</span>
-                              <div className="flex items-center gap-4">
+                            <div key={roll.id} className="flex justify-between items-center bg-white p-3 sm:p-3.5 rounded-xl border border-emerald-100 shadow-sm group gap-2">
+                              <span className="text-slate-600 font-bold text-sm shrink-0">Roll {i + 1}</span>
+                              <div className="flex items-center gap-2 sm:gap-4 shrink-0">
                                 <InlineEdit value={roll.weight} onSave={(val) => updateRollWeight(roll.id, val)} suffix="kg" />
-                                <button type="button" onClick={() => handleRemoveRoll(roll.id)} className="text-slate-300 hover:text-red-500 p-2 bg-slate-50 hover:bg-red-50 rounded-lg transition-colors"><Trash2 size={18}/></button>
+                                <button type="button" onClick={() => handleRemoveRoll(roll.id)} className="text-slate-300 hover:text-red-500 p-1.5 sm:p-2 bg-slate-50 hover:bg-red-50 rounded-lg transition-colors"><Trash2 size={16}/></button>
                               </div>
                             </div>
                           ))}
@@ -2768,11 +2930,11 @@ const App = () => {
                       
                       <div className="space-y-2 mb-4 max-h-48 overflow-y-auto pr-1 custom-scrollbar flex-1">
                         {formData.scrapEntries?.length > 0 && formData.scrapEntries.map((scrap) => (
-                          <div key={scrap.id} className="flex justify-between items-center bg-white p-3.5 rounded-xl border border-rose-100 shadow-sm">
-                            <span className="text-slate-600 font-bold text-sm">{scrap.type === 'setupScrap' ? 'Setup' : 'Process'}</span>
-                            <div className="flex items-center gap-4">
+                          <div key={scrap.id} className="flex justify-between items-center bg-white p-3 sm:p-3.5 rounded-xl border border-rose-100 shadow-sm gap-2">
+                            <span className="text-slate-600 font-bold text-sm shrink-0">{scrap.type === 'setupScrap' ? 'Setup' : 'Process'}</span>
+                            <div className="flex items-center gap-2 sm:gap-4 shrink-0">
                               <InlineEdit value={scrap.weight} onSave={(val) => updateScrapWeight(scrap.id, val)} suffix="kg" className="text-rose-700" />
-                              <button type="button" onClick={() => handleRemoveScrap(scrap.id)} className="text-slate-300 hover:text-rose-600 p-2 bg-rose-50 hover:bg-rose-100 rounded-lg transition-colors"><Trash2 size={18}/></button>
+                              <button type="button" onClick={() => handleRemoveScrap(scrap.id)} className="text-slate-300 hover:text-rose-600 p-1.5 sm:p-2 bg-rose-50 hover:bg-rose-100 rounded-lg transition-colors"><Trash2 size={16}/></button>
                             </div>
                           </div>
                         ))}
@@ -2836,11 +2998,11 @@ const App = () => {
                       
                       <div className="flex-1 space-y-3 overflow-y-auto pr-1 custom-scrollbar">
                         {formData.bagWeights.map((bag, index) => (
-                          <div key={bag.id} className="flex gap-3 items-center">
-                            <span className="text-[11px] font-black uppercase text-slate-400 w-12 shrink-0 tracking-wider">Bag {index + 1}</span>
-                            <input type="number" step="0.01" value={bag.weight} onChange={(e) => updateBagWeight(bag.id, e.target.value)} placeholder="0.00 kg" className="min-w-0 flex-1 h-12 px-4 border border-slate-300 rounded-xl focus:border-blue-500 outline-none font-bold bg-white text-base" />
+                          <div key={bag.id} className="flex gap-2 sm:gap-3 items-center">
+                            <span className="text-[11px] font-black uppercase text-slate-400 w-10 sm:w-12 shrink-0 tracking-wider">Bag {index + 1}</span>
+                            <input type="number" step="0.01" value={bag.weight} onChange={(e) => updateBagWeight(bag.id, e.target.value)} placeholder="0.00 kg" className="min-w-0 flex-1 h-12 px-3 sm:px-4 border border-slate-300 rounded-xl focus:border-blue-500 outline-none font-bold bg-white text-base" />
                             {formData.bagWeights.length > 1 && (
-                              <button type="button" onClick={() => removeBagWeightRow(bag.id)} className="text-slate-300 hover:text-red-500 p-3 bg-white border border-slate-200 rounded-xl transition-colors shrink-0"><Trash2 size={18}/></button>
+                              <button type="button" onClick={() => removeBagWeightRow(bag.id)} className="text-slate-300 hover:text-red-500 p-2 sm:p-3 bg-white border border-slate-200 rounded-xl transition-colors shrink-0"><Trash2 size={18}/></button>
                             )}
                           </div>
                         ))}
@@ -2991,14 +3153,14 @@ const App = () => {
                     {(formData.incomingBatches && formData.incomingBatches.length > 0) && (
                       <div className="mt-6 space-y-2 max-h-64 overflow-y-auto pr-1 custom-scrollbar">
                         {formData.incomingBatches.map((batch, idx) => (
-                           <div key={batch.id} className="flex justify-between items-center bg-white p-3.5 rounded-xl border border-slate-200 shadow-sm">
-                             <div className="flex items-center gap-3">
-                               <span className="bg-blue-100 text-blue-700 font-black text-xs px-2.5 py-1 rounded-md">{idx + 1}</span>
-                               <input type="text" value={batch.batchNo} onChange={(e) => updateIncomingBatchNo(batch.id, e.target.value)} className="font-bold text-slate-800 text-base outline-none border-b border-dashed border-slate-300 focus:border-blue-500 bg-transparent w-40 uppercase" />
+                           <div key={batch.id} className="flex justify-between items-center bg-white p-3 sm:p-3.5 rounded-xl border border-slate-200 shadow-sm gap-2">
+                             <div className="flex items-center gap-2 flex-1 min-w-0">
+                               <span className="bg-blue-100 text-blue-700 font-black text-xs px-2 py-1 rounded-md shrink-0">{idx + 1}</span>
+                               <input type="text" value={batch.batchNo} onChange={(e) => updateIncomingBatchNo(batch.id, e.target.value)} className="font-bold text-slate-800 text-sm sm:text-base outline-none border-b border-dashed border-slate-300 focus:border-blue-500 bg-transparent w-full min-w-[60px] uppercase" />
                              </div>
-                             <div className="flex items-center gap-4">
+                             <div className="flex items-center gap-2 sm:gap-4 shrink-0">
                                <InlineEdit value={batch.amount} onSave={(val) => updateIncomingBatchAmount(batch.id, val)} suffix="kg" />
-                               <button type="button" onClick={() => removeIncomingBatch(batch.id)} className="text-slate-400 hover:text-red-500 p-2 bg-slate-50 hover:bg-red-50 rounded-lg transition-colors"><Trash2 size={18}/></button>
+                               <button type="button" onClick={() => removeIncomingBatch(batch.id)} className="text-slate-400 hover:text-red-500 p-1.5 sm:p-2 bg-slate-50 hover:bg-red-50 rounded-lg transition-colors"><Trash2 size={16}/></button>
                              </div>
                            </div>
                         ))}
@@ -3008,6 +3170,40 @@ const App = () => {
 
                   <div className="pt-6 border-t border-slate-200 mt-6">
                     <ImageUploadField preview={evidenceImagePreview} onFileChange={handleEvidenceImageChange} onClear={clearEvidenceImage} t={t} />
+                  </div>
+                </section>
+              )}
+
+              {department === 'Purchase Requisition' && (
+                <section className="bg-white p-5 md:p-8 rounded-3xl border border-slate-200 shadow-sm max-w-4xl mx-auto">
+                  <h3 className="text-xl font-black text-slate-800 mb-6 flex items-center gap-2"><ShoppingCart size={22} className="text-amber-500"/> {t("Purchase Requisition")}</h3>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
+                    <div className="min-w-0">
+                      <label className="block text-sm font-bold text-slate-700 mb-2">{t("Item Name")}</label>
+                      <input type="text" name="reqItemName" value={formData.reqItemName} onChange={handleInputChange} required className="w-full h-14 px-4 border border-slate-300 rounded-xl focus:ring-2 focus:ring-amber-500 outline-none font-bold text-base uppercase" placeholder="e.g. PACKING TAPE" />
+                    </div>
+                    <div className="flex gap-4">
+                      <div className="flex-1 min-w-0">
+                        <label className="block text-sm font-bold text-slate-700 mb-2">{t("Quantity")}</label>
+                        <input type="number" step="0.01" name="reqQuantity" value={formData.reqQuantity} onChange={handleInputChange} required className="w-full h-14 px-4 border border-slate-300 rounded-xl focus:ring-2 focus:ring-amber-500 outline-none font-black text-base" />
+                      </div>
+                      <div className="w-28 shrink-0">
+                        <label className="block text-sm font-bold text-slate-700 mb-2">{t("UoM")}</label>
+                        <input type="text" name="reqUom" value={formData.reqUom} onChange={handleInputChange} required className="w-full h-14 px-4 border border-slate-300 rounded-xl outline-none font-bold text-base" />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
+                    <div className="min-w-0">
+                      <label className="block text-sm font-bold text-slate-700 mb-2">{t("Current Stock")}</label>
+                      <input type="number" step="0.01" name="reqCurrentStock" value={formData.reqCurrentStock} onChange={handleInputChange} className="w-full h-14 px-4 border border-slate-300 rounded-xl focus:ring-2 focus:ring-amber-500 outline-none font-bold text-base" />
+                    </div>
+                    <div className="min-w-0">
+                      <label className="block text-sm font-bold text-slate-700 mb-2">{t("Remarks")}</label>
+                      <input type="text" name="reqRemarks" value={formData.reqRemarks} onChange={handleInputChange} className="w-full h-14 px-4 border border-slate-300 rounded-xl focus:ring-2 focus:ring-amber-500 outline-none text-base" placeholder="Optional notes..." />
+                    </div>
                   </div>
                 </section>
               )}
