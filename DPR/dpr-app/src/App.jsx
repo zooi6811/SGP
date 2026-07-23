@@ -4,737 +4,88 @@ import {
   Package, Truck, ArrowDownToLine, PlusCircle, Trash2, CheckCircle, BarChart3, 
   Activity, RefreshCw, Flag, TrendingUp, X, Search, PackageCheck, Layers, 
   Lock, LogOut, UserCircle, Globe, Menu, ChevronUp, ChevronDown, Edit2, Camera,
-  Archive, ShoppingCart, CalendarDays, Zap
+  Archive, ShoppingCart, CalendarDays, Zap, ClipboardCheck, QrCode
 } from 'lucide-react';
 import toast, { Toaster } from 'react-hot-toast';
 
-// --- TRANSLATION DICTIONARY ---
-const dict = {
-  en: {
-    "Production Hub": "Production Hub",
-    "Secure Operator Access": "Secure Operator Access",
-    "Enter Operator PIN": "Enter Operator PIN",
-    "Secure Login": "Secure Login",
-    "Verifying Credentials...": "Verifying Credentials...",
-    "Session Parameters": "Session Parameters",
-    "Date": "Date",
-    "Shift": "Shift",
-    "Morning (AM)": "Morning (AM)",
-    "Night (PM)": "Night (PM)",
-    "Operator / Supervisor": "Operator / Supervisor",
-    "Receiver / Admin Name": "Receiver / Admin Name",
-    "QC Inspector": "QC Inspector",
-    "Machine No.": "Machine No.",
-    "Material Inputs": "Material Inputs",
-    "Job Order No.": "Job Order No.",
-    "Shift Accumulator (Materials)": "Shift Accumulator (Materials)",
-    "Batch No.": "Batch No.",
-    "Quantity": "Quantity",
-    "+ Add": "+ Add",
-    "Total Input Material:": "Total Input Material:",
-    "Input Roll Weight (kg)": "Input Roll Weight (kg)",
-    "Production Output & Wastage": "Production Output & Wastage",
-    "Shift Accumulator (Rolls)": "Shift Accumulator (Rolls)",
-    "New Roll Weight (kg)": "New Roll Weight (kg)",
-    "+ Add Roll": "+ Add Roll",
-    "Accumulated Good Output": "Accumulated Good Output",
-    "Actual Good Output": "Actual Good Output",
-    "UoM": "UoM",
-    "Wastage Generated": "Wastage Generated",
-    "Wastage Accumulator": "Wastage Accumulator",
-    "Type": "Type",
-    "Weight (kg)": "Weight (kg)",
-    "Setup Wastage": "Setup Wastage",
-    "Process Wastage": "Process Wastage",
-    "Machine Downtime": "Machine Downtime",
-    "Planned (mins)": "Planned (mins)",
-    "Unplanned (mins)": "Unplanned (mins)",
-    "Primary Downtime Reason": "Primary Downtime Reason",
-    "Finished Goods Packing": "Finished Goods Packing",
-    "Packing Size": "Packing Size",
-    "Quantity Packed": "Quantity Packed",
-    "Standardised Total:": "Standardised Total:",
-    "Palletisation Details": "Palletisation Details",
-    "Pallet Weight (kg) [Tare/Gross]": "Pallet Weight (kg) [Tare/Gross]",
-    "Individual Bag/Carton Accumulator": "Individual Bag/Carton Accumulator",
-    "Bag": "Bag",
-    "Add Another Bag": "Add Another Bag",
-    "Actual Bag Weight submitted:": "Actual Bag Weight submitted:",
-    "Dispatch / Shipping": "Dispatch / Shipping",
-    "Shipped Quantity (kg)": "Shipped Quantity (kg)",
-    "Delivery Order (DO) / Invoice No.": "Delivery Order (DO) / Invoice No.",
-    "Raw Material Inwards": "Raw Material Inwards",
-    "Material Name / ID": "Material Name / ID",
-    "Incoming / Received Amount (kg)": "Incoming / Received Amount (kg)",
-    "Supplier Name": "Supplier Name",
-    "Purchase Order (PO) No.": "Purchase Order (PO) No.",
-    "Storage Location / Zone": "Storage Location / Zone",
-    "Quality / Condition Check": "Quality / Condition Check",
-    "Quality Control Assessment": "Quality Control Assessment",
-    "Job Order No. (Under Inspection)": "Job Order No. (Under Inspection)",
-    "Thickness Check (Microns)": "Thickness Check (Microns)",
-    "Width Check (mm)": "Width Check (mm)",
-    "Seal Integrity Assessment": "Seal Integrity Assessment",
-    "Length Check (mm)": "Length Check (mm)",
-    "Packing Size (Bag Weight - kg)": "Packing Size (Bag Weight - kg)",
-    "Quantity Check (Bags per Pallet)": "Quantity Check (Bags per Pallet)",
-    "Total Bags Verified": "Total Bags Verified",
-    "Total Pallets Counted": "Total Pallets Counted",
-    "Overall QC Remarks / Issues Noted": "Overall QC Remarks / Issues Noted",
-    "Machine Inspection": "Machine Inspection",
-    "Machine Type": "Machine Type",
-    "Filter Status": "Filter Status",
-    "Scrap Purged": "Scrap Purged",
-    "Sealing Temperature (℃)": "Sealing Temperature (℃)",
-    "Blade / Thickness Check": "Blade / Thickness Check",
-    "Machine Cleanliness": "Machine Cleanliness",
-    "Safety Guards": "Safety Guards",
-    "Good": "Good",
-    "Needs Change": "Needs Change",
-    "Changed": "Changed",
-    "Yes": "Yes",
-    "No": "No",
-    "Status": "Status",
-    "Pass": "Pass",
-    "Fail": "Fail",
-    "N/A": "N/A",
-    "Submit Shift Log": "Submit Shift Log",
-    "Saving...": "Saving...",
-    "Discrepancy Must Be Resolved": "Discrepancy Must Be Resolved",
-    "Mass Balance Verified": "Mass Balance Verified",
-    "Mass Balance Failed (Discrepancy > 2%)": "Mass Balance Failed (Discrepancy > 2%)",
-    "Total Input": "Total Input",
-    "Total Output + Wastage": "Total Output + Wastage",
-    "Variance": "Variance",
-    "Error Margin": "Error Margin",
-    "Reason for Discrepancy (Required for Override)": "Reason for Discrepancy (Required for Override)",
-    "Dashboard": "Dashboard",
-    "Extrusion": "Extrusion",
-    "Cutting": "Cutting",
-    "Packing": "Packing",
-    "Dispatch": "Dispatch",
-    "Quality Control": "Quality Control",
-    "Incoming Goods": "Incoming Goods",
-    "Print": "Print",
-    "Exit": "Exit",
-    "Optional": "Optional",
-    "Evidence Photo (Optional)": "Evidence Photo (Optional)",
-    "Tap to take photo or upload": "Tap to take photo or upload",
-    "bag": "bag",
-    "Mark Job as Complete": "Mark Job as Complete",
-    "Flag this order as fully packed and ready for shipping.": "Flag this order as fully packed and ready for shipping.",
-    "Ready to Ship Tracker": "Ready to Ship Tracker",
-    "Customer": "Customer",
-    "Packing Details": "Packing Details",
-    "Packed Weight": "Packed Weight",
-    "Pending Dispatch": "Pending Dispatch",
-    "Container Logistics": "Container Logistics",
-    "Container": "Container",
-    "Arrival Date": "Arrival Date",
-    "Laden Date": "Laden Date",
-    "ETD PK Date": "ETD PK Date",
-    "Inventory": "Inventory",
-    "Warehouse Overview": "Warehouse Overview",
-    "Raw Material Stock": "Raw Material Stock",
-    "Finished Goods (Pending)": "Finished Goods (Pending)",
-    "Total Volume": "Total Volume",
-    "Material": "Material",
-    "Incoming": "Incoming",
-    "Consumed": "Consumed",
-    "Current Stock": "Current Stock",
-    "Purchase Requisition": "Purchase Requisition",
-    "Item Name": "Item Name",
-    "Remarks": "Remarks",
-    "Resolve": "Resolve",
-    "Action": "Action",
-    "Job Schedule": "Job Schedule",
-    "Job Schedule & Overview": "Job Schedule & Overview",
-    "Pending Extrusion": "Pending Extrusion",
-    "Pending Cutting": "Pending Cutting",
-    "Pending Packing": "Pending Packing",
-    "Left to run": "Left to run",
-    "Left to cut": "Left to cut",
-    "Left to pack": "Left to pack",
-    "Run Date": "Run Date",
-    "Target": "Target",
-    "Unscheduled": "Unscheduled",
-    "Job Order Overview": "Job Order Overview",
-    "Scheduled Run Date": "Scheduled Run Date",
-    "Assigned Machine": "Assigned Machine",
-    "Extrusion Pending": "Extrusion Pending",
-    "Cutting Pending": "Cutting Pending",
-    "Packing Pending": "Packing Pending",
-    "Shift Schedule": "Shift Schedule",
-    "Shift Target": "Shift Target",
-    "Auto-Schedule Jobs": "Auto-Schedule Jobs",
-    "Urgency": "Urgency",
-    "Ready to Run Tracker": "Ready to Run Tracker",
-    "Ready to Cut Tracker": "Ready to Cut Tracker",
-    "Ready to Pack Tracker": "Ready to Pack Tracker"
-  },
-  bn: {
-    "Production Hub": "উৎপাদন হাব",
-    "Secure Operator Access": "নিরাপদ অপারেটর অ্যাক্সেস",
-    "Enter Operator PIN": "অপারেটর পিন লিখুন",
-    "Secure Login": "লগইন করুন",
-    "Verifying Credentials...": "যাচাই করা হচ্ছে...",
-    "Session Parameters": "সেশন প্যারামিটার",
-    "Date": "তারিখ",
-    "Shift": "শিফট",
-    "Morning (AM)": "সকাল (AM)",
-    "Night (PM)": "রাত (PM)",
-    "Operator / Supervisor": "অপারেটর / সুপারভাইজার",
-    "Receiver / Admin Name": "রিসিভার / অ্যাডমিন নাম",
-    "QC Inspector": "কিউসি ইন্সপেক্টর",
-    "Machine No.": "মেশিন নম্বর",
-    "Material Inputs": "কাঁচামাল ইনপুট",
-    "Job Order No.": "জব অর্ডার নম্বর (JO)",
-    "Shift Accumulator (Materials)": "শিফট অ্যাকুমুলেটর (কাঁচামাল)",
-    "Batch No.": "ব্যাচ নম্বর",
-    "Quantity": "পরিমাণ",
-    "Unit": "একক",
-    "+ Add": "+ যোগ করুন",
-    "Total Input Material:": "মোট ইনপুট কাঁচামাল:",
-    "Input Roll Weight (kg)": "ইনপুট রোল ওজন (কেজি)",
-    "Production Output & Wastage": "উৎপাদন আউটপুট এবং বর্জ্য",
-    "Shift Accumulator (Rolls)": "শিফট অ্যাকুমুলেটর (রোল)",
-    "New Roll Weight (kg)": "নতুন রোলের ওজন (কেজি)",
-    "+ Add Roll": "+ রোল যোগ করুন",
-    "Accumulated Good Output": "জমে থাকা ভালো আউটপুট",
-    "Actual Good Output": "প্রকৃত ভালো আউটপুট",
-    "UoM": "একক (UoM)",
-    "Wastage Generated": "উৎপাদিত বর্জ্য",
-    "Wastage Accumulator": "বর্জ্য অ্যাকুমুলেটর",
-    "Type": "ধরন",
-    "Weight (kg)": "ওজন (কেজি)",
-    "Setup Wastage": "সেটআপ বর্জ্য",
-    "Process Wastage": "প্রসেস বর্জ্য",
-    "Machine Downtime": "মেশিন ডাউনটাইম",
-    "Planned (mins)": "পরিকল্পিত (মিনিট)",
-    "Unplanned (mins)": "অপরিকল্পিত (মিনিট)",
-    "Primary Downtime Reason": "ডাউনটাইমের প্রধান কারণ",
-    "Finished Goods Packing": "প্যাকিং (ফিনিশড গুডস)",
-    "Packing Size": "প্যাকিং সাইজ",
-    "Quantity Packed": "প্যাক করা পরিমাণ",
-    "Standardised Total:": "মোট পরিমাণ:",
-    "Palletisation Details": "প্যালেট বিবরণ",
-    "Pallet Weight (kg) [Tare/Gross]": "প্যালেটের ওজন (কেজি)",
-    "Individual Bag/Carton Accumulator": "ব্যাগ/কার্টন অ্যাকুমুলেটর",
-    "Bag": "ব্যাগ",
-    "Add Another Bag": "আরও ব্যাগ যোগ করুন",
-    "Actual Bag Weight submitted:": "মোট ব্যাগের ওজন:",
-    "Dispatch / Shipping": "ডিসপ্যাচ / শিপিং",
-    "Shipped Quantity (kg)": "শিপ করা পরিমাণ (কেজি)",
-    "Delivery Order (DO) / Invoice No.": "ডেলিভারি অর্ডার (DO) নম্বর",
-    "Raw Material Inwards": "কাঁচামাল গ্রহণ",
-    "Material Name / ID": "কাঁচামালের নাম / আইডি",
-    "Incoming / Received Amount (kg)": "গৃহীত পরিমাণ (কেজি)",
-    "Supplier Name": "সরবরাহকারীর নাম",
-    "Purchase Order (PO) No.": "পারচেজ অর্ডার (PO) নম্বর",
-    "Storage Location / Zone": "স্টোরেজ লোকেশন",
-    "Quality / Condition Check": "কোয়ালিটি চেক",
-    "Quality Control Assessment": "কোয়ালিটি কন্ট্রোল (QC)",
-    "Job Order No. (Under Inspection)": "জব অর্ডার নম্বর (তদন্তাধীন)",
-    "Thickness Check (Microns)": "পুরুত্ব চেক (মাইক্রন)",
-    "Width Check (mm)": "প্রস্থ চেক (মিমি)",
-    "Seal Integrity Assessment": "সিল ইন্টিগ্রিটি চেক",
-    "Length Check (mm)": "দৈর্ঘ্য চেক (মিমি)",
-    "Packing Size (Bag Weight - kg)": "প্যাকিং সাইজ (ব্যাগের ওজন - কেজি)",
-    "Quantity Check (Bags per Pallet)": "পরিমাণ চেক (ব্যাগ প্রতি প্যালেট)",
-    "Total Bags Verified": "মোট যাচাইকৃত ব্যাগ",
-    "Total Pallets Counted": "মোট গোনা প্যালেট",
-    "Overall QC Remarks / Issues Noted": "সার্বিক কিউসি মন্তব্য",
-    "Machine Inspection": "মেশিন পরিদর্শন",
-    "Machine Type": "মেশিনের ধরন",
-    "Filter Status": "ফিল্টার স্ট্যাটাস",
-    "Scrap Purged": "স্ক্র্যাপ পার্জ করা হয়েছে",
-    "Sealing Temperature (℃)": "সিলিং তাপমাত্রা (℃)",
-    "Blade / Thickness Check": "ব্লেড / পুরুত্ব চেক",
-    "Machine Cleanliness": "মেশিনের পরিচ্ছন্নতা",
-    "Safety Guards": "নিরাপত্তা গার্ড",
-    "Good": "ভালো",
-    "Needs Change": "পরিবর্তন প্রয়োজন",
-    "Changed": "পরিবর্তন করা হয়েছে",
-    "Yes": "হ্যাঁ",
-    "No": "না",
-    "Status": "স্ট্যাটাস",
-    "Pass": "পাস",
-    "Fail": "ফেইল",
-    "N/A": "প্রযোজ্য নয়",
-    "Submit Shift Log": "শিফট লগ জমা দিন",
-    "Saving...": "সেভ হচ্ছে...",
-    "Discrepancy Must Be Resolved": "অসঙ্গতি সমাধান করতে হবে",
-    "Mass Balance Verified": "ম্যাস ব্যালেন্স যাচাই করা হয়েছে",
-    "Mass Balance Failed (Discrepancy > 2%)": "ম্যাস ব্যালেন্স ফেইল (পার্থক্য > ২%)",
-    "Total Input": "মোট ইনপুট",
-    "Total Output + Wastage": "মোট আউটপুট + বর্জ্য",
-    "Variance": "পার্থক্য",
-    "Error Margin": "ভুলের মার্জিন",
-    "Reason for Discrepancy (Required for Override)": "অসঙ্গতির কারণ (অপরিহার্য)",
-    "Dashboard": "ড্যাশবোর্ড",
-    "Extrusion": "এক্সট্রুশন",
-    "Cutting": "কাটিং",
-    "Packing": "প্যাকিং",
-    "Dispatch": "ডিসপ্যাচ",
-    "Quality Control": "কিউসি (QC)",
-    "Incoming Goods": "ইনকামিং গুডস",
-    "Print": "প্রিন্ট",
-    "Exit": "প্রস্থান",
-    "Optional": "ঐচ্ছিক",
-    "Evidence Photo (Optional)": "প্রমাণের ছবি (ঐচ্ছিক)",
-    "Tap to take photo or upload": "ছবি তুলতে বা আপলোড করতে ট্যাপ করুন",
-    "bag": "ব্যাগ",
-    "Mark Job as Complete": "কাজটি সম্পূর্ণ হিসেবে চিহ্নিত করুন",
-    "Flag this order as fully packed and ready for shipping.": "এই অর্ডারটি সম্পূর্ণ প্যাক করা এবং শিপিংয়ের জন্য প্রস্তুত হিসেবে ফ্ল্যাগ করুন।",
-    "Ready to Ship Tracker": "শিপিংয়ের জন্য প্রস্তুত ট্র্যাকার",
-    "Customer": "গ্রাহক",
-    "Packing Details": "প্যাকিং বিবরণ",
-    "Packed Weight": "প্যাক করা ওজন",
-    "Pending Dispatch": "অপেক্ষমাণ ডিসপ্যাচ",
-    "Container Logistics": "কনটেইনার লজিস্টিকস",
-    "Container": "কনটেইনার",
-    "Arrival Date": "আগমনের তারিখ",
-    "Laden Date": "লাডেন তারিখ",
-    "ETD PK Date": "ইটিডি পিকে তারিখ",
-    "Inventory": "ইনভেন্টরি",
-    "Warehouse Overview": "গুদাম ওভারভিউ",
-    "Raw Material Stock": "কাঁচামাল স্টক",
-    "Finished Goods (Pending)": "ফিনিশড গুডস (অপেক্ষমাণ)",
-    "Total Volume": "মোট আয়তন",
-    "Material": "উপাদান",
-    "Incoming": "ইনকামিং",
-    "Consumed": "ব্যবহৃত",
-    "Current Stock": "বর্তমান স্টক",
-    "Purchase Requisition": "ক্রয় রিকুইজিশন",
-    "Item Name": "আইটেমের নাম",
-    "Remarks": "মন্তব্য",
-    "Resolve": "সমাধান করুন",
-    "Action": "অ্যাকশন",
-    "Job Schedule": "কাজের সময়সূচী",
-    "Job Schedule & Overview": "কাজের সময়সূচী এবং ওভারভিউ",
-    "Pending Extrusion": "অপেক্ষমাণ এক্সট্রুশন",
-    "Pending Cutting": "অপেক্ষমাণ কাটিং",
-    "Pending Packing": "অপেক্ষমাণ প্যাকিং",
-    "Left to run": "বাকি রান",
-    "Left to cut": "বাকি কাট",
-    "Left to pack": "বাকি প্যাক",
-    "Run Date": "রান তারিখ",
-    "Target": "লক্ষ্য",
-    "Unscheduled": "অনির্ধারিত",
-    "Job Order Overview": "জব অর্ডার ওভারভিউ",
-    "Scheduled Run Date": "নির্ধারিত রান তারিখ",
-    "Assigned Machine": "বরাদ্দকৃত মেশিন",
-    "Extrusion Pending": "এক্সট্রুশন অপেক্ষমাণ",
-    "Cutting Pending": "কাটিং অপেক্ষমাণ",
-    "Packing Pending": "প্যাকিং অপেক্ষমাণ",
-    "Shift Schedule": "শিফট শিডিউল",
-    "Shift Target": "শিফট টার্গেট",
-    "Auto-Schedule Jobs": "অটো-শিডিউল জবস",
-    "Urgency": "জরুরী",
-    "Ready to Run Tracker": "রান করার জন্য প্রস্তুত ট্র্যাকার",
-    "Ready to Cut Tracker": "কাটার জন্য প্রস্তুত ট্র্যাকার",
-    "Ready to Pack Tracker": "প্যাক করার জন্য প্রস্তুত ট্র্যাকার"
-  },
-  ms: {
-    "Production Hub": "Pusat Pengeluaran",
-    "Secure Operator Access": "Akses Operator Selamat",
-    "Enter Operator PIN": "Masukkan PIN Operator",
-    "Secure Login": "Log Masuk Selamat",
-    "Verifying Credentials...": "Mengesahkan Kelayakan...",
-    "Session Parameters": "Parameter Sesi",
-    "Date": "Tarikh",
-    "Shift": "Syif",
-    "Morning (AM)": "Pagi (AM)",
-    "Night (PM)": "Malam (PM)",
-    "Operator / Supervisor": "Operator / Penyelia",
-    "Receiver / Admin Name": "Penerima / Nama Admin",
-    "QC Inspector": "Pemeriksa QC",
-    "Machine No.": "No. Mesin",
-    "Material Inputs": "Input Bahan",
-    "Job Order No.": "No. Pesanan Kerja (JO)",
-    "Shift Accumulator (Materials)": "Pengumpul Syif (Bahan)",
-    "Batch No.": "No. Kumpulan",
-    "Quantity": "Kuantiti",
-    "Unit": "Unit",
-    "+ Add": "+ Tambah",
-    "Total Input Material:": "Jumlah Bahan Input:",
-    "Input Roll Weight (kg)": "Berat Gulungan Input (kg)",
-    "Production Output & Wastage": "Keluaran Pengeluaran & Sisa",
-    "Shift Accumulator (Rolls)": "Pengumpul Syif (Gulungan)",
-    "New Roll Weight (kg)": "Berat Gulungan Baru (kg)",
-    "+ Add Roll": "+ Tambah Gulungan",
-    "Accumulated Good Output": "Terkumpul Keluaran Baik",
-    "Actual Good Output": "Keluaran Baik Sebenar",
-    "UoM": "Unit",
-    "Wastage Generated": "Sisa Terjana",
-    "Wastage Accumulator": "Pengumpul Sisa",
-    "Type": "Jenis",
-    "Weight (kg)": "Berat (kg)",
-    "Setup Wastage": "Sisa Persediaan",
-    "Process Wastage": "Sisa Proses",
-    "Machine Downtime": "Masa Henti Mesin",
-    "Planned (mins)": "Dirancang (minit)",
-    "Unplanned (mins)": "Tidak Dirancang (minit)",
-    "Primary Downtime Reason": "Sebab Utama Masa Henti",
-    "Finished Goods Packing": "Pembungkusan Barang Siap",
-    "Packing Size": "Saiz Pembungkusan",
-    "Quantity Packed": "Kuantiti Dibungkus",
-    "Standardised Total:": "Jumlah Standard:",
-    "Palletisation Details": "Butiran Pempaletan",
-    "Pallet Weight (kg) [Tare/Gross]": "Berat Pallet (kg) [Bersih/Kasar]",
-    "Individual Bag/Carton Accumulator": "Pengumpul Beg/Kadbod Individu",
-    "Bag": "Beg",
-    "Add Another Bag": "Tambah Beg Lain",
-    "Actual Bag Weight submitted:": "Berat Beg Sebenar dihantar:",
-    "Dispatch / Shipping": "Penghantaran",
-    "Shipped Quantity (kg)": "Kuantiti Dihantar (kg)",
-    "Delivery Order (DO) / Invoice No.": "No. Pesanan Penghantaran (DO) / Invois",
-    "Raw Material Inwards": "Bahan Mentah Masuk",
-    "Material Name / ID": "Nama/ID Bahan",
-    "Incoming / Received Amount (kg)": "Jumlah Masuk / Diterima (kg)",
-    "Supplier Name": "Nama Pembekal",
-    "Purchase Order (PO) No.": "No. Pesanan Belian (PO)",
-    "Storage Location / Zone": "Lokasi/Zon Simpanan",
-    "Quality / Condition Check": "Pemeriksaan Kualiti / Keadaan",
-    "Quality Control Assessment": "Penilaian Kawalan Kualiti",
-    "Job Order No. (Under Inspection)": "No. Pesanan Kerja (Di Bawah Pemeriksaan)",
-    "Thickness Check (Microns)": "Pemeriksaan Ketebalan (Mikron)",
-    "Width Check (mm)": "Pemeriksaan Lebar (mm)",
-    "Seal Integrity Assessment": "Penilaian Integriti Kedap",
-    "Length Check (mm)": "Pemeriksaan Panjang (mm)",
-    "Packing Size (Bag Weight - kg)": "Saiz Pembungkusan (Berat Beg - kg)",
-    "Quantity Check (Bags per Pallet)": "Pemeriksaan Kuantiti (Beg setiap Pallet)",
-    "Total Bags Verified": "Jumlah Beg Disahkan",
-    "Total Pallets Counted": "Jumlah Pallet Dikira",
-    "Overall QC Remarks / Issues Noted": "Ulasan QC Keseluruhan / Isu Dicatat",
-    "Machine Inspection": "Pemeriksaan Mesin",
-    "Machine Type": "Jenis Mesin",
-    "Filter Status": "Status Penapis",
-    "Scrap Purged": "Sisa Dibuang",
-    "Sealing Temperature (℃)": "Suhu Pengedap (℃)",
-    "Blade / Thickness Check": "Pemeriksaan Bilah / Ketebalan",
-    "Machine Cleanliness": "Kebersihan Mesin",
-    "Safety Guards": "Pengadang Keselamatan",
-    "Good": "Baik",
-    "Needs Change": "Perlu Ditukar",
-    "Changed": "Telah Ditukar",
-    "Yes": "Ya",
-    "No": "Tidak",
-    "Status": "Status",
-    "Pass": "Lulus",
-    "Fail": "Gagal",
-    "N/A": "N/A",
-    "Submit Shift Log": "Hantar Log Syif",
-    "Saving...": "Menyimpan...",
-    "Discrepancy Must Be Resolved": "Percanggahan Mesti Diselesaikan",
-    "Mass Balance Verified": "Imbangan Jisim Disahkan",
-    "Mass Balance Failed (Discrepancy > 2%)": "Imbangan Jisim Gagal (Percanggahan > 2%)",
-    "Total Input": "Jumlah Input",
-    "Total Output + Wastage": "Jumlah Keluaran + Sisa",
-    "Variance": "Varians",
-    "Error Margin": "Margin Ralat",
-    "Reason for Discrepancy (Required for Override)": "Sebab Percanggahan (Wajib untuk Override)",
-    "Dashboard": "Papan Pemuka",
-    "Extrusion": "Penyemperitan (Extrusion)",
-    "Cutting": "Pemotongan",
-    "Packing": "Pembungkusan",
-    "Dispatch": "Penghantaran",
-    "Quality Control": "Kawalan Kualiti (QC)",
-    "Incoming Goods": "Barang Masuk",
-    "Print": "Cetak",
-    "Exit": "Keluar",
-    "Optional": "Pilihan",
-    "Evidence Photo (Optional)": "Gambar Bukti (Pilihan)",
-    "Tap to take photo or upload": "Ketik untuk mengambil gambar atau muat naik",
-    "bag": "beg",
-    "Mark Job as Complete": "Tandakan Kerja sebagai Selesai",
-    "Flag this order as fully packed and ready for shipping.": "Tandakan pesanan ini sebagai siap dibungkus dan sedia untuk penghantaran.",
-    "Ready to Ship Tracker": "Penjejak Sedia untuk Dihantar",
-    "Customer": "Pelanggan",
-    "Packing Details": "Butiran Pembungkusan",
-    "Packed Weight": "Berat Dibungkus",
-    "Pending Dispatch": "Penghantaran Tertunda",
-    "Container Logistics": "Logistik Kontena",
-    "Container": "Kontena",
-    "Arrival Date": "Tarikh Ketibaan",
-    "Laden Date": "Tarikh Muatan (Laden)",
-    "ETD PK Date": "Tarikh ETD PK",
-    "Inventory": "Inventori",
-    "Warehouse Overview": "Gambaran Keseluruhan Gudang",
-    "Raw Material Stock": "Stok Bahan Mentah",
-    "Finished Goods (Pending)": "Barang Siap (Tertunda)",
-    "Total Volume": "Jumlah Isipadu",
-    "Material": "Bahan",
-    "Incoming": "Masuk",
-    "Consumed": "Digunakan",
-    "Current Stock": "Stok Semasa",
-    "Purchase Requisition": "Permintaan Pembelian",
-    "Item Name": "Nama Item",
-    "Remarks": "Catatan",
-    "Resolve": "Selesaikan",
-    "Action": "Tindakan",
-    "Job Schedule": "Jadual Kerja",
-    "Job Schedule & Overview": "Jadual Kerja & Gambaran Keseluruhan",
-    "Pending Extrusion": "Penyemperitan Tertunda",
-    "Pending Cutting": "Pemotongan Tertunda",
-    "Pending Packing": "Pembungkusan Tertunda",
-    "Left to run": "Baki untuk dijalankan",
-    "Left to cut": "Baki untuk dipotong",
-    "Left to pack": "Baki untuk dibungkus",
-    "Run Date": "Tarikh Larian",
-    "Target": "Sasaran",
-    "Unscheduled": "Tidak Dijadualkan",
-    "Job Order Overview": "Gambaran Keseluruhan Pesanan Kerja",
-    "Scheduled Run Date": "Tarikh Larian Dijadualkan",
-    "Assigned Machine": "Mesin Ditugaskan",
-    "Extrusion Pending": "Penyemperitan Tertunda",
-    "Cutting Pending": "Pemotongan Tertunda",
-    "Packing Pending": "Pembungkusan Tertunda",
-    "Shift Schedule": "Jadual Syif",
-    "Shift Target": "Sasaran Syif",
-    "Auto-Schedule Jobs": "Jadual Auto",
-    "Urgency": "Kecemasan",
-    "Ready to Run Tracker": "Penjejak Sedia untuk Dijalankan",
-    "Ready to Cut Tracker": "Penjejak Sedia untuk Dipotong",
-    "Ready to Pack Tracker": "Penjejak Sedia untuk Dibungkus"
-  }
-};
-
-// --- CONFIGURATION ENGINE ---
-// Manage all production constraints and routing logic here instead of inside the algorithm
-const SCHEDULING_CONFIG = {
-  capacities: {
-    extrusion: { default: 3000, 'B6': 3000 },
-    cutting: { defaultKg: 3000, defaultPcs: 4000, 'C5_pcs': 4000 },
-    packing: { kg: 6750, pcs: 45000 } // Approx 450 bags/shift
-  },
-  concurrency: {
-    // Pipeline Variables for Concurrent Manufacturing (Just-In-Time)
-    rollWeightKg: 180,               // Standard weight of a roll before it is moved to cutting
-    transitTimeMins: 30,             // Time needed to weigh, QA, and move the roll to the next machine
-    packBatchPcs: 150,               // Target pcs needed to trigger the packing team to start
-    packBatchKg: 50                  // Target kg needed to trigger the packing team to start (if order is in kg)
-  },
-  extrusionRoutingRules: [
-    // The algorithm evaluates these top-to-bottom. It will use the first rule that matches.
-    { material: 'HDPE', minWidth: 700, maxWidth: Infinity, machines: ['B8'] },
-    { material: 'HDPE', minWidth: 0, maxWidth: 699.99, machines: ['B1', 'B8'] },
-    { material: 'LDPE', minWidth: 1800.01, maxWidth: Infinity, machines: ['B6'] },
-    { material: 'LDPE', minWidth: 1200, maxWidth: 1800, machines: ['B4', 'B5'] },
-    { material: 'LDPE', minWidth: 700, maxWidth: 1199.99, machines: ['B9', 'B4', 'B5'] },
-    { material: 'LDPE', minWidth: 0, maxWidth: 699.99, machines: ['B2', 'B9'] }
-  ],
-  defaultExtrusionMachines: ['B1','B2','B3','B4','B5','B6','B7','B8','B9']
-};
+import JobScheduleView from './components/views/JobScheduleView';
+import ProductionFormView from './components/views/ProductionFormView';
+import InventoryView from './components/views/InventoryView';
+import { dict, SCHEDULING_CONFIG, STORAGE_KEY, GOOGLE_SCRIPT_URL, defaultStats, defaultAnalytics } from './config/constants';
+import SortableTable from './components/ui/SortableTable';
+import DashboardView from './components/views/DashboardView';
 
 // --- REUSABLE COMPONENTS ---
 
-// 1. Inline Edit Component for Accumulators
-const InlineEdit = ({ value, onSave, suffix = "kg", className = "" }) => {
-  const [isEditing, setIsEditing] = useState(false);
-  const [tempValue, setTempValue] = useState(value);
-  const inputRef = useRef(null);
-
-  useEffect(() => { setTempValue(value); }, [value]);
-  useEffect(() => { if (isEditing && inputRef.current) inputRef.current.focus(); }, [isEditing]);
-
-  const handleBlurOrEnter = () => {
-    setIsEditing(false);
-    const numValue = parseFloat(tempValue);
-    if (!isNaN(numValue) && numValue !== value) {
-      onSave(numValue);
-      toast.success("Value updated", { position: 'bottom-right' });
-    } else {
-      setTempValue(value);
-    }
-  };
-
-  if (isEditing) {
-    return (
-      <div className="flex items-center gap-1">
-        <input 
-          ref={inputRef} type="number" step="0.01" value={tempValue}
-          onChange={(e) => setTempValue(e.target.value)}
-          onBlur={handleBlurOrEnter}
-          onKeyDown={(e) => e.key === 'Enter' && handleBlurOrEnter()}
-          className={`w-20 p-1 text-base border-2 border-blue-500 rounded outline-none font-bold text-slate-800 ${className}`}
-        />
-        <span className="text-sm font-medium text-slate-500">{suffix}</span>
-      </div>
-    );
-  }
-
-  return (
-    <div 
-      onClick={() => setIsEditing(true)} 
-      className={`flex items-center gap-1 cursor-pointer group hover:bg-slate-100 p-1 -ml-1 rounded transition-colors ${className}`}
-      title="Tap to edit"
-    >
-      <span className="font-bold text-slate-700 text-base">{value} {suffix}</span>
-      <Edit2 size={14} className="text-blue-500 opacity-0 group-hover:opacity-100 transition-opacity" />
-    </div>
-  );
-};
-
-// 2. Sortable, Filterable & Paginated Table Component
-const SortableTable = ({ title, columns, data, onFlag, onRowClick, rowsPerPage = 5, showCompletedToggle = false, showCompleted = false, setShowCompleted = null }) => {
-  const [filter, setFilter] = useState('');
-  const [sortCol, setSortCol] = useState(0); 
-  const [sortDesc, setSortDesc] = useState(true);
-  const [currentPage, setCurrentPage] = useState(1);
-
-  const filteredData = useMemo(() => {
-    if (!data) return [];
-    return data.filter(row => {
-      if (!row) return false;
-      const cells = Array.isArray(row) ? row : Object.values(row);
-      const matchesSearch = cells.some(cell => cell != null && String(cell).toLowerCase().includes((filter || '').toLowerCase()));
-      
-      if (!matchesSearch) return false;
-      
-      // If it's a completed job, we hide it UNLESS the user checked 'showCompleted' OR is actively searching for it
-      if (showCompletedToggle && row.isCompleted && !showCompleted && !filter) {
-        return false;
-      }
-      
-      return true;
-    });
-  }, [data, filter, showCompletedToggle, showCompleted]);
-
-  const sortedData = useMemo(() => {
-    return [...filteredData].sort((a, b) => {
-      let valA = a[columns[sortCol].dataIndex];
-      let valB = b[columns[sortCol].dataIndex];
-      if (columns[sortCol].type === 'date') { valA = new Date(valA).getTime(); valB = new Date(valB).getTime(); }
-      else if (columns[sortCol].type === 'number') { valA = parseFloat(valA) || 0; valB = parseFloat(valB) || 0; }
-      
-      if (valA === valB) return 0;
-      if (valA < valB) return sortDesc ? 1 : -1;
-      if (valA > valB) return sortDesc ? -1 : 1;
-      return 0;
-    });
-  }, [filteredData, sortCol, sortDesc, columns]);
-
+// 4. Sleek QR Scanner Modal (Dynamically loads html5-qrcode)
+const QRScannerModal = ({ onScan, onClose }) => {
   useEffect(() => {
-    setCurrentPage(1);
-  }, [filter, sortCol, sortDesc]);
+    let html5QrCode;
 
-  const totalPages = rowsPerPage > 0 ? Math.ceil(sortedData.length / rowsPerPage) || 1 : 1;
-  const paginatedData = rowsPerPage > 0 ? sortedData.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage) : sortedData;
+    const init = () => {
+      html5QrCode = new window.Html5Qrcode("reader");
+      html5QrCode.start(
+        { facingMode: "environment" }, // Forces rear camera on mobile
+        { fps: 10, qrbox: { width: 250, height: 250 }, aspectRatio: 1 },
+        (decodedText) => {
+          if (html5QrCode) {
+            html5QrCode.stop().then(() => {
+              html5QrCode.clear();
+              onScan(decodedText);
+            }).catch(err => console.log(err));
+          }
+        },
+        (errorMessage) => { /* ignore minor read errors */ }
+      ).catch((err) => {
+        console.error("Camera start failed", err);
+        toast.error("Could not access camera. Please check browser permissions.");
+        onClose();
+      });
+    };
 
-  const handleSort = (index) => {
-    if (sortCol === index) setSortDesc(!sortDesc);
-    else { setSortCol(index); setSortDesc(true); }
-  };
+    if (!window.Html5Qrcode) {
+      const script = document.createElement('script');
+      script.src = 'https://unpkg.com/html5-qrcode';
+      script.onload = init;
+      document.body.appendChild(script);
+    } else {
+      init();
+    }
+
+    return () => {
+      if (html5QrCode && html5QrCode.isScanning) {
+        html5QrCode.stop().then(() => html5QrCode.clear()).catch(e => console.error(e));
+      }
+    };
+  }, [onScan, onClose]);
 
   return (
-    <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col h-full">
-      <div className="bg-slate-50 px-5 py-4 border-b border-slate-200 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
-          <h3 className="font-bold text-slate-800 text-base">{title}</h3>
-          {showCompletedToggle && setShowCompleted && (
-            <label className="flex items-center gap-2 text-sm font-semibold text-slate-600 cursor-pointer bg-white px-3 py-1.5 rounded-lg border border-slate-200 shadow-sm hover:bg-slate-50 transition-colors">
-              <input 
-                type="checkbox" 
-                checked={showCompleted} 
-                onChange={e => setShowCompleted(e.target.checked)}
-                className="rounded border-slate-300 text-blue-600 focus:ring-blue-500 w-4 h-4 cursor-pointer"
-              />
-              Show Completed Jobs
-            </label>
-          )}
+    <div className="fixed inset-0 z-[80] bg-slate-900/90 backdrop-blur-sm flex items-center justify-center p-4">
+      <div className="bg-white rounded-3xl w-full max-w-sm overflow-hidden shadow-2xl relative flex flex-col animate-in zoom-in-95 duration-200">
+        <div className="p-5 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+          <h3 className="font-black text-slate-800 flex items-center gap-2"><QrCode size={20} className="text-indigo-600"/> Scan QR Code</h3>
+          <button onClick={onClose} className="p-2 bg-slate-200 rounded-xl hover:bg-slate-300 text-slate-600 transition-colors"><X size={18}/></button>
         </div>
-        <div className="relative w-full sm:w-auto">
-          <input 
-            type="text" placeholder="Search records..." value={filter} onChange={e => setFilter(e.target.value)}
-            className="pl-9 pr-3 py-2.5 text-base border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none w-full sm:w-56"
-          />
-          <Search size={16} className="absolute left-3 top-3 text-slate-400" />
-        </div>
-      </div>
-      
-      <div className={`p-0 flex-1 ${rowsPerPage === 0 ? 'max-h-[500px] overflow-auto custom-scrollbar' : 'overflow-x-auto'}`}>
-        <table className="w-full text-left whitespace-nowrap relative">
-          <thead className="text-xs text-slate-500 bg-slate-100/90 backdrop-blur-sm uppercase border-b border-slate-200 font-bold sticky top-0 z-10">
-            <tr>
-              {columns.map((col, i) => (
-                <th key={i} onClick={() => col.sortable !== false && handleSort(i)} className={`px-5 py-3 cursor-pointer hover:bg-slate-200/80 transition-colors ${col.sortable !== false ? 'select-none' : ''}`}>
-                  <div className="flex items-center gap-1.5">
-                    {col.label}
-                    {sortCol === i ? (sortDesc ? <ChevronDown size={14} className="text-blue-600"/> : <ChevronUp size={14} className="text-blue-600"/>) : <span className="w-3.5" />}
-                  </div>
-                </th>
-              ))}
-              {onFlag && <th className="px-5 py-3 text-center">Action</th>}
-            </tr>
-          </thead>
-          <tbody>
-            {paginatedData.length > 0 ? paginatedData.map((row, i) => (
-              <tr key={i} onClick={() => onRowClick && onRowClick(row)} className={`border-b border-slate-100 last:border-0 hover:bg-blue-50/30 transition-colors text-sm ${onRowClick ? 'cursor-pointer' : ''} ${row.isCompleted ? 'opacity-50 bg-slate-50 grayscale-[50%]' : ''}`}>
-                {columns.map((col, j) => (
-                  <td key={j} className="px-5 py-3.5 text-slate-700">
-                    {col.render ? col.render(row[col.dataIndex], row) : row[col.dataIndex]}
-                  </td>
-                ))}
-                {onFlag && (
-                  <td className="px-5 py-3.5 text-center">
-                    <button onClick={(e) => { e.stopPropagation(); onFlag(row); }} className="text-slate-400 hover:text-amber-600 transition-colors bg-white border border-slate-200 p-2 rounded-lg shadow-sm active:scale-95" title="Flag Error"><Flag size={16}/></button>
-                  </td>
-                )}
-              </tr>
-            )) : <tr><td colSpan={columns.length + (onFlag ? 1 : 0)} className="text-center py-8 text-slate-400 italic">No records found.</td></tr>}
-          </tbody>
-        </table>
-      </div>
-
-      {rowsPerPage > 0 && (
-        <div className="bg-slate-50 border-t border-slate-200 px-5 py-3 flex items-center justify-between">
-          <span className="text-sm text-slate-500 font-medium hidden sm:block">Page {currentPage} of {totalPages}</span>
-          <span className="text-sm text-slate-500 font-medium sm:hidden">{currentPage} / {totalPages}</span>
-          <div className="flex items-center gap-2">
-            <button 
-              onClick={() => setCurrentPage(p => Math.max(1, p - 1))} 
-              disabled={currentPage === 1}
-              className="px-4 py-2 text-sm font-bold bg-white border border-slate-300 rounded-lg hover:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors active:scale-95"
-            >
-              Prev
-            </button>
-            <button 
-              onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))} 
-              disabled={currentPage === totalPages}
-              className="px-4 py-2 text-sm font-bold bg-white border border-slate-300 rounded-lg hover:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors active:scale-95"
-            >
-              Next
-            </button>
+        <div className="p-4 bg-black relative flex-1 min-h-[350px] flex items-center justify-center">
+          <div id="reader" className="w-full h-full"></div>
+          {/* Target Overlay UI */}
+          <div className="absolute inset-0 pointer-events-none border-[50px] border-black/50">
+              <div className="w-full h-full border-2 border-indigo-500/50 rounded-xl relative">
+                 <div className="absolute top-0 left-0 w-10 h-10 border-t-4 border-l-4 border-indigo-500 rounded-tl-xl -m-0.5"></div>
+                 <div className="absolute top-0 right-0 w-10 h-10 border-t-4 border-r-4 border-indigo-500 rounded-tr-xl -m-0.5"></div>
+                 <div className="absolute bottom-0 left-0 w-10 h-10 border-b-4 border-l-4 border-indigo-500 rounded-bl-xl -m-0.5"></div>
+                 <div className="absolute bottom-0 right-0 w-10 h-10 border-b-4 border-r-4 border-indigo-500 rounded-br-xl -m-0.5"></div>
+              </div>
           </div>
         </div>
-      )}
+        <div className="p-6 bg-slate-50 text-center">
+           <p className="text-sm font-bold text-slate-700">Point your camera at the item's QR code.</p>
+           <p className="text-xs font-semibold text-slate-500 mt-1">Details will auto-fill instantly upon detection.</p>
+        </div>
+      </div>
     </div>
   );
 };
-
-// 3. Image Upload Field Component
-const ImageUploadField = ({ preview, onFileChange, onClear, disabled, t }) => (
-  <div className={`mt-3 mb-6 ${disabled ? 'opacity-50 pointer-events-none' : ''}`}>
-    <label className="block text-sm font-bold text-slate-700 mb-2">{t("Evidence Photo (Optional)")}</label>
-    {!preview ? (
-      <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-slate-300 border-dashed rounded-xl cursor-pointer bg-slate-50 hover:bg-slate-100 transition-colors">
-        <div className="flex flex-col items-center justify-center pt-5 pb-6">
-          <Camera className="w-8 h-8 text-slate-400 mb-2" />
-          <p className="text-sm text-slate-500 font-semibold">{t("Tap to take photo or upload")}</p>
-        </div>
-        <input type="file" accept="image/*" capture="environment" className="hidden" onChange={onFileChange} disabled={disabled} />
-      </label>
-    ) : (
-      <div className="relative w-full h-48 rounded-xl overflow-hidden border border-slate-200 shadow-sm bg-slate-900">
-        <img src={preview} alt="QC Evidence" className="w-full h-full object-contain" />
-        <button type="button" onClick={onClear} disabled={disabled} className="absolute top-2 right-2 bg-red-500 text-white p-2.5 rounded-lg shadow-md hover:bg-red-600 transition-colors active:scale-95">
-          <Trash2 size={16} />
-        </button>
-      </div>
-    )}
-  </div>
-);
 
 // Log Details Banner Component
 const LogDetailsBanner = ({ log, onClose, masterOrders = [] }) => {
@@ -916,26 +267,6 @@ const LogDetailsBanner = ({ log, onClose, masterOrders = [] }) => {
   );
 };
 
-// QC Field Component
-const QCField = ({ label, name, statusName, formData, onChange, placeholder, t, disabled }) => (
-  <div className={`flex flex-col sm:flex-row sm:items-end gap-3 p-4 bg-white rounded-xl border border-slate-200 shadow-sm ${disabled ? 'opacity-70' : ''}`}>
-    <div className="flex-1 min-w-0">
-      <label className="block text-sm font-bold text-slate-700 mb-2">{label}</label>
-      <input type="text" name={name} value={formData[name]} onChange={onChange} placeholder={placeholder} disabled={disabled} className="w-full p-3 border border-slate-300 rounded-lg text-base focus:ring-2 focus:ring-blue-500 outline-none font-semibold disabled:bg-slate-50 transition-colors" />
-    </div>
-    <div className="w-full sm:w-32 shrink-0">
-      <label className="block text-sm font-bold text-slate-700 mb-2 sm:hidden">{t("Status")}</label>
-      <select name={statusName} value={formData[statusName]} onChange={onChange} disabled={disabled} className="w-full p-3 border border-slate-300 rounded-lg text-base focus:outline-none font-bold disabled:bg-slate-50 transition-colors">
-        <option className="text-emerald-600" value="Pass">{t("Pass")}</option>
-        <option className="text-red-600" value="Fail">{t("Fail")}</option>
-        <option className="text-slate-400" value="N/A">{t("N/A")}</option>
-      </select>
-    </div>
-  </div>
-);
-
-const STORAGE_KEY = 'dpr_draft_session';
-
 const getInitialFormData = (userProfile = null) => ({
   date: new Date().toISOString().split('T')[0],
   shift: userProfile ? userProfile.shift : 'AM', 
@@ -950,12 +281,6 @@ const getInitialFormData = (userProfile = null) => ({
   reqItemName: '', reqQuantity: '', reqUom: 'pcs', reqCurrentStock: '', reqRemarks: ''
 });
 
-const defaultStats = { output: 0, prevOutput: 0, consumption: 0, prevConsumption: 0, wastage: 0, prevWastage: 0, units: 0, pallets: 0 };
-const defaultAnalytics = { daily: defaultStats, weekly: defaultStats, monthly: defaultStats, yearly: defaultStats };
-
-// YOUR GOOGLE SCRIPT URL HERE
-const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwN-C9qBtAcngf47KULzbBoqmJwahILr1Qkf7WTGRzfp7iUCtWxSXEhETlwVQJ7iNdvWg/exec';
-
 const App = () => {
   const [language, setLanguage] = useState('en');
   const t = (text) => (dict[language] && dict[language][text]) || text;
@@ -969,6 +294,17 @@ const App = () => {
   const [qcStage, setQcStage] = useState('Extrusion'); 
   const [qcActiveForm, setQcActiveForm] = useState('product'); // Tracks which container is active
   const [scheduleTab, setScheduleTab] = useState('Extrusion'); // Tracks active job schedule tab
+  
+  // Reference for triggering native HTML5 validation from floating footer
+  const formRef = useRef(null);
+
+  // --- INVENTORY / STOCKTAKE STATES ---
+  const [inventoryTab, setInventoryTab] = useState('Overview'); // 'Overview' | 'Stocktake'
+  const [stocktakeCategory, setStocktakeCategory] = useState('Finished Goods'); // 'Finished Goods' | 'Unpacked FG' | 'Raw Materials' | 'WIP'
+  const initialStocktakeForm = { itemCode: '', customer: '', description: '', dimension: '', quantity: '', uom: 'kg', materialName: '', location: '', remarks: '' };
+  const [stocktakeForm, setStocktakeForm] = useState(initialStocktakeForm);
+  const [isScanningQR, setIsScanningQR] = useState(false);
+  
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [selectedLog, setSelectedLog] = useState(null); 
 
@@ -1246,6 +582,10 @@ const App = () => {
         extPending: Math.max(0, target - (totals.extrusion || 0)),
         cutPending: Math.max(0, target - (totals.cutting || 0)),
         packPending: Math.max(0, target - (totals.packing || 0)),
+        // Expose completed totals for downstream orchestration
+        extCompleted: totals.extrusion || 0,
+        cutCompleted: totals.cutting || 0,
+        packCompleted: totals.packing || 0,
         requiresCutting: order.requiresCutting,
         urgency: order.urgency || 5, // Fallback to 5
         lastUpdated: totals.lastUpdated || 0,
@@ -1370,6 +710,96 @@ const App = () => {
     }).sort((a, b) => b.current - a.current);
   }, [dashboardData]);
 
+  // --- UNIQUE CATALOGUES FOR STOCKTAKE ---
+  const uniqueFinishedGoods = useMemo(() => {
+    if (!dashboardData?.masterOrders) return [];
+    const map = new Map();
+    // Prioritize grouping by Item Code if available, otherwise fallback to details
+    dashboardData.masterOrders.forEach(o => {
+      const key = o.itemCode || `${o.customer}|${o.description}|${o.dimension}`;
+      if (!map.has(key)) {
+        map.set(key, {
+           id: key,
+           itemCode: o.itemCode || '',
+           customer: o.customer || '-',
+           description: o.description || '-',
+           dimension: o.dimension || '-',
+           targetUom: o.targetUom ? o.targetUom.toLowerCase() : 'pcs'
+        });
+      }
+    });
+    return Array.from(map.values()).sort((a, b) => a.customer.localeCompare(b.customer));
+  }, [dashboardData]);
+
+  const uniqueRawMaterials = useMemo(() => {
+    // Draws from the rawMaterialsSummary to ensure all historically received items are available
+    return rawMaterialsSummary.map(rm => ({
+      material: rm.material,
+      currentStockEstimate: rm.current
+    })).sort((a, b) => a.material.localeCompare(b.material));
+  }, [rawMaterialsSummary]);
+
+  const handleStocktakeSubmit = async (e) => {
+    e.preventDefault();
+    if ((stocktakeCategory === 'Finished Goods' || stocktakeCategory === 'Unpacked FG') && (!stocktakeForm.customer || !stocktakeForm.description)) {
+       toast.error("Please select a product from the catalogue first."); return;
+    }
+    if ((stocktakeCategory === 'Raw Materials' || stocktakeCategory === 'WIP') && !stocktakeForm.materialName) {
+       toast.error("Please select a material from the catalogue first."); return;
+    }
+    if (!stocktakeForm.quantity) {
+       toast.error("Please enter the counted quantity."); return;
+    }
+
+    const loadToast = toast.loading("Saving stocktake data...");
+    try {
+      await fetch(GOOGLE_SCRIPT_URL, {
+         method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+         body: JSON.stringify({
+            action: 'submitStocktake', // Sends to Google Apps Script
+            date: new Date().toISOString().split('T')[0],
+            category: stocktakeCategory,
+            operator: currentUser?.name || 'Admin',
+            ...stocktakeForm
+         })
+      });
+      toast.success(`${stocktakeCategory} stocktake recorded!`, { id: loadToast });
+      setStocktakeForm(initialStocktakeForm);
+    } catch(err) {
+      toast.error("Network error: Failed to save stocktake.", { id: loadToast });
+    }
+  };
+
+  // --- QR CODE SCAN HANDLER ---
+  const handleQRScan = (decodedText) => {
+    setIsScanningQR(false);
+    const scannedCode = decodedText.trim().toUpperCase();
+    
+    // Play a tiny success blip if supported by browser
+    try { const ctx = new (window.AudioContext || window.webkitAudioContext)(); const osc = ctx.createOscillator(); osc.connect(ctx.destination); osc.frequency.setValueAtTime(800, ctx.currentTime); osc.start(); osc.stop(ctx.currentTime + 0.1); } catch(e) {}
+    
+    if (stocktakeCategory === 'Finished Goods' || stocktakeCategory === 'Unpacked FG') {
+      const match = uniqueFinishedGoods.find(item => item.itemCode && item.itemCode.toUpperCase() === scannedCode);
+      if (match) {
+        setStocktakeForm(prev => ({
+          ...prev,
+          itemCode: scannedCode,
+          customer: match.customer,
+          description: match.description,
+          dimension: match.dimension,
+          uom: match.targetUom
+        }));
+        toast.success(`Matched: ${match.description}`, { icon: '🎯' });
+      } else {
+        setStocktakeForm(prev => ({ ...prev, itemCode: scannedCode }));
+        toast.success(`Scanned: ${scannedCode}. No exact catalogue match found.`, { icon: '📷' });
+      }
+    } else {
+      setStocktakeForm(prev => ({ ...prev, materialName: scannedCode }));
+      toast.success(`Scanned: ${scannedCode}`, { icon: '📷' });
+    }
+  };
+
   // Aggregator 3: Active Purchase Requisitions
   const activeRequisitions = useMemo(() => {
     if (!dashboardData?.requisitions) return [];
@@ -1410,22 +840,103 @@ const App = () => {
   const pendingExtrusion = useMemo(() => {
     return activeOrdersData.filter(o => o.extPending > 0.5).map(o => {
         const sched = scheduleMap[o.jo]?.extrusion || scheduleMap[o.jo]?.general || {};
-        return { ...o, runDateMs: sched.runDateMs || 9999999999999, runDateDisplay: sched.runDateDisplay || t("Unscheduled"), schedMachine: sched.machine || '-' };
+        
+        // --- SMART MATERIAL ORCHESTRATION ---
+        const cust = String(o.customer || '').toUpperCase();
+        const desc = String(o.description || '').toUpperCase();
+        let materials = [];
+        
+        if (cust.includes('YAMAICHI')) {
+            materials.push({ id: 'LD N1', name: 'LDPE N1', ratio: 1 });
+        } else if (cust.includes('MAB')) {
+            materials.push({ id: 'LD N3', name: 'LDPE N3', ratio: 1 });
+        } else if (desc.includes('HDPE') || desc.includes('HD ')) {
+            materials.push({ id: 'HD F6095', name: 'HD F6095', ratio: 5 });
+            materials.push({ id: 'LL 4211', name: 'LL 4211', ratio: 1 });
+        } else {
+            materials.push({ id: 'RESIN', name: 'Generic Resin', ratio: 1 });
+        }
+
+        // Search the warehouse inventory for the most recent matching batch
+        const suggestedMaterials = materials.map(mat => {
+            const matches = (dashboardData.incoming || []).filter(r => String(r[2]).toUpperCase().includes(mat.id.toUpperCase()));
+            // Grab the most recently logged incoming batch
+            const bestBatch = matches.length > 0 ? matches[matches.length - 1][5] : '';
+            const bestName = matches.length > 0 ? matches[matches.length - 1][2] : mat.name;
+            return { ...mat, matchName: bestName, matchBatch: bestBatch };
+        });
+
+        const materialsDisplay = suggestedMaterials.map(m => `${m.ratio > 1 ? m.ratio + 'x ' : ''}${m.id}`).join(' + ');
+
+        return { 
+          ...o, 
+          suggestedMaterials, 
+          materialsDisplay, 
+          runDateMs: sched.runDateMs || 9999999999999, 
+          runDateDisplay: sched.runDateDisplay || t("Unscheduled"), 
+          schedMachine: sched.machine || '-' 
+        };
     }).sort((a, b) => a.runDateMs - b.runDateMs || b.extPending - a.extPending);
-  }, [activeOrdersData, scheduleMap]);
+  }, [activeOrdersData, scheduleMap, dashboardData.incoming]);
 
   const pendingCutting = useMemo(() => {
     return activeOrdersData.filter(o => o.requiresCutting && o.cutPending > 0.5).map(o => {
         const sched = scheduleMap[o.jo]?.cutting || scheduleMap[o.jo]?.general || {};
-        return { ...o, runDateMs: sched.runDateMs || 9999999999999, runDateDisplay: sched.runDateDisplay || t("Unscheduled"), schedMachine: sched.machine || '-' };
-    }).sort((a, b) => a.runDateMs - b.runDateMs || b.cutPending - a.cutPending);
+        
+        // Calculate physical goods sitting on the floor waiting to be cut
+        const availableToCut = Math.max(0, o.extCompleted - o.cutCompleted);
+        
+        return { 
+          ...o, 
+          availableToCut, 
+          runDateMs: sched.runDateMs || 9999999999999, 
+          runDateDisplay: sched.runDateDisplay || t("Unscheduled"), 
+          schedMachine: sched.machine || '-' 
+        };
+    }).sort((a, b) => {
+        // Priority 1: Physically ready to cut right now
+        const aReady = a.availableToCut > 0.5;
+        const bReady = b.availableToCut > 0.5;
+        
+        if (aReady && !bReady) return -1;
+        if (!aReady && bReady) return 1;
+        
+        // Priority 2: According to the Schedule
+        if (a.runDateMs !== b.runDateMs) return a.runDateMs - b.runDateMs;
+        
+        // Priority 3: Quantity available
+        return b.availableToCut - a.availableToCut;
+    });
   }, [activeOrdersData, scheduleMap]);
 
   const pendingPacking = useMemo(() => {
     return activeOrdersData.filter(o => o.packPending > 0.5).map(o => {
         const sched = scheduleMap[o.jo]?.packing || scheduleMap[o.jo]?.general || {};
-        return { ...o, runDateMs: sched.runDateMs || 9999999999999, runDateDisplay: sched.runDateDisplay || t("Unscheduled"), schedMachine: sched.machine || '-' };
-    }).sort((a, b) => a.runDateMs - b.runDateMs || b.packPending - a.packPending);
+        
+        // Calculate physical goods waiting to be packed from upstream
+        const upstreamCompleted = o.requiresCutting ? o.cutCompleted : o.extCompleted;
+        const availableToPack = Math.max(0, upstreamCompleted - o.packCompleted);
+
+        return { 
+          ...o, 
+          availableToPack, 
+          runDateMs: sched.runDateMs || 9999999999999, 
+          runDateDisplay: sched.runDateDisplay || t("Unscheduled"), 
+          schedMachine: sched.machine || '-' 
+        };
+    }).sort((a, b) => {
+        // Priority 1: Physically ready to pack right now
+        const aReady = a.availableToPack > 0.5;
+        const bReady = b.availableToPack > 0.5;
+        
+        if (aReady && !bReady) return -1;
+        if (!aReady && bReady) return 1;
+        
+        // Priority 2: According to the Schedule
+        if (a.runDateMs !== b.runDateMs) return a.runDateMs - b.runDateMs;
+        
+        return b.availableToPack - a.availableToPack;
+    });
   }, [activeOrdersData, scheduleMap]);
 
   // --- AUTO SCHEDULE ENGINE ---
@@ -1653,17 +1164,35 @@ const App = () => {
   const [isFooterVisible, setIsFooterVisible] = useState(true);
   const lastScrollY = useRef(0);
 
-  // Live Mass Balance Integrity Evaluation
+  // Live Mass Balance Integrity Evaluation (Now allows up to 40% variance)
   useEffect(() => {
     if (!['Extrusion', 'Cutting'].includes(department)) return;
     let totalInput = department === 'Extrusion' ? (formData.extrusionMaterials || []).reduce((sum, mat) => sum + Number(mat.quantity || 0), 0) : Number(formData.inputRollWeight || 0);
-    const outputWeight = formData.uom === 'kg' ? Number(formData.actualOutput || 0) : 0;
+    
+    // Fetch itemWeight to convert pcs to kg
+    let itemWeight = 0;
+    if (formData.jobOrder && dashboardData?.masterOrders) {
+      const order = dashboardData.masterOrders.find(o => o.jo === formData.jobOrder);
+      if (order) itemWeight = order.itemWeight || 0;
+    }
+
+    let outputWeight = 0;
+    if (formData.uom === 'kg') {
+      outputWeight = Number(formData.actualOutput || 0);
+    } else if (formData.uom === 'pcs') {
+      outputWeight = Number(formData.actualOutput || 0) * itemWeight;
+    }
+
     const totalWastage = Number(formData.setupScrap || 0) + Number(formData.processScrap || 0) + Number(formData.rejections || 0);
     const totalAccounted = outputWeight + totalWastage;
     const discrepancyKg = totalInput - totalAccounted;
     const discrepancyPercent = totalInput > 0 ? (Math.abs(discrepancyKg) / totalInput) * 100 : 0;
-    setMassBalance({ totalInput, totalAccounted, discrepancyKg, discrepancyPercent, isFailed: discrepancyPercent > 2.0 });
-  }, [formData.extrusionMaterials, formData.inputRollWeight, formData.actualOutput, formData.setupScrap, formData.processScrap, formData.rejections, formData.uom, department]);
+    
+    // Updated threshold: 40%
+    const isFailed = (formData.uom === 'pcs' && itemWeight === 0) ? false : discrepancyPercent > 40.0;
+
+    setMassBalance({ totalInput, totalAccounted, discrepancyKg, discrepancyPercent, isFailed });
+  }, [formData.extrusionMaterials, formData.inputRollWeight, formData.actualOutput, formData.setupScrap, formData.processScrap, formData.rejections, formData.uom, formData.jobOrder, department, dashboardData.masterOrders]);
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -1898,6 +1427,21 @@ const App = () => {
 
   const handleSave = async (e) => {
     e.preventDefault();
+    
+    // Leverage native HTML5 form validation to guide operators to missed fields
+    if (formRef.current && !formRef.current.reportValidity()) {
+      toast.error("Please complete all required fields highlighted on the form.", { position: 'top-center', duration: 4000 });
+      return;
+    }
+    
+    // JO Master List Validation Interceptor
+    const isJoEntered = formData.jobOrder && formData.jobOrder.trim().length > 0;
+    const isValidJo = isJoEntered ? dashboardData?.masterOrders?.some(o => o.jo === formData.jobOrder) : true;
+    
+    if (['Extrusion', 'Cutting', 'Packing', 'Dispatch'].includes(department) && isJoEntered && !isValidJo) {
+       toast.error("Invalid Job Order! Please enter a JO that exists in the Master List.", { position: 'top-center' }); return;
+    }
+
     if ((department === 'Extrusion' || department === 'Cutting') && massBalance.isFailed && !formData.discrepancyReason) {
       toast.error(t("Discrepancy Must Be Resolved"), { position: 'top-center', style: { border: '1px solid #ef4444', color: '#ef4444' } }); return;
     }
@@ -2051,6 +1595,9 @@ const App = () => {
         </div>
       )}
 
+      {/* --- QR SCANNER MODAL --- */}
+      {isScanningQR && <QRScannerModal onScan={handleQRScan} onClose={() => setIsScanningQR(false)} />}
+
       {/* --- COLLAPSIBLE SIDEBAR --- */}
       <div className={`fixed inset-0 bg-slate-900/60 z-40 transition-opacity backdrop-blur-sm md:hidden ${isSidebarOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`} onClick={() => setIsSidebarOpen(false)} />
       
@@ -2093,7 +1640,7 @@ const App = () => {
       </aside>
 
       {/* --- PERSISTENT MASS BALANCE HUD --- */}
-      {(department === 'Extrusion' || department === 'Cutting') && massBalance.totalInput > 0 && formData.uom === 'kg' && (
+      {(department === 'Extrusion' || department === 'Cutting') && massBalance.totalInput > 0 && (
         <div className={`fixed bottom-24 right-5 z-[35] bg-white/95 backdrop-blur shadow-[0_8px_30px_rgb(0,0,0,0.12)] rounded-2xl p-5 border-l-4 w-72 transition-all duration-300 animate-in slide-in-from-right hidden md:block ${massBalance.isFailed ? 'border-red-500' : 'border-emerald-500'}`}>
           <div className="flex justify-between items-center mb-3">
             <h4 className="font-black text-[11px] uppercase tracking-wider text-slate-500">Live Balance Check</h4>
@@ -2129,1265 +1676,83 @@ const App = () => {
           <datalist id="supplier-suggestions">{localHistory.suppliers.map(s => <option key={s} value={s} />)}</datalist>
           <datalist id="downtime-suggestions">{localHistory.downtimeReasons.map(d => <option key={d} value={d} />)}</datalist>
 
-          {department === 'Dashboard' ? (
-            <div className="space-y-6 md:space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                <div>
-                  <h2 className="text-2xl sm:text-3xl font-black text-slate-800 tracking-tight">Operational Overview</h2>
-                  <p className="text-sm font-bold text-slate-500 mt-1">Real-time factory metrics and history</p>
-                </div>
-                <button onClick={fetchDashboardData} disabled={isFetchingDashboard} className="flex items-center justify-center gap-2 text-base font-black bg-white border border-slate-300 px-5 py-3 rounded-xl hover:bg-slate-50 transition-colors shadow-sm w-full sm:w-auto active:scale-95 text-slate-700">
-                  <RefreshCw size={18} className={isFetchingDashboard ? 'animate-spin text-blue-500' : 'text-slate-400'} /> Refresh Sync
-                </button>
-              </div>
-
-              {/* Analytics Section */}
-              <div className="bg-white p-5 md:p-8 rounded-3xl border border-slate-200 shadow-sm">
-                <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center mb-6 md:mb-8 gap-5 border-b border-slate-100 pb-5 md:pb-6">
-                  <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 w-full xl:w-auto">
-                    <h3 className="font-black text-slate-800 flex items-center gap-2 text-lg"><TrendingUp size={22} className="text-blue-600"/> Analytics</h3>
-                    <div className="flex bg-slate-100 p-1.5 rounded-xl w-full sm:w-auto">
-                      {['Extrusion', 'Cutting', 'Packing'].map(dept => (
-                        <button key={dept} onClick={() => setAnalyticsDept(dept)} className={`flex-1 sm:flex-none px-4 md:px-6 py-2 md:py-2.5 text-sm font-black rounded-lg transition-all ${analyticsDept === dept ? 'bg-white shadow text-blue-700' : 'text-slate-500 hover:text-slate-700'}`}>{t(dept)}</button>
-                      ))}
-                    </div>
-                  </div>
-                  <div className="flex bg-slate-100 p-1.5 rounded-xl w-full xl:w-auto">
-                    {['daily', 'weekly', 'monthly', 'yearly'].map(period => (
-                      <button key={period} onClick={() => setAnalyticsPeriod(period)} className={`flex-1 sm:flex-none px-4 md:px-6 py-2 md:py-2.5 text-sm font-black rounded-lg capitalize transition-all ${analyticsPeriod === period ? 'bg-slate-800 shadow text-white' : 'text-slate-500 hover:text-slate-700'}`}>{period}</button>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-5 md:gap-6">
-                  {/* Output Card */}
-                  <div className="bg-gradient-to-br from-blue-50 to-blue-100/50 p-6 md:p-8 rounded-2xl border border-blue-100 relative overflow-hidden group">
-                    <p className="text-[11px] md:text-xs font-black text-blue-500/80 uppercase tracking-widest mb-3">Total Output</p>
-                    <div className="flex items-end gap-3 relative z-10">
-                      <p className="text-4xl md:text-5xl font-black text-slate-800 tracking-tight">{currentAnalytics.output.toFixed(0)} <span className="text-lg md:text-xl font-bold text-slate-500 tracking-normal">kg</span></p>
-                      {trendOutput.dir !== 'none' && (
-                        <span className={`flex items-center text-xs font-black mb-1.5 px-2 py-1 rounded-md ${trendOutput.dir === 'up' ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'}`}>
-                          {trendOutput.dir === 'up' ? <ChevronUp size={14}/> : <ChevronDown size={14}/>} {trendOutput.val}%
-                        </span>
-                      )}
-                    </div>
-                    <Package className="absolute -right-6 -bottom-6 text-blue-500/10 transition-transform group-hover:scale-110 duration-500" size={120} />
-                  </div>
-
-                  {/* Dynamic Middle Card */}
-                  <div className={`p-6 md:p-8 rounded-2xl border relative overflow-hidden group ${analyticsDept === 'Packing' ? 'bg-gradient-to-br from-purple-50 to-purple-100/50 border-purple-100' : 'bg-gradient-to-br from-emerald-50 to-emerald-100/50 border-emerald-100'}`}>
-                    <p className={`text-[11px] md:text-xs font-black uppercase tracking-widest mb-3 ${analyticsDept === 'Packing' ? 'text-purple-500/80' : 'text-emerald-500/80'}`}>{analyticsDept === 'Packing' ? 'Units Packed' : 'Consumption'}</p>
-                    <div className="flex items-end gap-3 relative z-10">
-                      <p className="text-4xl md:text-5xl font-black text-slate-800 tracking-tight">{analyticsDept === 'Packing' ? currentAnalytics.units : currentAnalytics.consumption.toFixed(0)} <span className="text-lg md:text-xl font-bold text-slate-500 tracking-normal">{analyticsDept === 'Packing' ? 'units' : 'kg'}</span></p>
-                      {analyticsDept !== 'Packing' && trendConsumption.dir !== 'none' && (
-                        <span className={`flex items-center text-xs font-black mb-1.5 px-2 py-1 rounded-md ${trendConsumption.dir === 'up' ? 'bg-amber-100 text-amber-700' : 'bg-emerald-100 text-emerald-700'}`}>
-                          {trendConsumption.dir === 'up' ? <ChevronUp size={14}/> : <ChevronDown size={14}/>} {trendConsumption.val}%
-                        </span>
-                      )}
-                    </div>
-                    {analyticsDept === 'Packing' ? <PackageCheck className="absolute -right-6 -bottom-6 text-purple-500/10 transition-transform group-hover:scale-110 duration-500" size={120} /> : <Box className="absolute -right-6 -bottom-6 text-emerald-500/10 transition-transform group-hover:scale-110 duration-500" size={120} />}
-                  </div>
-
-                  {/* Dynamic Right Card (Wastage) */}
-                  <div className={`p-6 md:p-8 rounded-2xl border relative overflow-hidden group ${analyticsDept === 'Packing' ? 'bg-gradient-to-br from-indigo-50 to-indigo-100/50 border-indigo-100' : 'bg-gradient-to-br from-rose-50 to-rose-100/50 border-rose-100'}`}>
-                    <p className={`text-[11px] md:text-xs font-black uppercase tracking-widest mb-3 ${analyticsDept === 'Packing' ? 'text-indigo-500/80' : 'text-rose-500/80'}`}>{analyticsDept === 'Packing' ? 'Pallets Processed' : 'Wastage Generated'}</p>
-                    <div className="flex items-end gap-3 relative z-10">
-                      <p className="text-4xl md:text-5xl font-black text-slate-800 tracking-tight">{analyticsDept === 'Packing' ? currentAnalytics.pallets : currentAnalytics.wastage.toFixed(1)} <span className="text-lg md:text-xl font-bold text-slate-500 tracking-normal">{analyticsDept === 'Packing' ? 'plts' : 'kg'}</span></p>
-                      {analyticsDept !== 'Packing' && trendWastage.dir !== 'none' && (
-                        <span className={`flex items-center text-xs font-black mb-1.5 px-2 py-1 rounded-md ${trendWastage.dir === 'up' ? 'bg-red-100 text-red-700' : 'bg-emerald-100 text-emerald-700'}`}>
-                          {trendWastage.dir === 'up' ? <ChevronUp size={14}/> : <ChevronDown size={14}/>} {trendWastage.val}%
-                        </span>
-                      )}
-                    </div>
-                    {analyticsDept === 'Packing' ? <Layers className="absolute -right-6 -bottom-6 text-indigo-500/10 transition-transform group-hover:scale-110 duration-500" size={120} /> : <Trash2 className="absolute -right-6 -bottom-6 text-rose-500/10 transition-transform group-hover:scale-110 duration-500" size={120} />}
-                  </div>
-                </div>
-              </div>
-
-              {/* Live Order Tracker */}
-              <div className="pb-2">
-                <SortableTable 
-                  title="Live Order Tracker" data={activeOrdersData}
-                  rowsPerPage={2}
-                  showCompletedToggle={true}
-                  showCompleted={showCompleted}
-                  setShowCompleted={setShowCompleted}
-                  columns={[
-                    { label: 'Status', dataIndex: 'isReadyToShip', type: 'boolean', render: (v, row) => {
-                      const readyBalance = row.packedQty - row.dispatchedQty;
-                      const isSystemReady = readyBalance > 0.5;
-                      
-                      let displayStatus = "Pending";
-                      let statusClasses = "bg-slate-100 text-slate-500 border-slate-200 hover:bg-slate-200";
-                      let readyIcon = <Clock size={12} className="text-slate-500"/>;
-
-                      if (row.isCompleted) {
-                        displayStatus = "Completed";
-                        statusClasses = "bg-slate-200 text-slate-500 border-slate-300 hover:bg-slate-300";
-                        readyIcon = <CheckCircle size={12} className="fill-slate-400 text-white"/>;
-                      } else if (isSystemReady || row.isReadyToShip) {
-                        displayStatus = "Ready";
-                        statusClasses = "bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100";
-                        readyIcon = <CheckCircle size={12} className="fill-emerald-200 text-emerald-600"/>;
-                      }
-
-                      return (
-                        <button 
-                          onClick={(e) => { e.stopPropagation(); handleCycleStatus(row); }}
-                          className={`flex items-center justify-center gap-1 px-2 py-1 rounded text-[10px] sm:text-[11px] font-black border transition-all active:scale-95 w-max shadow-sm whitespace-nowrap ${statusClasses}`}
-                          title="Click to cycle status: Pending -> Ready -> Completed"
-                        >
-                          {readyIcon} {displayStatus}
-                        </button>
-                      );
-                    }},
-                    { label: 'Issue Date', dataIndex: 'issueDateMs', type: 'number', render: (_, row) => <span className="text-slate-500 font-bold whitespace-nowrap">{row.issueDateDisplay}</span> },
-                    { label: 'J/O No.', dataIndex: 'jo', type: 'string', render: v => <span className="font-black text-slate-900 whitespace-nowrap text-base">{v}</span> },
-                    { label: 'Order Details', dataIndex: 'customer', type: 'string', render: (v, row) => (
-                      <div className="flex flex-col min-w-[160px] max-w-[220px]">
-                        <span className="text-slate-900 font-black text-base truncate" title={v}>{v}</span>
-                        {(row.description && row.description !== '-') && <span className="text-slate-600 text-sm font-bold truncate mt-0.5" title={row.description}>{row.description}</span>}
-                        {(row.dimension && row.dimension !== '-') && <span className="inline-block mt-1.5 bg-slate-100 text-slate-500 text-[10px] font-black uppercase tracking-wider px-2 py-1 rounded border border-slate-200 w-fit truncate" title={row.dimension}>{row.dimension}</span>}
-                      </div>
-                    )},
-                    { label: 'Target', dataIndex: 'target', type: 'string', render: v => <span className="font-black text-slate-700 text-base whitespace-nowrap">{v}</span> },
-                    { label: 'Extrusion', dataIndex: 'extProgress', type: 'number', render: v => (
-                      <div className="w-32 sm:w-44">
-                        <div className="flex justify-between items-center mb-2">
-                          <span className="text-[11px] uppercase font-black text-slate-400 tracking-wider hidden sm:inline">Progress</span>
-                          <span className="text-sm sm:text-base font-black text-blue-700">{v.toFixed(1)}%</span>
-                        </div>
-                        <div className="w-full bg-slate-200 rounded-full h-3 overflow-hidden shadow-inner border border-slate-300/50">
-                          <div className="bg-gradient-to-r from-blue-500 to-blue-400 h-full rounded-full transition-all duration-500" style={{width: `${Math.min(v, 100)}%`}}></div>
-                        </div>
-                      </div>
-                    )},
-                    { label: 'Cutting', dataIndex: 'cutProgress', type: 'number', render: v => (
-                      <div className="w-32 sm:w-44">
-                        <div className="flex justify-between items-center mb-2">
-                          <span className="text-[11px] uppercase font-black text-slate-400 tracking-wider hidden sm:inline">Progress</span>
-                          <span className="text-sm sm:text-base font-black text-emerald-700">{v.toFixed(1)}%</span>
-                        </div>
-                        <div className="w-full bg-slate-200 rounded-full h-3 overflow-hidden shadow-inner border border-slate-300/50">
-                          <div className="bg-gradient-to-r from-emerald-500 to-emerald-400 h-full rounded-full transition-all duration-500" style={{width: `${Math.min(v, 100)}%`}}></div>
-                        </div>
-                      </div>
-                    )},
-                    { label: 'Packing', dataIndex: 'packProgress', type: 'number', render: v => (
-                      <div className="w-32 sm:w-44">
-                        <div className="flex justify-between items-center mb-2">
-                          <span className="text-[11px] uppercase font-black text-slate-400 tracking-wider hidden sm:inline">Progress</span>
-                          <span className="text-sm sm:text-base font-black text-purple-700">{v.toFixed(1)}%</span>
-                        </div>
-                        <div className="w-full bg-slate-200 rounded-full h-3 overflow-hidden shadow-inner border border-slate-300/50">
-                          <div className="bg-gradient-to-r from-purple-500 to-purple-400 h-full rounded-full transition-all duration-500" style={{width: `${Math.min(v, 100)}%`}}></div>
-                        </div>
-                      </div>
-                    )}
-                  ]}
-                />
-              </div>
-
-              {/* Data Tables Grid */}
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8 pb-8">
-                <SortableTable 
-                  title="Latest Extrusion Runs" data={dashboardData.extrusion} onFlag={(r) => {setFlagData({department: 'Extrusion', date: new Date(r[1]).toLocaleDateString('en-GB'), jobOrder: r[3], reason: ''}); setIsFlagModalOpen(true);}}
-                  onRowClick={(r) => setSelectedLog({ type: 'Extrusion', data: r })}
-                  columns={[
-                    { label: 'Date', dataIndex: 1, type: 'date', render: d => new Date(d).toLocaleDateString('en-GB') },
-                    { label: 'Job Order', dataIndex: 3, type: 'string', render: v => <span className="font-bold text-slate-900">{v}</span> },
-                    { label: 'Output (kg)', dataIndex: 6, type: 'number', render: v => <span className="font-black text-blue-700">{v}</span> }
-                  ]}
-                />
-                <SortableTable 
-                  title="Latest Cutting Logs" data={dashboardData.cutting} onFlag={(r) => {setFlagData({department: 'Cutting', date: new Date(r[1]).toLocaleDateString('en-GB'), jobOrder: r[3], reason: ''}); setIsFlagModalOpen(true);}}
-                  onRowClick={(r) => setSelectedLog({ type: 'Cutting', data: r })}
-                  columns={[
-                    { label: 'Date', dataIndex: 1, type: 'date', render: d => new Date(d).toLocaleDateString('en-GB') },
-                    { label: 'Job Order', dataIndex: 3, type: 'string', render: v => <span className="font-bold text-slate-900">{v}</span> },
-                    { label: 'Output (kg)', dataIndex: 6, type: 'number', render: v => <span className="font-black text-emerald-700">{v}</span> }
-                  ]}
-                />
-                <SortableTable 
-                  title="Latest Packing Logs" data={dashboardData.packing} onFlag={(r) => {setFlagData({department: 'Packing', date: new Date(r[1]).toLocaleDateString('en-GB'), jobOrder: r[3], reason: ''}); setIsFlagModalOpen(true);}}
-                  onRowClick={(r) => setSelectedLog({ type: 'Packing', data: r })}
-                  columns={[
-                    { label: 'Date', dataIndex: 1, type: 'date', render: d => new Date(d).toLocaleDateString('en-GB') },
-                    { label: 'Job Order', dataIndex: 3, type: 'string', render: v => <span className="font-bold text-slate-900">{v}</span> },
-                    { label: 'Qty', dataIndex: 6, type: 'number', render: v => <span className="font-black text-purple-700">{v}</span> }
-                  ]}
-                />
-                <SortableTable 
-                  title="Incoming Materials" data={dashboardData.incoming} onFlag={(r) => {setFlagData({department: 'Incoming Goods', date: new Date(r[1]).toLocaleDateString('en-GB'), jobOrder: r[2], reason: ''}); setIsFlagModalOpen(true);}}
-                  onRowClick={(r) => setSelectedLog({ type: 'Incoming Goods', data: r })}
-                  columns={[
-                    { label: 'Date', dataIndex: 1, type: 'date', render: d => new Date(d).toLocaleDateString('en-GB') },
-                    { label: 'Material', dataIndex: 2, type: 'string', render: v => <span className="font-bold text-slate-900">{v}</span> },
-                    { label: 'Amount (kg)', dataIndex: 3, type: 'number', render: v => <span className="font-black text-blue-700">{v}</span> }
-                  ]}
-                />
-              </div>
-            </div>
-
-          ) : department === 'Job Schedule' ? (
-            <div className="space-y-6 md:space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                  <div>
-                    <h2 className="text-2xl sm:text-3xl font-black text-slate-800 tracking-tight">{t("Job Schedule & Overview")}</h2>
-                    <p className="text-sm font-bold text-slate-500 mt-1">Master schedule and departmental backlog</p>
-                  </div>
-                  <div className="flex gap-2 w-full sm:w-auto">
-                      <button onClick={handleAutoSchedule} className="flex-1 sm:flex-none flex items-center justify-center gap-2 text-sm font-black bg-indigo-600 text-white px-5 py-3 rounded-xl hover:bg-indigo-700 transition-colors shadow-sm active:scale-95">
-                          <Zap size={16} /> {t("Auto-Schedule Jobs")}
-                      </button>
-                      <button onClick={fetchDashboardData} disabled={isFetchingDashboard} className="flex-1 sm:flex-none flex items-center justify-center gap-2 text-sm font-black bg-white border border-slate-300 px-5 py-3 rounded-xl hover:bg-slate-50 transition-colors shadow-sm active:scale-95 text-slate-700">
-                          <RefreshCw size={16} className={isFetchingDashboard ? 'animate-spin text-blue-500' : 'text-slate-400'} /> Refresh
-                      </button>
-                  </div>
-               </div>
-
-               {/* Departmental Tab Switcher */}
-               <div className="flex flex-col sm:flex-row bg-slate-200/60 p-1.5 rounded-2xl w-full max-w-md mx-auto sm:mx-0 shadow-inner">
-                 {['Extrusion', 'Cutting', 'Packing'].map(tab => (
-                   <button 
-                     key={tab} 
-                     onClick={() => setScheduleTab(tab)} 
-                     className={`flex-1 py-3 px-4 text-base font-black rounded-xl transition-all duration-300 ${scheduleTab === tab ? 'bg-white text-blue-700 shadow-md transform scale-[1.02]' : 'text-slate-500 hover:text-slate-700 hover:bg-slate-200'}`}
-                   >
-                     {t(tab)}
-                   </button>
-                 ))}
-               </div>
-
-               {/* Departmental Schedule View */}
-               <div className="mt-4 grid grid-cols-1 gap-6 md:gap-8">
-                 {scheduleTab === 'Extrusion' && (
-                   <>
-                     <SortableTable 
-                       title={`${t("Extrusion")} - ${t("Shift Schedule")}`}
-                       data={extSchedule}
-                       rowsPerPage={6}
-                       onRowClick={(row) => setSelectedLog({ type: 'Job Overview', data: activeOrdersData.find(o => o.jo === row.jo) || { jo: row.jo, customer: 'Unknown', description: row.details, target: row.originalTarget, extPending: 0, cutPending: 0, packPending: 0, runDateDisplay: row.runDateDisplay, schedMachine: row.machine } })}
-                       columns={[
-                         { label: t("Run Date"), dataIndex: 'runDateMs', type: 'number', render: (_, r) => <span className="font-bold text-slate-700 whitespace-nowrap">{r.runDateDisplay}</span> },
-                         { label: t("Shift"), dataIndex: 'shift', type: 'string', render: v => <span className={`px-2 py-1 rounded-md text-[10px] font-black uppercase tracking-wider ${v === 'AM' ? 'bg-amber-100 text-amber-700' : 'bg-indigo-100 text-indigo-700'}`}>{v}</span> },
-                         { label: t("Machine"), dataIndex: 'machine', type: 'string', render: v => <span className="font-black text-slate-800 bg-slate-100 px-2 py-1 rounded-md">{v}</span> },
-                         { label: t("Job Order"), dataIndex: 'jo', type: 'string', render: v => <span className="font-black text-blue-700 text-base">{v}</span> },
-                         { label: t("Details"), dataIndex: 'details', type: 'string', render: v => <span className="text-sm font-semibold text-slate-600 truncate max-w-[200px] block" title={v}>{v}</span> },
-                         { label: t("Shift Target"), dataIndex: 'allocatedTarget', type: 'string', render: v => <span className="font-black text-emerald-600 whitespace-nowrap">{v}</span> }
-                       ]}
-                     />
-                     <SortableTable 
-                       title={`${t("Extrusion")} - ${t("Pending Extrusion")} (Backlog)`}
-                       data={pendingExtrusion}
-                       rowsPerPage={6}
-                       onRowClick={(row) => setSelectedLog({ type: 'Job Overview', data: row })}
-                       columns={[
-                         { label: t("Urgency"), dataIndex: 'urgency', type: 'number', render: (v, r) => (
-                             <select
-                               value={v || 5}
-                               onClick={e => e.stopPropagation()}
-                               onChange={e => handleUrgencyChange(r.jo, parseInt(e.target.value))}
-                               className={`bg-transparent outline-none cursor-pointer font-black text-xs border-b-2 pb-0.5 ${
-                                 v === 1 ? 'text-rose-600 border-rose-600' :
-                                 v === 2 ? 'text-orange-500 border-orange-500' :
-                                 v === 3 ? 'text-amber-500 border-amber-500' :
-                                 v === 4 ? 'text-blue-500 border-blue-500' :
-                                 v === 5 ? 'text-emerald-500 border-emerald-500' :
-                                 'text-slate-400 border-slate-400'
-                               }`}
-                             >
-                               <option value={1}>1 - CRITICAL</option>
-                               <option value={2}>2 - HIGH</option>
-                               <option value={3}>3 - NORMAL</option>
-                               <option value={4}>4 - LOW</option>
-                               <option value={5}>5 - WHENEVER</option>
-                               <option value={6}>6 - IGNORE</option>
-                             </select>
-                         )},
-                         { label: t("Start Date"), dataIndex: 'runDateMs', type: 'number', render: (_, r) => <span className={`font-bold whitespace-nowrap ${r.runDateDisplay === t("Unscheduled") ? 'text-slate-400 italic' : 'text-blue-700'}`}>{r.runDateDisplay}</span> },
-                         { label: t("Job Order"), dataIndex: 'jo', type: 'string', render: (v, r) => (
-                           <div className="flex flex-col min-w-[120px]">
-                             <span className="font-black text-slate-900 text-base">{v}</span>
-                             <span className="text-xs font-bold text-slate-500 mt-0.5 truncate max-w-[150px]" title={r.customer}>{r.customer}</span>
-                           </div>
-                         )},
-                         { label: t("Details"), dataIndex: 'dimension', type: 'string', render: (v, r) => (
-                           <div className="flex flex-col min-w-[150px] max-w-[200px]">
-                             <span className="text-slate-800 font-bold text-sm truncate" title={r.description}>{r.description || '-'}</span>
-                             <span className="inline-block mt-1.5 bg-slate-100 text-slate-500 text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded border border-slate-200 w-fit truncate" title={v}>{v || '-'}</span>
-                           </div>
-                         )},
-                         { label: t("Machine"), dataIndex: 'schedMachine', type: 'string', render: v => <span className="font-black text-slate-700">{v}</span> },
-                         { label: t("Total Target"), dataIndex: 'target', type: 'string', render: v => <span className="font-bold text-slate-600 whitespace-nowrap">{v}</span> },
-                         { label: t("Left to run"), dataIndex: 'extPending', type: 'number', render: v => <span className="font-black text-blue-600 text-base whitespace-nowrap">{v.toFixed(1)} kg</span> }
-                       ]}
-                     />
-                   </>
-                 )}
-
-                 {scheduleTab === 'Cutting' && (
-                   <>
-                     <SortableTable 
-                       title={`${t("Cutting")} - ${t("Shift Schedule")}`}
-                       data={cutSchedule}
-                       rowsPerPage={6}
-                       onRowClick={(row) => setSelectedLog({ type: 'Job Overview', data: activeOrdersData.find(o => o.jo === row.jo) || { jo: row.jo, customer: 'Unknown', description: row.details, target: row.originalTarget, extPending: 0, cutPending: 0, packPending: 0, runDateDisplay: row.runDateDisplay, schedMachine: row.machine } })}
-                       columns={[
-                         { label: t("Run Date"), dataIndex: 'runDateMs', type: 'number', render: (_, r) => <span className="font-bold text-slate-700 whitespace-nowrap">{r.runDateDisplay}</span> },
-                         { label: t("Shift"), dataIndex: 'shift', type: 'string', render: v => <span className={`px-2 py-1 rounded-md text-[10px] font-black uppercase tracking-wider ${v === 'AM' ? 'bg-amber-100 text-amber-700' : 'bg-indigo-100 text-indigo-700'}`}>{v}</span> },
-                         { label: t("Machine"), dataIndex: 'machine', type: 'string', render: v => <span className="font-black text-slate-800 bg-slate-100 px-2 py-1 rounded-md">{v}</span> },
-                         { label: t("Job Order"), dataIndex: 'jo', type: 'string', render: v => <span className="font-black text-emerald-700 text-base">{v}</span> },
-                         { label: t("Details"), dataIndex: 'details', type: 'string', render: v => <span className="text-sm font-semibold text-slate-600 truncate max-w-[200px] block" title={v}>{v}</span> },
-                         { label: t("Shift Target"), dataIndex: 'allocatedTarget', type: 'string', render: v => <span className="font-black text-emerald-600 whitespace-nowrap">{v}</span> }
-                       ]}
-                     />
-                     <SortableTable 
-                       title={`${t("Cutting")} - ${t("Pending Cutting")} (Backlog)`}
-                       data={pendingCutting}
-                       rowsPerPage={6}
-                       onRowClick={(row) => setSelectedLog({ type: 'Job Overview', data: row })}
-                       columns={[
-                         { label: t("Urgency"), dataIndex: 'urgency', type: 'number', render: (v, r) => (
-                             <select
-                               value={v || 5}
-                               onClick={e => e.stopPropagation()}
-                               onChange={e => handleUrgencyChange(r.jo, parseInt(e.target.value))}
-                               className={`bg-transparent outline-none cursor-pointer font-black text-xs border-b-2 pb-0.5 ${
-                                 v === 1 ? 'text-rose-600 border-rose-600' :
-                                 v === 2 ? 'text-orange-500 border-orange-500' :
-                                 v === 3 ? 'text-amber-500 border-amber-500' :
-                                 v === 4 ? 'text-blue-500 border-blue-500' :
-                                 v === 5 ? 'text-emerald-500 border-emerald-500' :
-                                 'text-slate-400 border-slate-400'
-                               }`}
-                             >
-                               <option value={1}>1 - CRITICAL</option>
-                               <option value={2}>2 - HIGH</option>
-                               <option value={3}>3 - NORMAL</option>
-                               <option value={4}>4 - LOW</option>
-                               <option value={5}>5 - WHENEVER</option>
-                               <option value={6}>6 - IGNORE</option>
-                             </select>
-                         )},
-                         { label: t("Start Date"), dataIndex: 'runDateMs', type: 'number', render: (_, r) => <span className={`font-bold whitespace-nowrap ${r.runDateDisplay === t("Unscheduled") ? 'text-slate-400 italic' : 'text-emerald-700'}`}>{r.runDateDisplay}</span> },
-                         { label: t("Job Order"), dataIndex: 'jo', type: 'string', render: (v, r) => (
-                           <div className="flex flex-col min-w-[120px]">
-                             <span className="font-black text-slate-900 text-base">{v}</span>
-                             <span className="text-xs font-bold text-slate-500 mt-0.5 truncate max-w-[150px]" title={r.customer}>{r.customer}</span>
-                           </div>
-                         )},
-                         { label: t("Details"), dataIndex: 'dimension', type: 'string', render: (v, r) => (
-                           <div className="flex flex-col min-w-[150px] max-w-[200px]">
-                             <span className="text-slate-800 font-bold text-sm truncate" title={r.description}>{r.description || '-'}</span>
-                             <span className="inline-block mt-1.5 bg-slate-100 text-slate-500 text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded border border-slate-200 w-fit truncate" title={v}>{v || '-'}</span>
-                           </div>
-                         )},
-                         { label: t("Machine"), dataIndex: 'schedMachine', type: 'string', render: v => <span className="font-black text-slate-700">{v}</span> },
-                         { label: t("Total Target"), dataIndex: 'target', type: 'string', render: v => <span className="font-bold text-slate-600 whitespace-nowrap">{v}</span> },
-                         { label: t("Left to cut"), dataIndex: 'cutPending', type: 'number', render: v => <span className="font-black text-emerald-600 text-base whitespace-nowrap">{v.toFixed(1)} kg</span> }
-                       ]}
-                     />
-                   </>
-                 )}
-
-                 {scheduleTab === 'Packing' && (
-                   <>
-                     <SortableTable 
-                       title={`${t("Packing")} - ${t("Shift Schedule")}`}
-                       data={packSchedule}
-                       rowsPerPage={6}
-                       onRowClick={(row) => setSelectedLog({ type: 'Job Overview', data: activeOrdersData.find(o => o.jo === row.jo) || { jo: row.jo, customer: 'Unknown', description: row.details, target: row.originalTarget, extPending: 0, cutPending: 0, packPending: 0, runDateDisplay: row.runDateDisplay, schedMachine: row.machine } })}
-                       columns={[
-                         { label: t("Run Date"), dataIndex: 'runDateMs', type: 'number', render: (_, r) => <span className="font-bold text-slate-700 whitespace-nowrap">{r.runDateDisplay}</span> },
-                         { label: t("Shift"), dataIndex: 'shift', type: 'string', render: v => <span className={`px-2 py-1 rounded-md text-[10px] font-black uppercase tracking-wider ${v === 'AM' ? 'bg-amber-100 text-amber-700' : 'bg-indigo-100 text-indigo-700'}`}>{v}</span> },
-                         { label: t("Machine"), dataIndex: 'machine', type: 'string', render: v => <span className="font-black text-slate-800 bg-slate-100 px-2 py-1 rounded-md">{v}</span> },
-                         { label: t("Job Order"), dataIndex: 'jo', type: 'string', render: v => <span className="font-black text-purple-700 text-base">{v}</span> },
-                         { label: t("Details"), dataIndex: 'details', type: 'string', render: v => <span className="text-sm font-semibold text-slate-600 truncate max-w-[200px] block" title={v}>{v}</span> },
-                         { label: t("Shift Target"), dataIndex: 'allocatedTarget', type: 'string', render: v => <span className="font-black text-emerald-600 whitespace-nowrap">{v}</span> }
-                       ]}
-                     />
-                     <SortableTable 
-                       title={`${t("Packing")} - ${t("Pending Packing")} (Backlog)`}
-                       data={pendingPacking}
-                       rowsPerPage={6}
-                       onRowClick={(row) => setSelectedLog({ type: 'Job Overview', data: row })}
-                       columns={[
-                         { label: t("Urgency"), dataIndex: 'urgency', type: 'number', render: (v, r) => (
-                             <select
-                               value={v || 5}
-                               onClick={e => e.stopPropagation()}
-                               onChange={e => handleUrgencyChange(r.jo, parseInt(e.target.value))}
-                               className={`bg-transparent outline-none cursor-pointer font-black text-xs border-b-2 pb-0.5 ${
-                                 v === 1 ? 'text-rose-600 border-rose-600' :
-                                 v === 2 ? 'text-orange-500 border-orange-500' :
-                                 v === 3 ? 'text-amber-500 border-amber-500' :
-                                 v === 4 ? 'text-blue-500 border-blue-500' :
-                                 v === 5 ? 'text-emerald-500 border-emerald-500' :
-                                 'text-slate-400 border-slate-400'
-                               }`}
-                             >
-                               <option value={1}>1 - CRITICAL</option>
-                               <option value={2}>2 - HIGH</option>
-                               <option value={3}>3 - NORMAL</option>
-                               <option value={4}>4 - LOW</option>
-                               <option value={5}>5 - WHENEVER</option>
-                               <option value={6}>6 - IGNORE</option>
-                             </select>
-                         )},
-                         { label: t("Start Date"), dataIndex: 'runDateMs', type: 'number', render: (_, r) => <span className={`font-bold whitespace-nowrap ${r.runDateDisplay === t("Unscheduled") ? 'text-slate-400 italic' : 'text-purple-700'}`}>{r.runDateDisplay}</span> },
-                         { label: t("Job Order"), dataIndex: 'jo', type: 'string', render: (v, r) => (
-                           <div className="flex flex-col min-w-[120px]">
-                             <span className="font-black text-slate-900 text-base">{v}</span>
-                             <span className="text-xs font-bold text-slate-500 mt-0.5 truncate max-w-[150px]" title={r.customer}>{r.customer}</span>
-                           </div>
-                         )},
-                         { label: t("Details"), dataIndex: 'dimension', type: 'string', render: (v, r) => (
-                           <div className="flex flex-col min-w-[150px] max-w-[200px]">
-                             <span className="text-slate-800 font-bold text-sm truncate" title={r.description}>{r.description || '-'}</span>
-                             <span className="inline-block mt-1.5 bg-slate-100 text-slate-500 text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded border border-slate-200 w-fit truncate" title={v}>{v || '-'}</span>
-                           </div>
-                         )},
-                         { label: t("Machine"), dataIndex: 'schedMachine', type: 'string', render: v => <span className="font-black text-slate-700">{v}</span> },
-                         { label: t("Total Target"), dataIndex: 'target', type: 'string', render: v => <span className="font-bold text-slate-600 whitespace-nowrap">{v}</span> },
-                         { label: t("Left to pack"), dataIndex: 'packPending', type: 'number', render: v => <span className="font-black text-purple-600 text-base whitespace-nowrap">{v.toFixed(1)} kg</span> }
-                       ]}
-                     />
-                   </>
-                 )}
-               </div>
-            </div>
-
-          ) : department === 'Inventory' ? (
-            <div className="space-y-6 md:space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                  <div>
-                    <h2 className="text-2xl sm:text-3xl font-black text-slate-800 tracking-tight">{t("Warehouse Overview")}</h2>
-                    <p className="text-sm font-bold text-slate-500 mt-1">Real-time inventory and stock levels</p>
-                  </div>
-                  <button onClick={fetchDashboardData} disabled={isFetchingDashboard} className="flex items-center justify-center gap-2 text-base font-black bg-white border border-slate-300 px-5 py-3 rounded-xl hover:bg-slate-50 transition-colors shadow-sm w-full sm:w-auto active:scale-95 text-slate-700">
-                    <RefreshCw size={18} className={isFetchingDashboard ? 'animate-spin text-blue-500' : 'text-slate-400'} /> Refresh Sync
-                  </button>
-                </div>
-
-                {/* Inventory Summary Cards */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-5 md:gap-6">
-                  <div className="bg-gradient-to-br from-blue-50 to-blue-100/50 p-6 md:p-8 rounded-2xl border border-blue-100 relative overflow-hidden group">
-                    <p className="text-[11px] md:text-xs font-black text-blue-500/80 uppercase tracking-widest mb-3">Total Raw Materials (Current)</p>
-                    <div className="flex items-end gap-3 relative z-10">
-                      <p className="text-4xl md:text-5xl font-black text-slate-800 tracking-tight">
-                        {rawMaterialsSummary.reduce((sum, item) => sum + item.current, 0).toFixed(0)} <span className="text-lg md:text-xl font-bold text-slate-500 tracking-normal">kg</span>
-                      </p>
-                    </div>
-                    <div className="mt-3 flex gap-4 text-xs font-bold text-blue-700/70 relative z-10">
-                        <span>In: {rawMaterialsSummary.reduce((sum, item) => sum + item.incoming, 0).toFixed(0)} kg</span>
-                        <span>Out: {rawMaterialsSummary.reduce((sum, item) => sum + item.consumed, 0).toFixed(0)} kg</span>
-                    </div>
-                    <Box className="absolute -right-6 -bottom-6 text-blue-500/10 transition-transform group-hover:scale-110 duration-500" size={120} />
-                  </div>
-                  <div className="bg-gradient-to-br from-amber-50 to-amber-100/50 p-6 md:p-8 rounded-2xl border border-amber-100 relative overflow-hidden group">
-                    <p className="text-[11px] md:text-xs font-black text-amber-600/80 uppercase tracking-widest mb-3">Finished Goods (Pending)</p>
-                    <div className="flex items-end gap-3 relative z-10">
-                      <p className="text-4xl md:text-5xl font-black text-slate-800 tracking-tight">
-                        {warehouseGoodsData.reduce((sum, item) => sum + item.pendingDispatch, 0).toFixed(0)} <span className="text-lg md:text-xl font-bold text-slate-500 tracking-normal">kg</span>
-                      </p>
-                    </div>
-                    <div className="mt-3 text-xs font-bold text-amber-700/70 relative z-10">
-                        Packed jobs awaiting physical dispatch
-                    </div>
-                    <Package className="absolute -right-6 -bottom-6 text-amber-500/10 transition-transform group-hover:scale-110 duration-500" size={120} />
-                  </div>
-                  <div className="bg-gradient-to-br from-indigo-50 to-indigo-100/50 p-6 md:p-8 rounded-2xl border border-indigo-100 relative overflow-hidden group">
-                    <p className="text-[11px] md:text-xs font-black text-indigo-500/80 uppercase tracking-widest mb-3">Active Logistics</p>
-                    <div className="flex items-end gap-3 relative z-10">
-                      <p className="text-4xl md:text-5xl font-black text-slate-800 tracking-tight">
-                        {dashboardData.containers?.length || 0} <span className="text-lg md:text-xl font-bold text-slate-500 tracking-normal">containers</span>
-                      </p>
-                    </div>
-                    <div className="mt-3 text-xs font-bold text-indigo-700/70 relative z-10">
-                        Scheduled shipping & arrivals
-                    </div>
-                    <Truck className="absolute -right-6 -bottom-6 text-indigo-500/10 transition-transform group-hover:scale-110 duration-500" size={120} />
-                  </div>
-                </div>
-
-                {/* Inventory Tables */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8 pb-8">
-                  <SortableTable 
-                    title={t("Raw Material Stock")} 
-                    data={rawMaterialsSummary}
-                    columns={[
-                      { label: t("Material"), dataIndex: 'material', type: 'string', render: v => <span className="font-bold text-slate-800">{v}</span> },
-                      { label: t("Incoming"), dataIndex: 'incoming', type: 'number', render: v => <span className="text-slate-500 font-semibold">{v.toFixed(1)}</span> },
-                      { label: t("Consumed"), dataIndex: 'consumed', type: 'number', render: v => <span className="text-slate-500 font-semibold">{v.toFixed(1)}</span> },
-                      { label: t("Current Stock"), dataIndex: 'current', type: 'number', render: v => <span className={`font-black ${v > 0 ? 'text-blue-700' : v < 0 ? 'text-red-500' : 'text-slate-400'}`}>{v.toFixed(1)} kg</span> }
-                    ]}
-                  />
-                  <SortableTable 
-                    title={t("Finished Goods (Pending)")} 
-                    data={warehouseGoodsData}
-                    columns={[
-                      { label: 'J/O No.', dataIndex: 'jo', type: 'string', render: (v, row) => (
-                        <div className="flex flex-col min-w-[120px]">
-                          <span className="font-black text-slate-900 text-base">{v}</span>
-                          <span className="text-xs font-bold text-slate-500 mt-0.5 truncate max-w-[150px]" title={row.customer}>{row.customer}</span>
-                        </div>
-                      )},
-                      { label: 'Details', dataIndex: 'dimension', type: 'string', render: v => <span className="inline-block bg-slate-100 text-slate-500 text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded border border-slate-200 w-fit truncate" title={v}>{v || '-'}</span> },
-                      { label: 'Pending', dataIndex: 'pendingDispatch', type: 'number', render: v => <span className="font-black text-amber-600 text-base">{v.toFixed(1)} kg</span> },
-                      { label: 'Status', dataIndex: 'isReady', type: 'boolean', render: v => (
-                          <span className={`px-2.5 py-1 rounded-md text-[10px] font-black uppercase tracking-wider border ${v ? 'bg-emerald-50 text-emerald-600 border-emerald-200' : 'bg-slate-50 text-slate-500 border-slate-200'}`}>
-                              {v ? 'Ready' : 'Packing'}
-                          </span>
-                      )}
-                    ]}
-                  />
-                </div>
-                
-                {/* Purchase Requisition Tracker inside Inventory */}
-                <div className="mt-6 md:mt-8">
-                  <SortableTable 
-                    title={t("Pending Purchase Requisitions")} 
-                    data={activeRequisitions}
-                    rowsPerPage={4}
-                    columns={[
-                      { label: t("Date"), dataIndex: 'timestamp', type: 'date', render: (_, r) => <span className="font-bold text-slate-600">{new Date(r.timestamp).toLocaleDateString('en-GB')}</span> },
-                      { label: t("Item Name"), dataIndex: 'item', type: 'string', render: v => <span className="font-black text-slate-900 text-base">{v}</span> },
-                      { label: t("Quantity"), dataIndex: 'qty', type: 'number', render: (v, r) => <span className="font-black text-blue-700 text-base">{v} <span className="text-xs">{r.uom}</span></span> },
-                      { label: t("Current Stock"), dataIndex: 'stock', type: 'number', render: (v, r) => <span className="font-bold text-amber-600">{v} <span className="text-xs">{r.uom}</span></span> },
-                      { label: t("Remarks"), dataIndex: 'remarks', type: 'string', render: v => <span className="text-slate-600 italic text-sm">{v}</span> },
-                      { label: t("Action"), dataIndex: 'timestamp', type: 'string', render: (v) => (
-                        <button 
-                          onClick={(e) => { e.stopPropagation(); handleResolveRequisition(v); }}
-                          className="px-4 py-2 bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-500 hover:text-white rounded-lg text-xs font-black transition-all shadow-sm active:scale-95 flex items-center gap-1.5"
-                        >
-                          <CheckCircle size={14}/> {t("Resolve")}
-                        </button>
-                      )}
-                    ]}
-                  />
-                </div>
-            </div>
-          ) : (
-            // ================= DATA ENTRY FORMS =================
-            <form className="space-y-6 md:space-y-8 animate-in fade-in zoom-in-95 duration-300">
-              
-              <div className="hidden md:flex justify-between items-center mb-2">
-                <div>
-                  <h2 className="text-3xl font-black text-slate-800 flex items-center gap-3 tracking-tight">
-                    {department === 'Extrusion' && <Activity className="text-blue-600" size={32} />}
-                    {department === 'Packing' && <Package className="text-purple-600" size={32} />}
-                    {department === 'Quality Control' && <CheckCircle className="text-emerald-600" size={32} />}
-                    {department === 'Purchase Requisition' && <ShoppingCart className="text-amber-500" size={32} />}
-                    {department} Report
-                  </h2>
-                </div>
-              </div>
-
-              {/* Section 1: Session Parameters */}
-              <section className="bg-white p-5 md:p-8 rounded-3xl border border-slate-200 shadow-sm relative">
-                <h3 className="text-xl font-black text-slate-800 mb-6 flex items-center gap-2"><ClipboardList size={20} className="text-slate-400"/> {t("Session Parameters")}</h3>
-                
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-                  <div className="min-w-0">
-                    <label className="block text-sm font-bold text-slate-700 mb-2">{t("Date")}</label>
-                    <input type="date" name="date" value={formData.date} onChange={handleInputChange} required className="box-border block w-full appearance-none h-14 px-4 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none bg-slate-50 focus:bg-white transition-colors text-base font-bold" />
-                  </div>
-                  {(department !== 'Incoming Goods' && department !== 'Purchase Requisition') && (
-                    <div className="min-w-0">
-                      <label className="block text-sm font-bold text-slate-700 mb-2">{t("Shift")}</label>
-                      <select name="shift" value={formData.shift} onChange={handleInputChange} className="w-full h-14 px-4 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none bg-slate-50 focus:bg-white transition-colors text-base font-black">
-                        <option value="AM">{t("Morning (AM)")}</option>
-                        <option value="PM">{t("Night (PM)")}</option>
-                      </select>
-                    </div>
-                  )}
-                  <div className={`min-w-0 ${(department === 'Incoming Goods' || department === 'Purchase Requisition') ? 'sm:col-span-2 lg:col-span-3' : ''}`}>
-                    <label className="block text-sm font-bold text-slate-700 mb-2">{department === 'Incoming Goods' ? t('Receiver / Admin Name') : department === 'Quality Control' ? t('QC Inspector') : t('Operator / Supervisor')}</label>
-                    <input type="text" name="supervisor" value={formData.supervisor} onChange={handleInputChange} required className="w-full h-14 px-4 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none bg-slate-50 focus:bg-white transition-colors text-base font-bold" />
-                  </div>
-                  {(department === 'Extrusion' || department === 'Cutting') && (
-                    <div className="min-w-0">
-                      <label className="block text-sm font-bold text-slate-700 mb-2">{t("Machine No.")}</label>
-                      <input type="text" name="machineId" value={formData.machineId} onChange={handleInputChange} required placeholder={department === 'Extrusion' ? 'e.g. B1' : 'e.g. C1'} className="w-full h-14 px-4 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none bg-slate-50 focus:bg-white uppercase transition-colors text-base font-black" list="machine-suggestions" />
-                    </div>
-                  )}
-                </div>
-              </section>
-
-              {/* --- DEPARTMENTAL AUTO-FILL TRACKERS --- */}
-              {department === 'Extrusion' && pendingExtrusion.length > 0 && (
-                <div className="animate-in fade-in slide-in-from-top-4 duration-500 mb-2">
-                  <SortableTable 
-                    title={t("Ready to Run Tracker")}
-                    data={pendingExtrusion}
-                    rowsPerPage={3}
-                    onRowClick={(row) => {
-                      setFormData(prev => ({...prev, jobOrder: row.jo, machineId: row.schedMachine !== '-' ? row.schedMachine : prev.machineId}));
-                      toast.success(`Auto-filled Job: ${row.jo}`, { icon: '⚡' });
-                      window.scrollTo({ top: document.body.scrollHeight / 2, behavior: 'smooth' });
-                    }}
-                    columns={[
-                      { label: t("Job Order"), dataIndex: 'jo', type: 'string', render: (v, r) => (
-                        <div className="flex flex-col min-w-[120px]">
-                          <span className="font-black text-slate-900 text-base">{v}</span>
-                          <span className="text-xs font-bold text-slate-500 mt-0.5 truncate max-w-[150px]" title={r.customer}>{r.customer}</span>
-                        </div>
-                      )},
-                      { label: t("Details"), dataIndex: 'dimension', type: 'string', render: (v, r) => (
-                        <div className="flex flex-col min-w-[150px] max-w-[200px]">
-                          <span className="text-slate-800 font-bold text-sm truncate" title={r.description}>{r.description || '-'}</span>
-                          <span className="inline-block mt-1.5 bg-slate-100 text-slate-500 text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded border border-slate-200 w-fit truncate" title={v}>{v || '-'}</span>
-                        </div>
-                      )},
-                      { label: t("Machine"), dataIndex: 'schedMachine', type: 'string', render: v => <span className="font-black text-slate-700 bg-slate-100 px-2 py-1 rounded-md">{v}</span> },
-                      { label: t("Left to run"), dataIndex: 'extPending', type: 'number', render: v => <span className="font-black text-blue-600 text-base whitespace-nowrap">{v.toFixed(1)} kg</span> }
-                    ]}
-                  />
-                </div>
-              )}
-
-              {department === 'Cutting' && pendingCutting.length > 0 && (
-                <div className="animate-in fade-in slide-in-from-top-4 duration-500 mb-2">
-                  <SortableTable 
-                    title={t("Ready to Cut Tracker")}
-                    data={pendingCutting}
-                    rowsPerPage={3}
-                    onRowClick={(row) => {
-                      setFormData(prev => ({...prev, jobOrder: row.jo, machineId: row.schedMachine !== '-' ? row.schedMachine : prev.machineId}));
-                      toast.success(`Auto-filled Job: ${row.jo}`, { icon: '✂️' });
-                      window.scrollTo({ top: document.body.scrollHeight / 2, behavior: 'smooth' });
-                    }}
-                    columns={[
-                      { label: t("Job Order"), dataIndex: 'jo', type: 'string', render: (v, r) => (
-                        <div className="flex flex-col min-w-[120px]">
-                          <span className="font-black text-slate-900 text-base">{v}</span>
-                          <span className="text-xs font-bold text-slate-500 mt-0.5 truncate max-w-[150px]" title={r.customer}>{r.customer}</span>
-                        </div>
-                      )},
-                      { label: t("Details"), dataIndex: 'dimension', type: 'string', render: (v, r) => (
-                        <div className="flex flex-col min-w-[150px] max-w-[200px]">
-                          <span className="text-slate-800 font-bold text-sm truncate" title={r.description}>{r.description || '-'}</span>
-                          <span className="inline-block mt-1.5 bg-slate-100 text-slate-500 text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded border border-slate-200 w-fit truncate" title={v}>{v || '-'}</span>
-                        </div>
-                      )},
-                      { label: t("Machine"), dataIndex: 'schedMachine', type: 'string', render: v => <span className="font-black text-slate-700 bg-slate-100 px-2 py-1 rounded-md">{v}</span> },
-                      { label: t("Left to cut"), dataIndex: 'cutPending', type: 'number', render: v => <span className="font-black text-emerald-600 text-base whitespace-nowrap">{v.toFixed(1)} kg</span> }
-                    ]}
-                  />
-                </div>
-              )}
-
-              {department === 'Packing' && pendingPacking.length > 0 && (
-                <div className="animate-in fade-in slide-in-from-top-4 duration-500 mb-2">
-                  <SortableTable 
-                    title={t("Ready to Pack Tracker")}
-                    data={pendingPacking}
-                    rowsPerPage={3}
-                    onRowClick={(row) => {
-                      setFormData(prev => ({...prev, jobOrder: row.jo}));
-                      toast.success(`Auto-filled Job: ${row.jo}`, { icon: '📦' });
-                      window.scrollTo({ top: document.body.scrollHeight / 2, behavior: 'smooth' });
-                    }}
-                    columns={[
-                      { label: t("Job Order"), dataIndex: 'jo', type: 'string', render: (v, r) => (
-                        <div className="flex flex-col min-w-[120px]">
-                          <span className="font-black text-slate-900 text-base">{v}</span>
-                          <span className="text-xs font-bold text-slate-500 mt-0.5 truncate max-w-[150px]" title={r.customer}>{r.customer}</span>
-                        </div>
-                      )},
-                      { label: t("Details"), dataIndex: 'dimension', type: 'string', render: (v, r) => (
-                        <div className="flex flex-col min-w-[150px] max-w-[200px]">
-                          <span className="text-slate-800 font-bold text-sm truncate" title={r.description}>{r.description || '-'}</span>
-                          <span className="inline-block mt-1.5 bg-slate-100 text-slate-500 text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded border border-slate-200 w-fit truncate" title={v}>{v || '-'}</span>
-                        </div>
-                      )},
-                      { label: t("Left to pack"), dataIndex: 'packPending', type: 'number', render: v => <span className="font-black text-purple-600 text-base whitespace-nowrap">{v.toFixed(1)} kg</span> }
-                    ]}
-                  />
-                </div>
-              )}
-              {/* --- END TRACKERS --- */}
-
-              {/* MANUFACTURING DEPARTMENTS (Extrusion & Cutting) -> 2 Column Grid */}
-              {(department === 'Extrusion' || department === 'Cutting') && (
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8 items-start">
-                  
-                  {/* Left Column: 1. Material Inputs */}
-                  <section className="bg-white p-5 md:p-8 rounded-3xl border border-slate-200 shadow-sm flex flex-col">
-                    <h3 className="text-xl font-black text-slate-800 mb-6 flex items-center gap-2"><Box size={22} className="text-blue-500"/> {t("Material Inputs")}</h3>
-                    
-                    <div className="mb-6">
-                      <label className="block text-sm font-bold text-slate-700 mb-2">{t("Job Order No.")}</label>
-                      <input type="text" name="jobOrder" value={formData.jobOrder} onChange={handleInputChange} required placeholder="e.g. 99-1" className="w-full h-14 px-4 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none uppercase font-black text-slate-800 text-base" list="jo-suggestions" />
-                    </div>
-
-                    {department === 'Extrusion' ? (
-                      <div className="bg-slate-50 p-5 rounded-2xl border border-slate-200 flex-1">
-                        <h4 className="text-sm font-black text-slate-700 mb-4 tracking-wide">{t("Shift Accumulator (Materials)")}</h4>
-                        <div className="flex flex-col gap-3 mb-5">
-                          <div className="min-w-0">
-                            <input type="text" value={quickMaterialBatch} onChange={e => setQuickMaterialBatch(e.target.value.toUpperCase())} className="w-full h-14 px-4 border border-slate-300 rounded-xl focus:ring-blue-500 outline-none text-base font-bold uppercase" placeholder="e.g. LDN1CY-2" list="batch-suggestions" />
-                          </div>
-                          <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center">
-                            <div className="flex min-w-0 sm:flex-1 gap-2">
-                              <input type="number" step="0.01" value={quickMaterialWeight} onChange={e => setQuickMaterialWeight(e.target.value)} onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), handleAddMaterial())} className="min-w-0 flex-1 h-14 px-4 border border-slate-300 rounded-xl focus:ring-blue-500 outline-none text-base font-black" placeholder="Amount" />
-                              <select value={quickMaterialUom} onChange={e => setQuickMaterialUom(e.target.value)} className="h-14 w-24 sm:w-28 px-2 border border-slate-300 rounded-xl focus:ring-blue-500 outline-none text-base font-bold bg-white shrink-0">
-                                <option value="kg">kg</option>
-                                <option value="bag">{t("bag")}</option>
-                              </select>
-                            </div>
-                            <button type="button" onClick={handleAddMaterial} className="h-14 w-full sm:w-auto px-6 bg-blue-100 hover:bg-blue-200 text-blue-700 font-black rounded-xl transition-colors shrink-0 active:scale-95">Add Mat.</button>
-                          </div>
-                          {quickMaterialBatch && quickMaterialName && (
-                            <div className="text-xs text-emerald-700 flex items-center gap-1.5 font-bold bg-emerald-100 p-2.5 rounded-lg border border-emerald-200 mt-1"><CheckCircle size={16}/> Matched: {quickMaterialName}</div>
-                          )}
-                        </div>
-                        
-                        <div className="space-y-2 max-h-52 overflow-y-auto pr-1 custom-scrollbar">
-                          {formData.extrusionMaterials.map((mat) => (
-                            <div key={mat.id} className="flex justify-between items-center bg-white p-3 sm:p-3.5 rounded-xl border border-slate-200 shadow-sm group gap-2">
-                              <div className="min-w-0 flex-1">
-                                <div className="font-black text-slate-800 text-sm truncate">{mat.materialId !== 'N/A' ? mat.materialId : (mat.materialName !== 'N/A' ? mat.materialName : 'Unknown')}</div>
-                                <div className="text-[11px] text-slate-500 font-bold mt-0.5 truncate">Batch: {mat.batchNo}</div>
-                              </div>
-                              <div className="flex items-center gap-2 sm:gap-3 shrink-0">
-                                <InlineEdit value={mat.quantity} onSave={(val) => updateMaterialQuantity(mat.id, val)} suffix="kg" />
-                                <button type="button" onClick={() => handleRemoveMaterial(mat.id)} className="text-slate-300 hover:text-red-500 p-1.5 sm:p-2 bg-slate-50 hover:bg-red-50 rounded-lg transition-colors"><Trash2 size={16}/></button>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                        <div className="mt-4 pt-4 border-t border-slate-200 flex justify-between items-center text-sm font-bold">
-                          <span className="text-slate-600 uppercase tracking-wide">{t("Total Input Material:")}</span>
-                          <span className="text-blue-700 text-lg font-black">{formData.extrusionMaterials.reduce((sum, m) => sum + Number(m.quantity || 0), 0).toFixed(2)} kg</span>
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="min-w-0">
-                        <label className="block text-sm font-bold text-slate-700 mb-2">{t("Input Roll Weight (kg)")}</label>
-                        <input type="number" step="0.01" name="inputRollWeight" value={formData.inputRollWeight} onChange={handleInputChange} className="w-full h-14 px-4 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-base font-black bg-white" placeholder="0.00" />
-                      </div>
-                    )}
-                  </section>
-
-                  {/* Right Column: Output & Wastage Joined */}
-                  <section className="bg-white p-5 md:p-8 rounded-3xl border border-slate-200 shadow-sm flex flex-col">
-                    <h3 className="text-xl font-black text-slate-800 mb-6 flex items-center gap-2"><Settings size={22} className="text-emerald-500"/> {t("Production Output & Wastage")}</h3>
-
-                    {department === 'Extrusion' && (
-                      <div className="bg-emerald-50/50 p-5 rounded-2xl border border-emerald-100 mb-6">
-                        <h4 className="text-sm font-black text-emerald-800 mb-4 tracking-wide">{t("Shift Accumulator (Rolls)")}</h4>
-                        <div className="flex flex-col sm:flex-row gap-3 mb-5">
-                          <input type="number" step="0.01" value={quickRollWeight} onChange={e => setQuickRollWeight(e.target.value)} onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), handleAddRoll())} className="w-full sm:flex-1 h-14 px-4 border border-emerald-200 rounded-xl focus:ring-emerald-500 outline-none font-black text-base bg-white" placeholder="Weight (kg)" />
-                          <button type="button" onClick={handleAddRoll} className="w-full sm:w-auto h-14 px-6 bg-emerald-200 hover:bg-emerald-300 text-emerald-800 font-black rounded-xl transition-colors shrink-0 active:scale-95">Add Roll</button>
-                        </div>
-                        <div className="space-y-2 max-h-48 overflow-y-auto pr-1 custom-scrollbar">
-                          {formData.extrusionRolls.map((roll, i) => (
-                            <div key={roll.id} className="flex justify-between items-center bg-white p-3 sm:p-3.5 rounded-xl border border-emerald-100 shadow-sm group gap-2">
-                              <span className="text-slate-600 font-bold text-sm shrink-0">Roll {i + 1}</span>
-                              <div className="flex items-center gap-2 sm:gap-4 shrink-0">
-                                <InlineEdit value={roll.weight} onSave={(val) => updateRollWeight(roll.id, val)} suffix="kg" />
-                                <button type="button" onClick={() => handleRemoveRoll(roll.id)} className="text-slate-300 hover:text-red-500 p-1.5 sm:p-2 bg-slate-50 hover:bg-red-50 rounded-lg transition-colors"><Trash2 size={16}/></button>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                    
-                    <div className="flex gap-4 mb-6">
-                      <div className="flex-1 min-w-0">
-                        <label className="block text-sm font-bold text-slate-700 mb-2">{t("Actual Good Output")}</label>
-                        <input 
-                          type="number" step="0.01" name="actualOutput" value={formData.actualOutput} onChange={handleInputChange} required
-                          readOnly={department === 'Extrusion' && formData.extrusionRolls?.length > 0}
-                          className={`w-full h-14 px-4 border-2 rounded-xl outline-none text-xl font-black transition-colors ${massBalance.isFailed && formData.uom === 'kg' ? 'border-red-400 text-red-700 bg-red-50' : 'border-slate-300 focus:border-emerald-500 text-slate-800 bg-white'}`} 
-                        />
-                      </div>
-                      <div className="w-24 sm:w-28 shrink-0">
-                        <label className="block text-sm font-bold text-slate-700 mb-2">{t("UoM")}</label>
-                        <select name="uom" value={formData.uom} onChange={handleInputChange} className="w-full h-14 px-3 border border-slate-300 rounded-xl outline-none bg-white font-bold text-base">
-                          <option value="kg">kg</option>
-                          <option value="pcs">pcs</option>
-                        </select>
-                      </div>
-                    </div>
-
-                    {/* Wastage */}
-                    <div className="bg-rose-50/40 p-5 rounded-2xl border border-rose-100 flex-1 flex flex-col mt-auto">
-                      <h4 className="text-sm font-black text-rose-800 mb-4 tracking-wide">{t("Wastage Accumulator")}</h4>
-                      <div className="flex flex-col sm:flex-row gap-3 mb-5">
-                        <select value={quickScrapType} onChange={e => setQuickScrapType(e.target.value)} className="w-full sm:flex-1 h-14 px-3 border border-rose-200 rounded-xl focus:ring-rose-500 outline-none text-base font-bold bg-white">
-                          <option value="setupScrap">{t("Setup Wastage")}</option>
-                          <option value="processScrap">{t("Process Wastage")}</option>
-                        </select>
-                        <div className="flex w-full sm:w-auto sm:flex-[0.8] gap-2">
-                          <input type="number" step="0.01" value={quickScrapWeight} onChange={e => setQuickScrapWeight(e.target.value)} onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), handleAddScrap())} className="min-w-0 flex-1 h-14 px-4 border border-rose-200 rounded-xl focus:ring-rose-500 outline-none text-base font-black bg-white" placeholder="kg" />
-                          <button type="button" onClick={handleAddScrap} className="h-14 w-20 sm:w-auto px-5 bg-rose-200 hover:bg-rose-300 text-rose-900 font-black rounded-xl transition-colors active:scale-95 shrink-0 text-base">Add</button>
-                        </div>
-                      </div>
-                      
-                      <div className="space-y-2 mb-4 max-h-48 overflow-y-auto pr-1 custom-scrollbar flex-1">
-                        {formData.scrapEntries?.length > 0 && formData.scrapEntries.map((scrap) => (
-                          <div key={scrap.id} className="flex justify-between items-center bg-white p-3 sm:p-3.5 rounded-xl border border-rose-100 shadow-sm gap-2">
-                            <span className="text-slate-600 font-bold text-sm shrink-0">{scrap.type === 'setupScrap' ? 'Setup' : 'Process'}</span>
-                            <div className="flex items-center gap-2 sm:gap-4 shrink-0">
-                              <InlineEdit value={scrap.weight} onSave={(val) => updateScrapWeight(scrap.id, val)} suffix="kg" className="text-rose-700" />
-                              <button type="button" onClick={() => handleRemoveScrap(scrap.id)} className="text-slate-300 hover:text-rose-600 p-1.5 sm:p-2 bg-rose-50 hover:bg-rose-100 rounded-lg transition-colors"><Trash2 size={16}/></button>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                      
-                      <div className="flex gap-4 pt-4 border-t border-rose-100 mt-auto">
-                        <div className="flex-1 min-w-0">
-                          <label className="block text-[11px] font-black text-rose-700 uppercase tracking-wider mb-2">Total Setup</label>
-                          <input type="number" name="setupScrap" value={formData.setupScrap} onChange={handleInputChange} readOnly={formData.scrapEntries?.some(s => s.type === 'setupScrap')} className={`w-full h-12 px-3 rounded-xl outline-none text-base font-black border ${formData.scrapEntries?.some(s => s.type === 'setupScrap') ? 'bg-rose-50 border-transparent text-rose-900' : 'bg-white border-rose-200 focus:border-rose-400'}`} placeholder="0.00" />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <label className="block text-[11px] font-black text-rose-700 uppercase tracking-wider mb-2">Total Process</label>
-                          <input type="number" name="processScrap" value={formData.processScrap} onChange={handleInputChange} readOnly={formData.scrapEntries?.some(s => s.type === 'processScrap')} className={`w-full h-12 px-3 rounded-xl outline-none text-base font-black border ${formData.scrapEntries?.some(s => s.type === 'processScrap') ? 'bg-rose-50 border-transparent text-rose-900' : 'bg-white border-rose-200 focus:border-rose-400'}`} placeholder="0.00" />
-                        </div>
-                      </div>
-                    </div>
-                  </section>
-                </div>
-              )}
-
-              {/* PACKING DEPARTMENT */}
-              {department === 'Packing' && (
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8 w-full">
-                  <section className="bg-white p-5 md:p-8 rounded-3xl border border-slate-200 shadow-sm">
-                    <h3 className="text-xl font-black text-slate-800 mb-6 flex items-center gap-2"><Package size={22} className="text-purple-500"/> {t("Finished Goods Packing")}</h3>
-                    <div className="space-y-5">
-                      <div className="min-w-0">
-                        <label className="block text-sm font-bold text-slate-700 mb-2">{t("Job Order No.")}</label>
-                        <input type="text" name="jobOrder" value={formData.jobOrder} onChange={handleInputChange} required placeholder="e.g. 99-1" className="w-full h-14 px-4 border border-slate-300 rounded-xl focus:ring-2 focus:ring-purple-500 outline-none uppercase font-black text-slate-800 bg-slate-50 focus:bg-white text-base" list="jo-suggestions" />
-                      </div>
-                      <div className="flex gap-4">
-                        <div className="flex-1 min-w-0">
-                          <label className="block text-sm font-bold text-slate-700 mb-2">{t("Packing Size")}</label>
-                          <input type="number" step="0.01" name="packingSize" value={formData.packingSize} onChange={handleInputChange} placeholder="e.g. 25.00" className="w-full h-14 px-4 border border-slate-300 rounded-xl focus:ring-2 focus:ring-purple-500 outline-none bg-white font-black text-base" />
-                        </div>
-                        <div className="w-28 sm:w-32 shrink-0">
-                          <label className="block text-sm font-bold text-slate-700 mb-2">{t("UoM")}</label>
-                          <select name="packingUom" value={formData.packingUom} onChange={handleInputChange} className="w-full h-14 px-3 border border-slate-300 rounded-xl outline-none bg-white font-bold text-base">
-                            <option value="kg/bag">kg/bag</option><option value="pcs/bag">pcs/bag</option><option value="kg/roll">kg/roll</option><option value="kg/carton">kg/carton</option>
-                          </select>
-                        </div>
-                      </div>
-                      <div className="min-w-0">
-                        <label className="block text-sm font-bold text-slate-700 mb-2">{t("Quantity Packed")}</label>
-                        <input type="number" name="quantityPacked" value={formData.quantityPacked} onChange={handleInputChange} placeholder="e.g. 10" className="w-full h-14 px-4 border border-slate-300 rounded-xl focus:ring-2 focus:ring-purple-500 outline-none bg-white font-black text-xl text-purple-700" />
-                      </div>
-                    </div>
-                  </section>
-
-                  <section className="bg-white p-5 md:p-8 rounded-3xl border border-slate-200 shadow-sm flex flex-col">
-                    <h3 className="text-xl font-black text-slate-800 mb-6 flex items-center gap-2"><Scale size={22} className="text-blue-500"/> {t("Palletisation Details")}</h3>
-                    
-                    <div className="mb-6 min-w-0">
-                      <label className="block text-sm font-bold text-slate-700 mb-2">{t("Pallet Weight (kg) [Tare/Gross]")}</label>
-                      <input type="number" step="0.01" name="palletWeight" value={formData.palletWeight} onChange={handleInputChange} placeholder="e.g. 15.00" className="w-full md:w-1/2 h-14 px-4 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none bg-white font-black text-base" />
-                    </div>
-
-                    <div className="p-5 bg-slate-50 border border-slate-200 rounded-2xl flex-1 flex flex-col">
-                      <h4 className="text-sm font-black text-slate-700 mb-1 tracking-wide">{t("Individual Bag Accumulator")}</h4>
-                      <p className="text-[11px] sm:text-xs font-semibold text-slate-500 mb-5">Tap added weights below to edit inline.</p>
-                      
-                      <div className="flex-1 space-y-3 overflow-y-auto pr-1 custom-scrollbar">
-                        {formData.bagWeights.map((bag, index) => (
-                          <div key={bag.id} className="flex gap-2 sm:gap-3 items-center">
-                            <span className="text-[11px] font-black uppercase text-slate-400 w-10 sm:w-12 shrink-0 tracking-wider">Bag {index + 1}</span>
-                            <input type="number" step="0.01" value={bag.weight} onChange={(e) => updateBagWeight(bag.id, e.target.value)} placeholder="0.00 kg" className="min-w-0 flex-1 h-12 px-3 sm:px-4 border border-slate-300 rounded-xl focus:border-blue-500 outline-none font-bold bg-white text-base" />
-                            {formData.bagWeights.length > 1 && (
-                              <button type="button" onClick={() => removeBagWeightRow(bag.id)} className="text-slate-300 hover:text-red-500 p-2 sm:p-3 bg-white border border-slate-200 rounded-xl transition-colors shrink-0"><Trash2 size={18}/></button>
-                            )}
-                          </div>
-                        ))}
-                      </div>
-                      
-                      <button type="button" onClick={addBagWeightRow} className="mt-5 flex items-center justify-center gap-2 py-3.5 text-base text-blue-700 bg-blue-100 hover:bg-blue-200 rounded-xl font-black transition-colors active:scale-95">
-                        <PlusCircle size={18} /> Add Another Bag
-                      </button>
-                    </div>
-
-                    <div className={`mt-6 p-4 border-2 rounded-xl flex items-center justify-between cursor-pointer transition-all ${formData.jobComplete ? 'bg-emerald-50 border-emerald-500 ring-4 ring-emerald-50' : 'bg-white border-slate-200 hover:border-emerald-300'}`} onClick={() => setFormData(prev => ({...prev, jobComplete: !prev.jobComplete}))}>
-                      <div>
-                          <p className="font-black text-slate-800 text-sm">{t("Mark Job as Complete")}</p>
-                          <p className="text-xs font-semibold text-slate-500 mt-0.5">{t("Flag this order as fully packed and ready for shipping.")}</p>
-                      </div>
-                      <div className={`w-7 h-7 rounded-lg border-2 flex items-center justify-center transition-colors shrink-0 ${formData.jobComplete ? 'bg-emerald-500 border-emerald-500' : 'bg-slate-100 border-slate-300'}`}>
-                          {formData.jobComplete && <CheckCircle size={16} className="text-white" />}
-                      </div>
-                    </div>
-                  </section>
-                </div>
-              )}
-
-              {/* DISPATCH & INCOMING */}
-              {department === 'Dispatch' && (
-                <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 md:gap-8 w-full items-start">
-                  
-                  {/* Left Column: Trackers (Span 2 Columns) */}
-                  <div className="xl:col-span-2">
-                    <SortableTable 
-                      title={t("Ready to Ship Tracker")} 
-                      data={readyToShipData}
-                      rowsPerPage={4}
-                      onRowClick={(row) => {
-                        setFormData(prev => ({...prev, jobOrder: row.jo, dispatchQty: row.pendingDispatch > 0 ? row.pendingDispatch.toFixed(2) : ''}));
-                        toast.success(`Selected ${row.jo} for Dispatch`, { icon: '📦' });
-                        window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
-                      }}
-                      columns={[
-                        { label: 'Job Order', dataIndex: 'jo', type: 'string', render: (v, row) => (
-                          <div className="flex flex-col min-w-[120px]">
-                            <span className="font-black text-slate-900 text-base">{v}</span>
-                            <span className="text-xs font-bold text-slate-500 mt-0.5 truncate max-w-[150px]" title={row.customer}>{row.customer}</span>
-                          </div>
-                        )},
-                        { label: 'Details', dataIndex: 'description', type: 'string', render: (v, row) => (
-                          <div className="flex flex-col min-w-[150px] max-w-[200px]">
-                            <span className="text-slate-800 font-bold text-sm truncate" title={v}>{v || '-'}</span>
-                            <span className="inline-block mt-1.5 bg-slate-100 text-slate-500 text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded border border-slate-200 w-fit truncate" title={row.dimension}>{row.dimension || '-'}</span>
-                          </div>
-                        )},
-                        { label: 'Packing', dataIndex: 'packingSize', type: 'string', render: (v, row) => (
-                          <div className="flex items-center gap-1.5">
-                            <span className="font-black text-slate-700">{v}</span>
-                            <span className="text-xs font-bold text-slate-500">{row.packingUom}</span>
-                          </div>
-                        )},
-                        { label: 'Total Packed', dataIndex: 'totalPackedWeight', type: 'number', render: (v, row) => (
-                          <div className="flex flex-col">
-                            <span className="font-black text-emerald-700 text-base">{v.toFixed(1)} kg</span>
-                            <span className="text-[10px] font-black uppercase text-slate-400 mt-0.5">Pallets: {row.totalPalletWeight.toFixed(1)} kg</span>
-                          </div>
-                        )},
-                        { label: 'Pending', dataIndex: 'pendingDispatch', type: 'number', render: v => (
-                          <span className={`font-black text-base ${v > 0 ? 'text-amber-600' : 'text-slate-400'}`}>{v.toFixed(1)} kg</span>
-                        )}
-                      ]}
-                    />
-
-                    {/* Container Logistics Table */}
-                    <div className="mt-6 md:mt-8">
-                      <SortableTable 
-                        title={t("Container Logistics")} 
-                        data={dashboardData.containers || []}
-                        rowsPerPage={3}
-                        columns={[
-                          { label: t("Customer"), dataIndex: 0, type: 'string', render: v => <span className="font-bold text-slate-800">{v || '-'}</span> },
-                          { label: t("Container"), dataIndex: 1, type: 'string', render: v => <span className="font-black text-blue-700">{v || '-'}</span> },
-                          { label: t("Arrival Date"), dataIndex: 2, type: 'string', render: v => <span className="text-slate-600 font-bold">{v ? (isNaN(new Date(v).getTime()) ? String(v) : new Date(v).toLocaleDateString('en-GB')) : '-'}</span> },
-                          { label: t("Laden Date"), dataIndex: 3, type: 'string', render: v => <span className="text-slate-600 font-bold">{v ? (isNaN(new Date(v).getTime()) ? String(v) : new Date(v).toLocaleDateString('en-GB')) : '-'}</span> },
-                          { label: t("ETD PK Date"), dataIndex: 4, type: 'string', render: v => <span className="text-slate-600 font-bold">{v ? (isNaN(new Date(v).getTime()) ? String(v) : new Date(v).toLocaleDateString('en-GB')) : '-'}</span> }
-                        ]}
-                      />
-                    </div>
-                  </div>
-
-                  {/* Dispatch Submission Form (Sticky on Desktop) */}
-                  <section className="bg-white p-5 md:p-8 rounded-3xl border border-slate-200 shadow-sm flex flex-col xl:sticky xl:top-24">
-                    <h3 className="text-xl font-black text-slate-800 mb-6 flex items-center gap-2"><Truck size={22} className="text-blue-500"/> {t("Dispatch / Shipping")}</h3>
-                    <div className="space-y-5">
-                      <div className="min-w-0">
-                        <label className="block text-sm font-bold text-slate-700 mb-2">{t("Job Order No.")}</label>
-                        <input type="text" name="jobOrder" value={formData.jobOrder} onChange={handleInputChange} required placeholder="e.g. 99-1" className="w-full h-14 px-4 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none uppercase font-black text-base bg-slate-50 focus:bg-white transition-colors" list="jo-suggestions" />
-                      </div>
-                      <div className="min-w-0">
-                        <label className="block text-sm font-bold text-slate-700 mb-2">{t("Shipped Quantity (kg)")}</label>
-                        <input type="number" step="0.01" name="dispatchQty" value={formData.dispatchQty} onChange={handleInputChange} className="w-full h-14 px-4 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none font-black text-xl text-blue-700" />
-                      </div>
-                      <div className="min-w-0">
-                        <label className="block text-sm font-bold text-slate-700 mb-2">{t("Delivery Order (DO) / Invoice No.")}</label>
-                        <input type="text" name="deliveryOrderNo" value={formData.deliveryOrderNo} onChange={handleInputChange} className="w-full h-14 px-4 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none font-semibold text-base" />
-                      </div>
-                    </div>
-                    
-                    <div className="pt-6 border-t border-slate-200 mt-6">
-                      <ImageUploadField preview={evidenceImagePreview} onFileChange={handleEvidenceImageChange} onClear={clearEvidenceImage} t={t} />
-                    </div>
-                  </section>
-                </div>
-              )}
-
-              {department === 'Incoming Goods' && (
-                <section className="bg-white p-5 md:p-8 rounded-3xl border border-slate-200 shadow-sm max-w-4xl mx-auto">
-                  <h3 className="text-xl font-black text-slate-800 mb-6 flex items-center gap-2"><ArrowDownToLine size={22} className="text-blue-500"/> {t("Raw Material Inwards")}</h3>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
-                    <div className="min-w-0"><label className="block text-sm font-bold text-slate-700 mb-2">{t("Material Name / ID")}</label><input type="text" name="restockMaterial" value={formData.restockMaterial} onChange={handleInputChange} required className="w-full h-14 px-4 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none font-bold text-base uppercase" list="material-suggestions" /></div>
-                    <div className="min-w-0"><label className="block text-sm font-bold text-slate-700 mb-2">{t("Supplier Name")}</label><input type="text" name="supplier" value={formData.supplier} onChange={handleInputChange} className="w-full h-14 px-4 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none font-semibold text-base uppercase" list="supplier-suggestions" /></div>
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-6">
-                    <div className="min-w-0"><label className="block text-sm font-bold text-slate-700 mb-2">{t("PO No.")}</label><input type="text" name="poNumber" value={formData.poNumber} onChange={handleInputChange} className="w-full h-14 px-4 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none font-semibold text-base uppercase" /></div>
-                    <div className="min-w-0"><label className="block text-sm font-bold text-slate-700 mb-2">{t("Location")}</label><input type="text" name="location" value={formData.location} onChange={handleInputChange} className="w-full h-14 px-4 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none font-semibold uppercase text-base" /></div>
-                    <div className="min-w-0">
-                      <label className="block text-sm font-bold text-slate-700 mb-2">{t("Condition")}</label>
-                      <select name="incomingQualityCheck" value={formData.incomingQualityCheck} onChange={handleInputChange} className="w-full h-14 px-4 border border-slate-300 rounded-xl outline-none bg-white font-bold text-base">
-                        <option value="Pass">Pass</option><option value="Damaged">Damaged</option><option value="Contaminated">Contaminated</option>
-                      </select>
-                    </div>
-                  </div>
-
-                  {/* Batch Generator Section */}
-                  <div className="bg-slate-50 p-5 rounded-2xl border border-slate-200">
-                    <h4 className="text-sm font-black text-slate-700 mb-4 tracking-wide">Pallet / Batch Generator</h4>
-                    <div className="flex flex-col sm:flex-row gap-4 items-end">
-                      <div className="w-full sm:w-1/3">
-                        <label className="block text-xs font-bold text-slate-500 mb-2 uppercase tracking-wider">Amount Per Pallet (kg)</label>
-                        <input type="number" step="0.01" name="restockAmount" value={formData.restockAmount} onChange={handleInputChange} className="w-full h-14 px-4 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none font-black text-xl text-blue-700" placeholder="e.g. 1250" />
-                      </div>
-                      <div className="w-full sm:w-1/3">
-                        <label className="block text-xs font-bold text-slate-500 mb-2 uppercase tracking-wider">No. of Pallets</label>
-                        <input type="number" value={quickPalletCount} onChange={e => setQuickPalletCount(e.target.value)} className="w-full h-14 px-4 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none font-black text-lg" min="1" />
-                      </div>
-                      <button type="button" onClick={handleAutoBatch} className="w-full sm:w-1/3 h-14 bg-blue-600 hover:bg-blue-700 text-white font-black rounded-xl transition-all shadow-md active:scale-95 text-base">Generate Batches</button>
-                    </div>
-
-                    {/* List of generated batches */}
-                    {(formData.incomingBatches && formData.incomingBatches.length > 0) && (
-                      <div className="mt-6 space-y-2 max-h-64 overflow-y-auto pr-1 custom-scrollbar">
-                        {formData.incomingBatches.map((batch, idx) => (
-                           <div key={batch.id} className="flex justify-between items-center bg-white p-3 sm:p-3.5 rounded-xl border border-slate-200 shadow-sm gap-2">
-                             <div className="flex items-center gap-2 flex-1 min-w-0">
-                               <span className="bg-blue-100 text-blue-700 font-black text-xs px-2 py-1 rounded-md shrink-0">{idx + 1}</span>
-                               <input type="text" value={batch.batchNo} onChange={(e) => updateIncomingBatchNo(batch.id, e.target.value)} className="font-bold text-slate-800 text-sm sm:text-base outline-none border-b border-dashed border-slate-300 focus:border-blue-500 bg-transparent w-full min-w-[60px] uppercase" />
-                             </div>
-                             <div className="flex items-center gap-2 sm:gap-4 shrink-0">
-                               <InlineEdit value={batch.amount} onSave={(val) => updateIncomingBatchAmount(batch.id, val)} suffix="kg" />
-                               <button type="button" onClick={() => removeIncomingBatch(batch.id)} className="text-slate-400 hover:text-red-500 p-1.5 sm:p-2 bg-slate-50 hover:bg-red-50 rounded-lg transition-colors"><Trash2 size={16}/></button>
-                             </div>
-                           </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="pt-6 border-t border-slate-200 mt-6">
-                    <ImageUploadField preview={evidenceImagePreview} onFileChange={handleEvidenceImageChange} onClear={clearEvidenceImage} t={t} />
-                  </div>
-                </section>
-              )}
-
-              {department === 'Purchase Requisition' && (
-                <section className="bg-white p-5 md:p-8 rounded-3xl border border-slate-200 shadow-sm max-w-4xl mx-auto">
-                  <h3 className="text-xl font-black text-slate-800 mb-6 flex items-center gap-2"><ShoppingCart size={22} className="text-amber-500"/> {t("Purchase Requisition")}</h3>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
-                    <div className="min-w-0">
-                      <label className="block text-sm font-bold text-slate-700 mb-2">{t("Item Name")}</label>
-                      <input type="text" name="reqItemName" value={formData.reqItemName} onChange={handleInputChange} required className="w-full h-14 px-4 border border-slate-300 rounded-xl focus:ring-2 focus:ring-amber-500 outline-none font-bold text-base uppercase" placeholder="e.g. PACKING TAPE" />
-                    </div>
-                    <div className="flex gap-4">
-                      <div className="flex-1 min-w-0">
-                        <label className="block text-sm font-bold text-slate-700 mb-2">{t("Quantity")}</label>
-                        <input type="number" step="0.01" name="reqQuantity" value={formData.reqQuantity} onChange={handleInputChange} required className="w-full h-14 px-4 border border-slate-300 rounded-xl focus:ring-2 focus:ring-amber-500 outline-none font-black text-base" />
-                      </div>
-                      <div className="w-28 shrink-0">
-                        <label className="block text-sm font-bold text-slate-700 mb-2">{t("UoM")}</label>
-                        <input type="text" name="reqUom" value={formData.reqUom} onChange={handleInputChange} required className="w-full h-14 px-4 border border-slate-300 rounded-xl outline-none font-bold text-base" />
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
-                    <div className="min-w-0">
-                      <label className="block text-sm font-bold text-slate-700 mb-2">{t("Current Stock")}</label>
-                      <input type="number" step="0.01" name="reqCurrentStock" value={formData.reqCurrentStock} onChange={handleInputChange} className="w-full h-14 px-4 border border-slate-300 rounded-xl focus:ring-2 focus:ring-amber-500 outline-none font-bold text-base" />
-                    </div>
-                    <div className="min-w-0">
-                      <label className="block text-sm font-bold text-slate-700 mb-2">{t("Remarks")}</label>
-                      <input type="text" name="reqRemarks" value={formData.reqRemarks} onChange={handleInputChange} className="w-full h-14 px-4 border border-slate-300 rounded-xl focus:ring-2 focus:ring-amber-500 outline-none text-base" placeholder="Optional notes..." />
-                    </div>
-                  </div>
-                </section>
-              )}
-
-              {department === 'Quality Control' && (
-                <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 md:gap-8 items-start w-full">
-                  
-                  {/* Container 1: Machine Inspection */}
-                  <section 
-                    onClick={() => handleQcFormSwitch('machine')}
-                    className={`bg-white p-5 md:p-8 rounded-3xl border-2 transition-all duration-300 shadow-sm flex flex-col ${qcActiveForm === 'machine' ? 'border-blue-500 ring-4 ring-blue-50' : 'border-slate-200 opacity-60 hover:opacity-100 cursor-pointer'}`}
-                  >
-                    <h3 className="text-xl font-black text-slate-800 mb-6 flex items-center gap-2">
-                      <Settings size={22} className={qcActiveForm === 'machine' ? 'text-blue-500' : 'text-slate-400'}/> 
-                      {t("Machine Inspection")}
-                    </h3>
-                    
-                    <div className="space-y-5 pointer-events-auto flex-1 flex flex-col">
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 mb-5">
-                        <div className="min-w-0">
-                            <label className="block text-sm font-bold text-slate-700 mb-2">{t("Machine Type")}</label>
-                            <select name="qcMachineType" value={formData.qcMachineType} onChange={handleInputChange} disabled={qcActiveForm !== 'machine'} className="w-full h-14 px-4 border border-slate-300 rounded-xl outline-none bg-white font-bold text-base disabled:bg-slate-50 transition-colors">
-                                <option value="Extrusion">{t("Extrusion")}</option>
-                                <option value="Cutting">{t("Cutting")}</option>
-                            </select>
-                        </div>
-                        <div className="min-w-0">
-                            <label className="block text-sm font-bold text-slate-700 mb-2">{t("Machine No.")}</label>
-                            <input type="text" name="machineId" value={formData.machineId} onChange={handleInputChange} disabled={qcActiveForm !== 'machine'} className="w-full h-14 px-4 border border-slate-300 rounded-xl outline-none font-black text-base uppercase disabled:bg-slate-50 transition-colors" list="machine-suggestions" placeholder="e.g. B1 / C1" />
-                        </div>
-                      </div>
-
-                      {formData.qcMachineType === 'Extrusion' && (
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 mb-5">
-                          <div className="min-w-0">
-                              <label className="block text-sm font-bold text-slate-700 mb-2">{t("Filter Status")}</label>
-                              <select name="qcExtFilter" value={formData.qcExtFilter} onChange={handleInputChange} disabled={qcActiveForm !== 'machine'} className="w-full h-14 px-4 border border-slate-300 rounded-xl outline-none bg-white font-bold text-base disabled:bg-slate-50 transition-colors">
-                                  <option value="Good">{t("Good")}</option>
-                                  <option value="Needs Change">{t("Needs Change")}</option>
-                                  <option value="Changed">{t("Changed")}</option>
-                              </select>
-                          </div>
-                          <div className="min-w-0">
-                              <label className="block text-sm font-bold text-slate-700 mb-2">{t("Scrap Purged")}</label>
-                              <select name="qcExtPurged" value={formData.qcExtPurged} onChange={handleInputChange} disabled={qcActiveForm !== 'machine'} className="w-full h-14 px-4 border border-slate-300 rounded-xl outline-none bg-white font-bold text-base disabled:bg-slate-50 transition-colors">
-                                  <option value="Yes">{t("Yes")}</option>
-                                  <option value="No">{t("No")}</option>
-                                  <option value="N/A">{t("N/A")}</option>
-                              </select>
-                          </div>
-                        </div>
-                      )}
-                      
-                      {formData.qcMachineType === 'Cutting' && (
-                          <div className="space-y-5">
-                              <QCField label={t("Sealing Temperature (℃)")} name="qcCutTemp" statusName="qcCutTempStatus" formData={formData} onChange={handleInputChange} t={t} placeholder="e.g. 180" disabled={qcActiveForm !== 'machine'} />
-                              <QCField label={t("Blade / Thickness Check")} name="qcCutMachineThickness" statusName="qcCutMachineThicknessStatus" formData={formData} onChange={handleInputChange} t={t} placeholder="e.g. 0.05" disabled={qcActiveForm !== 'machine'} />
-                          </div>
-                      )}
-
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 mb-5">
-                          <div className="min-w-0">
-                              <label className="block text-sm font-bold text-slate-700 mb-2">{t("Machine Cleanliness")}</label>
-                              <select name="qcMachineCleanliness" value={formData.qcMachineCleanliness} onChange={handleInputChange} disabled={qcActiveForm !== 'machine'} className="w-full h-14 px-4 border border-slate-300 rounded-xl outline-none bg-white font-bold text-base disabled:bg-slate-50 transition-colors">
-                                  <option className="text-emerald-600" value="Pass">{t("Pass")}</option>
-                                  <option className="text-red-600" value="Fail">{t("Fail")}</option>
-                              </select>
-                          </div>
-                          <div className="min-w-0">
-                              <label className="block text-sm font-bold text-slate-700 mb-2">{t("Safety Guards")}</label>
-                              <select name="qcMachineSafety" value={formData.qcMachineSafety} onChange={handleInputChange} disabled={qcActiveForm !== 'machine'} className="w-full h-14 px-4 border border-slate-300 rounded-xl outline-none bg-white font-bold text-base disabled:bg-slate-50 transition-colors">
-                                  <option className="text-emerald-600" value="Pass">{t("Pass")}</option>
-                                  <option className="text-red-600" value="Fail">{t("Fail")}</option>
-                              </select>
-                          </div>
-                      </div>
-                      
-                      <div className="pt-6 border-t border-slate-200 mt-auto">
-                        <ImageUploadField preview={evidenceImagePreview} onFileChange={handleEvidenceImageChange} onClear={clearEvidenceImage} disabled={qcActiveForm !== 'machine'} t={t} />
-                        <label className="block text-sm font-bold text-slate-700 mb-2">{t("Overall QC Remarks / Issues Noted")}</label>
-                        <textarea name="qcNotes" value={formData.qcNotes} onChange={handleInputChange} disabled={qcActiveForm !== 'machine'} rows="3" className="w-full p-4 border border-slate-300 rounded-xl outline-none text-base disabled:bg-slate-50 transition-colors"></textarea>
-                      </div>
-                    </div>
-                  </section>
-
-                  {/* Container 2: Product QC */}
-                  <section 
-                    onClick={() => handleQcFormSwitch('product')}
-                    className={`bg-white p-5 md:p-8 rounded-3xl border-2 transition-all duration-300 shadow-sm flex flex-col ${qcActiveForm === 'product' ? 'border-emerald-500 ring-4 ring-emerald-50' : 'border-slate-200 opacity-60 hover:opacity-100 cursor-pointer'}`}
-                  >
-                    <h3 className="text-xl font-black text-slate-800 mb-6 flex items-center gap-2">
-                      <CheckCircle size={22} className={qcActiveForm === 'product' ? 'text-emerald-500' : 'text-slate-400'}/> 
-                      {t("Quality Control Assessment")}
-                    </h3>
-                    
-                    <div className="flex flex-col sm:flex-row bg-slate-100 rounded-xl p-1.5 mb-8 pointer-events-auto">
-                      {['Extrusion', 'Cutting', 'Packing'].map(stage => (
-                        <button key={stage} type="button" onClick={() => {setQcStage(stage); handleQcFormSwitch('product');}} className={`flex-1 py-3 px-3 text-base font-black rounded-lg transition-all ${qcStage === stage && qcActiveForm === 'product' ? 'bg-white text-emerald-700 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>{t(stage)} QC</button>
-                      ))}
-                    </div>
-
-                    <div className="space-y-5 pointer-events-auto flex-1 flex flex-col">
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 mb-5">
-                        <div className="min-w-0 sm:col-span-2">
-                            <label className="block text-sm font-bold text-slate-700 mb-2">Job Order No.</label>
-                            <input type="text" name="jobOrder" value={formData.jobOrder} onChange={handleInputChange} required={qcActiveForm === 'product'} disabled={qcActiveForm !== 'product'} className="w-full h-14 px-4 border border-slate-300 rounded-xl outline-none font-black text-base uppercase disabled:bg-slate-50 transition-colors" list="jo-suggestions" placeholder="e.g. 99-1" />
-                        </div>
-                        {qcStage !== 'Packing' && (
-                          <div className="min-w-0 sm:col-span-2">
-                              <label className="block text-sm font-bold text-slate-700 mb-2">{t("Machine No.")}</label>
-                              <input type="text" name="machineId" value={formData.machineId} onChange={handleInputChange} disabled={qcActiveForm !== 'product'} required={qcActiveForm === 'product' && qcStage !== 'Packing'} className="w-full h-14 px-4 border border-slate-300 rounded-xl outline-none font-black text-base uppercase disabled:bg-slate-50 transition-colors" list="machine-suggestions" placeholder="e.g. B1 / C1" />
-                          </div>
-                        )}
-                      </div>
-
-                      {qcStage === 'Extrusion' && (<><QCField label={t("Thickness Check (Microns)")} name="qcExtThickness" statusName="qcExtThicknessStatus" formData={formData} onChange={handleInputChange} t={t} disabled={qcActiveForm !== 'product'} /><QCField label={t("Width Check (mm)")} name="qcExtWidth" statusName="qcExtWidthStatus" formData={formData} onChange={handleInputChange} t={t} disabled={qcActiveForm !== 'product'} /></>)}
-                      {qcStage === 'Cutting' && (<><QCField label={t("Seal Integrity Assessment")} name="qcCutSeal" statusName="qcCutSealStatus" formData={formData} onChange={handleInputChange} t={t} disabled={qcActiveForm !== 'product'} /><QCField label={t("Length Check (mm)")} name="qcCutLength" statusName="qcCutLengthStatus" formData={formData} onChange={handleInputChange} t={t} disabled={qcActiveForm !== 'product'} /></>)}
-                      {qcStage === 'Packing' && (<><QCField label={t("Packing Size (Bag Weight - kg)")} name="qcPackBagWeight" statusName="qcPackBagWeightStatus" formData={formData} onChange={handleInputChange} t={t} disabled={qcActiveForm !== 'product'} /><QCField label={t("Total Bags Verified")} name="qcPackTotalBags" statusName="qcPackTotalBagsStatus" formData={formData} onChange={handleInputChange} t={t} disabled={qcActiveForm !== 'product'} /></>)}
-                      
-                      <div className="pt-6 border-t border-slate-200 mt-auto">
-                        <ImageUploadField preview={evidenceImagePreview} onFileChange={handleEvidenceImageChange} onClear={clearEvidenceImage} disabled={qcActiveForm !== 'product'} t={t} />
-                        <label className="block text-sm font-bold text-slate-700 mb-2">{t("Overall QC Remarks / Issues Noted")}</label>
-                        <textarea name="qcNotes" value={formData.qcNotes} onChange={handleInputChange} disabled={qcActiveForm !== 'product'} rows="3" className="w-full p-4 border border-slate-300 rounded-xl outline-none text-base disabled:bg-slate-50 transition-colors"></textarea>
-                      </div>
-                    </div>
-                  </section>
-                </div>
-              )}
-
-              {/* Downtime (Only for Manufacturing) */}
-              {['Extrusion', 'Cutting'].includes(department) && (
-                <section className="bg-white p-5 md:p-8 rounded-3xl border border-slate-200 shadow-sm">
-                  <h3 className="text-xl font-black text-slate-800 mb-6 flex items-center gap-2"><Clock size={22} className="text-blue-500"/> {t("Machine Downtime")}</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div className="grid grid-cols-2 gap-4 min-w-0">
-                      <div className="min-w-0"><label className="block text-sm font-bold text-slate-700 mb-2">{t("Planned (mins)")}</label><input type="number" name="plannedDowntime" value={formData.plannedDowntime} onChange={handleInputChange} className="w-full h-14 px-4 border border-slate-300 rounded-xl outline-none font-bold text-base" /></div>
-                      <div className="min-w-0"><label className="block text-sm font-bold text-slate-700 mb-2">{t("Unplanned (mins)")}</label><input type="number" name="unplannedDowntime" value={formData.unplannedDowntime} onChange={handleInputChange} className="w-full h-14 px-4 border border-slate-300 rounded-xl outline-none font-bold text-base" /></div>
-                    </div>
-                    <div className="md:col-span-2 min-w-0">
-                      <label className="block text-sm font-bold text-slate-700 mb-2">{t("Primary Downtime Reason")}</label>
-                      <input type="text" name="downtimeReason" value={formData.downtimeReason} onChange={handleInputChange} className="w-full h-14 px-4 border border-slate-300 rounded-xl outline-none font-semibold text-base" list="downtime-suggestions" />
-                    </div>
-                  </div>
-                </section>
-              )}
-              
-              {/* Discrepancy Box (if failed) */}
-              {['Extrusion', 'Cutting'].includes(department) && massBalance.isFailed && (
-                <div className="p-6 bg-red-50 border border-red-200 rounded-2xl animate-in slide-in-from-bottom-2">
-                   <label className="block text-sm font-black text-red-800 mb-3 tracking-wide">{t("Reason for Discrepancy (Required for Override)")}</label>
-                   <input type="text" name="discrepancyReason" value={formData.discrepancyReason} onChange={handleInputChange} placeholder="e.g. Scale calibration issue..." className="w-full h-14 px-4 border border-red-300 rounded-xl focus:ring-2 focus:ring-red-500 outline-none bg-white font-semibold text-base" />
-                </div>
-              )}
-
-            </form>
-          )}
+      {department === 'Dashboard' ? (
+        <DashboardView 
+         t={t} dashboardData={dashboardData} fetchDashboardData={fetchDashboardData} isFetchingDashboard={isFetchingDashboard}
+         analyticsDept={analyticsDept} setAnalyticsDept={setAnalyticsDept} analyticsPeriod={analyticsPeriod} setAnalyticsPeriod={setAnalyticsPeriod}
+         currentAnalytics={currentAnalytics} trendOutput={trendOutput} trendConsumption={trendConsumption} trendWastage={trendWastage}
+         activeOrdersData={activeOrdersData} showCompleted={showCompleted} setShowCompleted={setShowCompleted} handleCycleStatus={handleCycleStatus}
+         setFlagData={setFlagData} setIsFlagModalOpen={setIsFlagModalOpen} setSelectedLog={setSelectedLog}
+        />
+      ) : department === 'Job Schedule' ? (
+          <JobScheduleView 
+            t={t}
+            handleAutoSchedule={handleAutoSchedule}
+            fetchDashboardData={fetchDashboardData}
+            isFetchingDashboard={isFetchingDashboard}
+            scheduleTab={scheduleTab}
+            setScheduleTab={setScheduleTab}
+            extSchedule={extSchedule}
+            pendingExtrusion={pendingExtrusion}
+            cutSchedule={cutSchedule}
+            pendingCutting={pendingCutting}
+            packSchedule={packSchedule}
+            pendingPacking={pendingPacking}
+            activeOrdersData={activeOrdersData}
+            setSelectedLog={setSelectedLog}
+            handleUrgencyChange={handleUrgencyChange}
+    />) : department === 'Inventory' ? (
+              <InventoryView 
+                t={t}
+                inventoryTab={inventoryTab} setInventoryTab={setInventoryTab}
+                stocktakeCategory={stocktakeCategory} setStocktakeCategory={setStocktakeCategory}
+                stocktakeForm={stocktakeForm} setStocktakeForm={setStocktakeForm} initialStocktakeForm={initialStocktakeForm}
+                setIsScanningQR={setIsScanningQR}
+                fetchDashboardData={fetchDashboardData} isFetchingDashboard={isFetchingDashboard}
+                rawMaterialsSummary={rawMaterialsSummary} warehouseGoodsData={warehouseGoodsData} dashboardData={dashboardData}
+                activeRequisitions={activeRequisitions} handleResolveRequisition={handleResolveRequisition}
+                uniqueFinishedGoods={uniqueFinishedGoods} uniqueRawMaterials={uniqueRawMaterials}
+                handleStocktakeSubmit={handleStocktakeSubmit}
+              />
+            ) : ( <ProductionFormView 
+                formRef={formRef}
+                department={department} t={t} formData={formData} setFormData={setFormData} handleInputChange={handleInputChange} massBalance={massBalance}
+                pendingExtrusion={pendingExtrusion} pendingCutting={pendingCutting} pendingPacking={pendingPacking} readyToShipData={readyToShipData} dashboardData={dashboardData}
+                showCompleted={showCompleted} setShowCompleted={setShowCompleted}
+                joSuggestions={joSuggestions} materialSuggestions={materialSuggestions} localHistory={localHistory}
+                quickMaterialBatch={quickMaterialBatch} setQuickMaterialBatch={setQuickMaterialBatch} quickMaterialWeight={quickMaterialWeight} setQuickMaterialWeight={setQuickMaterialWeight} quickMaterialUom={quickMaterialUom} setQuickMaterialUom={setQuickMaterialUom} quickMaterialName={quickMaterialName} quickMaterialId={quickMaterialId}
+                quickRollWeight={quickRollWeight} setQuickRollWeight={setQuickRollWeight} quickScrapType={quickScrapType} setQuickScrapType={setQuickScrapType} quickScrapWeight={quickScrapWeight} setQuickScrapWeight={setQuickScrapWeight} quickPalletCount={quickPalletCount} setQuickPalletCount={setQuickPalletCount}
+                handleAddMaterial={handleAddMaterial} handleRemoveMaterial={handleRemoveMaterial} handleAddRoll={handleAddRoll} handleRemoveRoll={handleRemoveRoll} handleAddScrap={handleAddScrap} handleRemoveScrap={handleRemoveScrap}
+                updateMaterialQuantity={updateMaterialQuantity} updateRollWeight={updateRollWeight} updateScrapWeight={updateScrapWeight} updateBagWeight={updateBagWeight} addBagWeightRow={addBagWeightRow} removeBagWeightRow={removeBagWeightRow}
+                handleAutoBatch={handleAutoBatch} updateIncomingBatchNo={updateIncomingBatchNo} updateIncomingBatchAmount={updateIncomingBatchAmount} removeIncomingBatch={removeIncomingBatch}
+                qcStage={qcStage} setQcStage={setQcStage} qcActiveForm={qcActiveForm} handleQcFormSwitch={handleQcFormSwitch}
+                setIsScanningQR={setIsScanningQR} evidenceImagePreview={evidenceImagePreview} handleEvidenceImageChange={handleEvidenceImageChange} clearEvidenceImage={clearEvidenceImage}
+              />
+            )}
         </div>
+      </main>
 
-        {/* STICKY FOOTER ACTION BAR */}
-        {department !== 'Dashboard' && department !== 'Inventory' && department !== 'Job Schedule' && (
-          <div className={`fixed bottom-0 right-0 w-full md:w-[calc(100%-18rem)] bg-white/95 backdrop-blur-md border-t border-slate-200 p-4 shadow-[0_-10px_30px_-5px_rgba(0,0,0,0.1)] z-40 flex flex-col sm:flex-row justify-between items-center gap-3 sm:gap-4 px-4 md:px-8 transition-transform duration-300 ${!isFooterVisible || isSidebarOpen ? 'translate-y-full' : 'translate-y-0'}`}>
-            <div className="flex flex-col text-center sm:text-left text-sm w-full sm:w-auto">
-              <span className="font-black text-slate-800 tracking-tight text-base">
-                {department === 'Quality Control' ? (qcActiveForm === 'machine' ? 'Machine Inspection' : 'Product QC Report') : `${t(department)} Report`}
-              </span>
-              <span className="text-slate-500 text-[11px] uppercase tracking-widest font-bold flex items-center justify-center sm:justify-start gap-1.5 mt-0.5"><CheckCircle size={14} className="text-emerald-500"/> {saveIndicator}</span>
-            </div>
-            
-            <button 
-              onClick={handleSave} disabled={isSubmitting}
-              className={`flex items-center justify-center gap-2 px-8 py-3.5 rounded-xl text-base font-black transition-all w-full sm:w-auto shadow-md active:scale-95 ${
-                isSubmitting ? 'bg-slate-400 cursor-not-allowed text-white' : 
-                (massBalance.isFailed && !formData.discrepancyReason && ['Extrusion', 'Cutting'].includes(department)) ? 'bg-red-500 hover:bg-red-600 text-white shadow-red-500/30 ring-4 ring-red-100' : 
-                'bg-blue-600 hover:bg-blue-700 text-white shadow-blue-500/30 hover:-translate-y-0.5'
-              }`}
-            >
-              <Save size={20} /> 
-              {isSubmitting ? t('Saving...') : 
-               (massBalance.isFailed && !formData.discrepancyReason && ['Extrusion', 'Cutting'].includes(department)) ? t('Discrepancy Must Be Resolved') : 
-               (department === 'Quality Control' ? `Submit ${qcActiveForm === 'machine' ? 'Machine Inspection' : 'Product QC'}` : t('Submit Log'))}
+      {/* --- PERSISTENT FLOATING SUBMIT BUTTON --- */}
+      {isLoggedIn && !['Dashboard', 'Inventory', 'Job Schedule'].includes(department) && (
+        <div className={`fixed bottom-0 left-0 md:left-72 right-0 bg-white/80 backdrop-blur-md border-t border-slate-200 p-4 md:p-5 flex flex-col md:flex-row justify-between items-center z-40 transition-transform duration-300 ease-in-out ${isFooterVisible ? 'translate-y-0' : 'translate-y-[120%]'} shadow-[0_-10px_30px_rgba(0,0,0,0.05)]`}>
+          <div className="flex items-center gap-4 mb-3 md:mb-0 w-full md:w-auto overflow-x-auto custom-scrollbar pb-1 md:pb-0">
+             <div className="flex items-center gap-2 text-slate-600 bg-slate-100 px-3 py-1.5 rounded-lg shrink-0">
+                <Clock size={16} /> <span className="text-sm font-semibold">{saveIndicator}</span>
+             </div>
+             {(department === 'Extrusion' || department === 'Cutting') && massBalance.isFailed && (
+                <div className="min-w-[200px] shrink-0">
+                  <input type="text" name="discrepancyReason" value={formData.discrepancyReason} onChange={handleInputChange} placeholder={t("Reason for Discrepancy (Required for Override)")} className="w-full px-3 py-2 text-sm border-2 border-red-300 bg-red-50 rounded-lg outline-none focus:border-red-500 text-red-900 placeholder:text-red-300" required />
+                </div>
+             )}
+          </div>
+          <div className="flex gap-3 w-full md:w-auto shrink-0">
+            <button onClick={() => window.print()} className="hidden md:flex flex-1 md:flex-none items-center justify-center gap-2 px-6 py-3.5 bg-slate-100 text-slate-700 rounded-xl font-bold hover:bg-slate-200 transition-colors shadow-sm active:scale-95"><Printer size={18} /> {t("Print")}</button>
+            <button onClick={handleSave} disabled={isSubmitting} className={`flex-[2] md:flex-none flex items-center justify-center gap-2 px-8 py-3.5 text-white rounded-xl font-black text-lg transition-all shadow-md active:scale-95 ${isSubmitting ? 'bg-slate-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700 hover:shadow-lg'}`}>
+              <Save size={20} /> {isSubmitting ? t("Saving...") : t("Submit Shift Log")}
             </button>
           </div>
-        )}
-      </main>
+        </div>
+      )}
     </div>
   );
 };

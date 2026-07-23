@@ -1,0 +1,505 @@
+function doPost(e) {
+  if (!e) return ContentService.createTextOutput(JSON.stringify({"status": "error", "message": "No event provided."})).setMimeType(ContentService.MimeType.JSON);
+
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+
+  try {
+    var data = JSON.parse(e.postData.contents);
+    
+    // --- LOGIN HANDLER ---
+    if (data.action === 'login') {
+      var staffSheet = ss.getSheetByName('Staff List');
+      if (!staffSheet) return ContentService.createTextOutput(JSON.stringify({"status": "error", "message": "Staff List sheet not found."})).setMimeType(ContentService.MimeType.JSON);
+      
+      var staffData = staffSheet.getDataRange().getValues();
+      for (var i = 1; i < staffData.length; i++) {
+        if (staffData[i][0].toString() === data.pin.toString()) {
+          return ContentService.createTextOutput(JSON.stringify({
+            "status": "success",
+            "user": { "name": staffData[i][1], "department": staffData[i][2], "shift": staffData[i][3], "role": staffData[i][4] }
+          })).setMimeType(ContentService.MimeType.JSON);
+        }
+      }
+      return ContentService.createTextOutput(JSON.stringify({"status": "error", "message": "Invalid PIN."})).setMimeType(ContentService.MimeType.JSON);
+    }
+
+    // --- FLAG ERROR HANDLER ---
+    if (data.action === 'flag') {
+      var flagSheet = ss.getSheetByName('Flags');
+      if (!flagSheet) return ContentService.createTextOutput(JSON.stringify({"status": "error", "message": "Flags sheet not found."})).setMimeType(ContentService.MimeType.JSON);
+      flagSheet.appendRow([new Date(), data.flagDepartment, data.flagDate, data.flagJobOrder, data.flagReason, 'Pending', data.supervisor]);
+      return ContentService.createTextOutput(JSON.stringify({"status": "success"})).setMimeType(ContentService.MimeType.JSON);
+    }
+
+    // --- TOGGLE READY TO SHIP ---
+    if (data.action === 'toggleReadyToShip') {
+      var masterSheet = ss.getSheetByName('Master Job Order List');
+      if (!masterSheet) return ContentService.createTextOutput(JSON.stringify({"status": "error", "message": "Master sheet not found."})).setMimeType(ContentService.MimeType.JSON);
+      
+      var mData = masterSheet.getDataRange().getValues();
+      for (var i = 1; i < mData.length; i++) {
+        if (mData[i][1].toString().trim() === data.jo.toString().trim()) {
+          masterSheet.getRange(i + 1, 14).setValue(data.isReady ? "Yes" : ""); // Updates Column N (14)
+          return ContentService.createTextOutput(JSON.stringify({"status": "success"})).setMimeType(ContentService.MimeType.JSON);
+        }
+      }
+      return ContentService.createTextOutput(JSON.stringify({"status": "error", "message": "JO not found."})).setMimeType(ContentService.MimeType.JSON);
+    }
+
+    // --- TOGGLE COMPLETED ---
+    if (data.action === 'toggleCompleted') {
+      var masterSheet = ss.getSheetByName('Master Job Order List');
+      if (!masterSheet) return ContentService.createTextOutput(JSON.stringify({"status": "error", "message": "Master sheet not found."})).setMimeType(ContentService.MimeType.JSON);
+      
+      var mData = masterSheet.getDataRange().getValues();
+      for (var i = 1; i < mData.length; i++) {
+        if (mData[i][1].toString().trim() === data.jo.toString().trim()) {
+          masterSheet.getRange(i + 1, 23).setValue(data.isCompleted ? "Yes" : ""); // Updates Column W (23)
+          return ContentService.createTextOutput(JSON.stringify({"status": "success"})).setMimeType(ContentService.MimeType.JSON);
+        }
+      }
+      return ContentService.createTextOutput(JSON.stringify({"status": "error", "message": "JO not found."})).setMimeType(ContentService.MimeType.JSON);
+    }
+
+    // --- UPDATE URGENCY ---
+    if (data.action === 'updateUrgency') {
+      var masterSheet = ss.getSheetByName('Master Job Order List');
+      var mData = masterSheet.getDataRange().getValues();
+      for (var i = 1; i < mData.length; i++) {
+        if (mData[i][1].toString().trim() === data.jo.toString().trim()) {
+          masterSheet.getRange(i + 1, 22).setValue(data.urgency); // Updates Column V (22)
+          return ContentService.createTextOutput(JSON.stringify({"status": "success"})).setMimeType(ContentService.MimeType.JSON);
+        }
+      }
+      return ContentService.createTextOutput(JSON.stringify({"status": "error", "message": "JO not found."})).setMimeType(ContentService.MimeType.JSON);
+    }
+
+    // --- AUTO-SCHEDULE OVERRIDE ---
+    if (data.action === 'updateSchedule') {
+      var schedSheet = ss.getSheetByName('Job Schedule');
+      if (!schedSheet) return ContentService.createTextOutput(JSON.stringify({"status": "error", "message": "Job Schedule sheet not found."})).setMimeType(ContentService.MimeType.JSON);
+      
+      // Wipe the existing schedule (leaving header)
+      if (schedSheet.getLastRow() > 1) {
+        schedSheet.getRange(2, 1, schedSheet.getLastRow() - 1, 5).clearContent();
+      }
+      // Write the new optimized block
+      if (data.schedule && data.schedule.length > 0) {
+        schedSheet.getRange(2, 1, data.schedule.length, 5).setValues(data.schedule);
+      }
+      return ContentService.createTextOutput(JSON.stringify({"status": "success"})).setMimeType(ContentService.MimeType.JSON);
+    }
+
+    // --- RESOLVE REQUISITION ---
+    if (data.action === 'resolveRequisition') {
+      var reqSheet = ss.getSheetByName('Purchase Requisition');
+      if (!reqSheet) return ContentService.createTextOutput(JSON.stringify({"status": "error", "message": "Req sheet not found."})).setMimeType(ContentService.MimeType.JSON);
+      
+      var reqData = reqSheet.getDataRange().getValues();
+      for (var j = 1; j < reqData.length; j++) {
+        var rowTime = new Date(reqData[j][0]).getTime();
+        if (rowTime === data.timestamp) {
+          reqSheet.getRange(j + 1, 9).setValue("Resolved"); // Updates Status in Column I (9)
+          return ContentService.createTextOutput(JSON.stringify({"status": "success"})).setMimeType(ContentService.MimeType.JSON);
+        }
+      }
+      return ContentService.createTextOutput(JSON.stringify({"status": "error", "message": "Record not found."})).setMimeType(ContentService.MimeType.JSON);
+    }
+
+    // --- SUBMIT STOCKTAKE ---
+    if (data.action === 'submitStocktake') {
+      var stocktakeSheet = ss.getSheetByName('Stocktake');
+      if (!stocktakeSheet) return ContentService.createTextOutput(JSON.stringify({"status": "error", "message": "Stocktake sheet not found."})).setMimeType(ContentService.MimeType.JSON);
+      
+      // Appends data to match your requested format
+      stocktakeSheet.appendRow([
+        new Date(),
+        data.date,
+        data.operator,
+        data.category,
+        data.itemCode || '',
+        data.customer || '',
+        data.description || data.materialName || '',
+        data.dimension || '',
+        data.quantity,
+        data.uom,
+        data.location || '',
+        data.remarks || ''
+      ]);
+      return ContentService.createTextOutput(JSON.stringify({"status": "success"})).setMimeType(ContentService.MimeType.JSON);
+    }
+
+    // --- STANDARD PRODUCTION LOGGING ---
+    var sheetName = data.department;
+    var sheet = ss.getSheetByName(sheetName);
+
+    if (!sheet) return ContentService.createTextOutput(JSON.stringify({"status": "error", "message": "Sheet not found: " + sheetName})).setMimeType(ContentService.MimeType.JSON);
+
+    // --- GENERIC EVIDENCE IMAGE PROCESSOR ---
+    var imageUrl = "";
+    if (data.evidenceImageData && data.evidenceImageData !== null) {
+      try {
+        var blob = Utilities.newBlob(Utilities.base64Decode(data.evidenceImageData), data.evidenceImageMimeType || 'image/png', data.evidenceImageName || 'Evidence.png');
+        
+        var folderIterator = DriveApp.getFoldersByName("DPR_Evidence_Images");
+        var folder;
+        if (folderIterator.hasNext()) {
+          folder = folderIterator.next();
+        } else {
+          folder = DriveApp.createFolder("DPR_Evidence_Images");
+        }
+        
+        var file = folder.createFile(blob);
+        file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+        imageUrl = file.getUrl();
+      } catch(e) {
+        imageUrl = "Error Uploading Image: " + e.toString();
+      }
+    }
+
+    if (sheetName === 'Extrusion') {
+      var materials = "";
+      if (data.extrusionMaterials && data.extrusionMaterials.length > 0) {
+        materials = data.extrusionMaterials.map(function(m) {
+          return "Batch: " + m.batchNo + " | ID: " + m.materialId + " | Name: " + m.materialName + " | Input: " + m.originalQuantity + " " + m.uom + " (" + m.quantity + " kg)";
+        }).join("\n");
+      }
+      sheet.appendRow([new Date(), data.date, data.shift, data.jobOrder, data.machineId, materials, data.actualOutput, data.uom, data.setupScrap, data.processScrap, data.massDiscrepancyPercent, data.supervisor]);
+      
+    } else if (sheetName === 'Cutting') {
+      sheet.appendRow([new Date(), data.date, data.shift, data.jobOrder, data.machineId, (data.inputRollWeight || 0) + "kg", data.actualOutput, data.uom, data.setupScrap, data.processScrap, data.massDiscrepancyPercent, data.supervisor]);
+      
+    } else if (sheetName === 'Quality Control') {
+      var qcDetails = [];
+      var stage = data.qcStage || "General";
+      
+      if (stage === 'Extrusion') {
+        if (data.qcExtThickness) qcDetails.push("Thickness: " + data.qcExtThickness + " (" + data.qcExtThicknessStatus + ")");
+        if (data.qcExtWidth) qcDetails.push("Width: " + data.qcExtWidth + " mm (" + data.qcExtWidthStatus + ")");
+      } else if (stage === 'Cutting') {
+        if (data.qcCutSeal) qcDetails.push("Seal Check: " + data.qcCutSeal + " (" + data.qcCutSealStatus + ")");
+        if (data.qcCutLength) qcDetails.push("Length: " + data.qcCutLength + " mm (" + data.qcCutLengthStatus + ")");
+      } else if (stage === 'Packing') {
+        if (data.qcPackBagWeight) qcDetails.push("Bag Wt: " + data.qcPackBagWeight + " kg (" + data.qcPackBagWeightStatus + ")");
+        if (data.qcPackBagsPerPallet) qcDetails.push("Bags/Pallet: " + data.qcPackBagsPerPallet + " (" + data.qcPackBagsPerPalletStatus + ")");
+        if (data.qcPackTotalBags) qcDetails.push("Total Bags: " + data.qcPackTotalBags + " (" + data.qcPackTotalBagsStatus + ")");
+        if (data.qcPackTotalPallets) qcDetails.push("Total Pallets: " + data.qcPackTotalPallets + " (" + data.qcPackTotalPalletsStatus + ")");
+      } else if (stage === 'Machine Inspection') {
+        qcDetails.push("Type: " + data.qcMachineType);
+        if (data.qcMachineType === 'Extrusion') {
+            qcDetails.push("Filter Status: " + data.qcExtFilter);
+            qcDetails.push("Scrap Purged: " + data.qcExtPurged);
+        } else {
+            if (data.qcCutTemp) qcDetails.push("Sealing Temp: " + data.qcCutTemp + " (" + data.qcCutTempStatus + ")");
+            if (data.qcCutMachineThickness) qcDetails.push("Thickness Check: " + data.qcCutMachineThickness + " (" + data.qcCutMachineThicknessStatus + ")");
+        }
+        qcDetails.push("Cleanliness: " + data.qcMachineCleanliness);
+        qcDetails.push("Safety Guards: " + data.qcMachineSafety);
+      }
+
+      if (imageUrl) {
+        qcDetails.push("Evidence Photo: " + imageUrl);
+      }
+
+      var compiledDetails = "Stage: " + stage;
+      if (qcDetails.length > 0) compiledDetails += "\n" + qcDetails.join("\n");
+
+      var primaryThickness = data.qcExtThickness ? (data.qcExtThickness + " (" + data.qcExtThicknessStatus + ")") : "N/A";
+      var primarySeal = data.qcCutSeal ? (data.qcCutSeal + " (" + data.qcCutSealStatus + ")") : "N/A";
+
+      if (stage === 'Machine Inspection') {
+        if (data.qcMachineType === 'Cutting' && data.qcCutMachineThickness) {
+            primaryThickness = data.qcCutMachineThickness + " (" + data.qcCutMachineThicknessStatus + ")";
+        }
+        if (data.qcMachineType === 'Cutting' && data.qcCutTemp) {
+            primarySeal = "Temp: " + data.qcCutTemp + " (" + data.qcCutTempStatus + ")";
+        }
+      }
+
+      sheet.appendRow([new Date(), data.date, data.machineId || "", data.jobOrder || "N/A", primaryThickness, primarySeal, data.qcNotes || "", compiledDetails, data.supervisor]);
+      
+    } else if (sheetName === 'Packing') {
+      var bags = data.bagWeights ? data.bagWeights.map(function(b) { return b.weight + "kg"; }).join(", ") : "";
+      sheet.appendRow([new Date(), data.date, data.shift, data.jobOrder, data.packingSize, data.packingUom, data.quantityPacked, data.palletWeight, bags, data.supervisor, data.jobComplete ? "Yes" : "No"]);
+      
+      // Auto-Flag Master List if marked complete during packing
+      if (data.jobComplete) {
+        var masterSheet = ss.getSheetByName('Master Job Order List');
+        if (masterSheet) {
+          var mData = masterSheet.getDataRange().getValues();
+          for (var i = 1; i < mData.length; i++) {
+            if (mData[i][1].toString().trim() === data.jobOrder.toString().trim()) {
+              masterSheet.getRange(i + 1, 14).setValue("Yes"); 
+              break;
+            }
+          }
+        }
+      }
+
+    } else if (sheetName === 'Incoming Goods') {
+      if (data.incomingBatches && data.incomingBatches.length > 0) {
+        data.incomingBatches.forEach(function(batch) {
+          sheet.appendRow([new Date(), data.date, data.restockMaterial, batch.amount, data.supplier || "", batch.batchNo || "", data.poNumber || "", data.location || "", data.incomingQualityCheck || "", data.supervisor, imageUrl]);
+        });
+      } else {
+        sheet.appendRow([new Date(), data.date, data.restockMaterial, data.restockAmount, data.supplier || "", data.batchNumber || "", data.poNumber || "", data.location || "", data.incomingQualityCheck || "", data.supervisor, imageUrl]);
+      }
+      
+    } else if (sheetName === 'Purchase Requisition') {
+      sheet.appendRow([new Date(), data.date, data.reqItemName, data.reqQuantity, data.reqUom, data.reqCurrentStock, data.reqRemarks || "-", data.supervisor, "Pending"]);
+      
+    } else if (sheetName === 'Dispatch') {
+      sheet.appendRow([new Date(), data.date, data.jobOrder, data.dispatchQty, data.deliveryOrderNo, data.supervisor, imageUrl]);
+    }
+
+    return ContentService.createTextOutput(JSON.stringify({"status": "success"})).setMimeType(ContentService.MimeType.JSON);
+      
+  } catch (err) {
+    return ContentService.createTextOutput(JSON.stringify({"status": "error", "message": err.toString()})).setMimeType(ContentService.MimeType.JSON);
+  }
+}
+
+// --- HELPER FUNCTION FOR ALIAS UOM DETECTION ---
+function isCountUom(uStr) {
+  var u = (uStr || "").toString().toLowerCase();
+  return u.indexOf('pcs') !== -1 || 
+         u.indexOf('piece') !== -1 || 
+         u.indexOf('bag') !== -1 || 
+         u.indexOf('unit') !== -1 || 
+         u.indexOf('pkt') !== -1 ||
+         u.indexOf('roll') !== -1;
+}
+
+function doGet(e) {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var results = { extrusion: [], cutting: [], packing: [], qc: [], dispatch: [], incoming: [], analytics: {}, masterOrders: [], joTotals: {} };
+
+  var joWeights = {};
+  var joTargetUoms = {}; // NEW: Stores the targeted unit for accurate progress aggregation
+
+  var masterSheet = ss.getSheetByName('Master Job Order List');
+  if (masterSheet && masterSheet.getLastRow() > 1) {
+    var mData = masterSheet.getRange(2, 1, masterSheet.getLastRow() - 1, 23).getValues();
+    var seenJOs = {}; 
+    for (var j = 0; j < mData.length; j++) {
+      var jo = (mData[j][1] || "").toString().trim();
+      if (jo) {
+        if (!seenJOs[jo]) { 
+          seenJOs[jo] = true;
+          results.masterOrders.push({
+            jo: jo, date: mData[j][2], 
+            itemCode: (mData[j][4] || "").toString().trim(),
+            customer: (mData[j][5] || "Unknown Customer").toString().trim(), description: (mData[j][6] || "").toString().trim(),
+            targetQty: parseFloat(mData[j][9]) || 0, 
+            targetUom: (mData[j][10] || "").toString().trim(), 
+            itemWeight: parseFloat(mData[j][12]) || 0, 
+            dimension: (mData[j][7] || "").toString().trim(),
+            isReadyToShip: (mData[j][13] || "").toString().toLowerCase() === "yes",
+            requiresCutting: (mData[j][20] || "").toString().toLowerCase() === "yes",
+            urgency: parseInt(mData[j][21]) || 5,
+            isCompleted: (mData[j][22] || "").toString().toLowerCase() === "yes"
+          });
+        }
+        var weight = parseFloat(mData[j][12]);
+        if (!isNaN(weight)) joWeights[jo] = weight;
+        joTargetUoms[jo] = (mData[j][10] || "").toString().trim().toLowerCase();
+      }
+    }
+  }
+
+  function getRecent(sheetName) {
+    var sheet = ss.getSheetByName(sheetName);
+    if (!sheet) return [];
+    var lastRow = sheet.getLastRow();
+    if (lastRow <= 1) return [];
+    var startRow = Math.max(2, lastRow - 50); 
+    return sheet.getRange(startRow, 1, lastRow - startRow + 1, sheet.getLastColumn()).getValues().reverse();
+  }
+
+  function getSchedule() {
+    var sheet = ss.getSheetByName('Job Schedule');
+    if (!sheet) return [];
+    var data = sheet.getDataRange().getValues();
+    if (data.length <= 1) return [];
+    return data.slice(1);
+  }
+
+  function getPendingRequisitions() {
+    var sheet = ss.getSheetByName('Purchase Requisition');
+    if (!sheet) return [];
+    var data = sheet.getDataRange().getValues();
+    var pending = [];
+    for (var i = 1; i < data.length; i++) {
+      if (data[i][8] !== 'Resolved') {
+        pending.push(data[i]);
+      }
+    }
+    return pending.reverse(); 
+  }
+
+  function calculateStats(sheetName) {
+    var stats = {
+      daily: { output: 0, prevOutput: 0, consumption: 0, prevConsumption: 0, wastage: 0, prevWastage: 0, units: 0, pallets: 0 },
+      weekly: { output: 0, prevOutput: 0, consumption: 0, prevConsumption: 0, wastage: 0, prevWastage: 0, units: 0, pallets: 0 },
+      monthly: { output: 0, prevOutput: 0, consumption: 0, prevConsumption: 0, wastage: 0, prevWastage: 0, units: 0, pallets: 0 },
+      yearly: { output: 0, prevOutput: 0, consumption: 0, prevConsumption: 0, wastage: 0, prevWastage: 0, units: 0, pallets: 0 }
+    };
+    var sheet = ss.getSheetByName(sheetName);
+    if (!sheet || sheet.getLastRow() <= 1) return stats;
+
+    var data = sheet.getRange(2, 1, sheet.getLastRow() - 1, 11).getValues();
+    var now = new Date();
+
+    for (var i = 0; i < data.length; i++) {
+      var rowDate = new Date(data[i][1]); 
+      if (isNaN(rowDate.getTime())) continue;
+
+      var output = 0, consumption = 0, wastage = 0, units = 0, pallets = 0;
+      var rowJo = (data[i][3] || "").toString().trim();
+      var itemW = joWeights[rowJo] || 0;
+
+      if (sheetName === 'Extrusion' || sheetName === 'Cutting') {
+        var uom = (data[i][7] || "").toString().toLowerCase(); 
+        var qty = parseFloat(data[i][6]) || 0; 
+        var isPcsInput = isCountUom(uom);
+
+        // Convert to KG for factory analytics (if possible)
+        output = isPcsInput ? (qty * itemW) : qty;
+        
+        wastage = (parseFloat(data[i][8]) || 0) + (parseFloat(data[i][9]) || 0);
+        var matches = (data[i][5] || "").toString().match(/[\d.]+(?=kg)/g);
+        if (matches) matches.forEach(function(m) { consumption += parseFloat(m); });
+        
+      } else if (sheetName === 'Packing') {
+        var packSize = parseFloat(data[i][4]) || 0; 
+        var pUom = (data[i][5] || "").toString().toLowerCase(); 
+        var pQty = parseFloat(data[i][6]) || 0; 
+        var isPackPcs = (pUom.indexOf('pcs') !== -1 || pUom.indexOf('piece') !== -1);
+        
+        if (isPackPcs) {
+            // It's pcs per bag
+            var totalPcs = packSize * pQty;
+            output = totalPcs * itemW; // Convert to KG for analytics
+            units = totalPcs;
+        } else {
+            // It's kg per bag
+            output = packSize * pQty; // Already in KG
+            units = (itemW > 0) ? (output / itemW) : 0;
+        }
+
+        pallets = 1; 
+        var matchesPack = (data[i][8] || "").toString().match(/[\d.]+(?=kg)/g);
+        if (matchesPack) matchesPack.forEach(function(m) { consumption += parseFloat(m); });
+      }
+
+      var diffDays = Math.floor((now - rowDate) / (1000 * 3600 * 24));
+
+      // Daily & Prev Daily
+      if (diffDays === 0) { stats.daily.output += output; stats.daily.consumption += consumption; stats.daily.wastage += wastage; stats.daily.units += units; stats.daily.pallets += pallets; }
+      else if (diffDays === 1) { stats.daily.prevOutput += output; stats.daily.prevConsumption += consumption; stats.daily.prevWastage += wastage; }
+      
+      // Weekly & Prev Weekly
+      if (diffDays <= 7) { stats.weekly.output += output; stats.weekly.consumption += consumption; stats.weekly.wastage += wastage; stats.weekly.units += units; stats.weekly.pallets += pallets; }
+      else if (diffDays > 7 && diffDays <= 14) { stats.weekly.prevOutput += output; stats.weekly.prevConsumption += consumption; stats.weekly.prevWastage += wastage; }
+      
+      // Monthly & Prev Monthly
+      if (rowDate.getMonth() === now.getMonth() && rowDate.getFullYear() === now.getFullYear()) { stats.monthly.output += output; stats.monthly.consumption += consumption; stats.monthly.wastage += wastage; stats.monthly.units += units; stats.monthly.pallets += pallets; }
+      else if (rowDate.getMonth() === (now.getMonth() - 1 === -1 ? 11 : now.getMonth() - 1)) { stats.monthly.prevOutput += output; stats.monthly.prevConsumption += consumption; stats.monthly.prevWastage += wastage; }
+
+      // Yearly & Prev Yearly
+      if (rowDate.getFullYear() === now.getFullYear()) { stats.yearly.output += output; stats.yearly.consumption += consumption; stats.yearly.wastage += wastage; stats.yearly.units += units; stats.yearly.pallets += pallets; }
+      else if (rowDate.getFullYear() === now.getFullYear() - 1) { stats.yearly.prevOutput += output; stats.yearly.prevConsumption += consumption; stats.yearly.prevWastage += wastage; }
+    }
+    return stats;
+  }
+
+  try {
+    results.extrusion = getRecent('Extrusion');
+    results.cutting = getRecent('Cutting');
+    results.packing = getRecent('Packing');
+    results.qc = getRecent('Quality Control');
+    results.dispatch = getRecent('Dispatch');
+    results.incoming = getRecent('Incoming Goods');
+    results.containers = getRecent('Container Information');
+    results.requisitions = getPendingRequisitions(); 
+    results.schedule = getSchedule(); 
+
+    results.analytics.Extrusion = calculateStats('Extrusion');
+    results.analytics.Cutting = calculateStats('Cutting');
+    results.analytics.Packing = calculateStats('Packing');
+
+    // Aggregate active Job Order totals aligned with Target UOM
+    var joTotals = {};
+    
+    function aggregateTotals(sheetName) {
+      var sheet = ss.getSheetByName(sheetName);
+      if (!sheet || sheet.getLastRow() <= 1) return;
+      var data = sheet.getRange(2, 1, sheet.getLastRow() - 1, 12).getValues();
+      
+      for (var k = 0; k < data.length; k++) {
+        var timestamp = new Date(data[k][0]).getTime(); 
+        var jo = (sheetName === 'Incoming Goods') ? "" : (data[k][3] || "").toString().trim(); 
+        
+        if (sheetName === 'Dispatch') jo = (data[k][2] || "").toString().trim();
+        if (!jo) continue;
+
+        if (!joTotals[jo]) joTotals[jo] = { extrusion: 0, cutting: 0, packing: 0, dispatched: 0, palletWeight: 0, lastUpdated: 0, isReadyToShip: false, packingSize: "", packingUom: "" };
+        if (timestamp && !isNaN(timestamp)) joTotals[jo].lastUpdated = Math.max(joTotals[jo].lastUpdated, timestamp);
+        
+        var joTargetIsPcs = isCountUom(joTargetUoms[jo] || "");
+        var itemW = joWeights[jo] || 0;
+
+        if (sheetName === 'Extrusion' || sheetName === 'Cutting') {
+           var qty = parseFloat(data[k][6]) || 0;
+           var uom = (data[k][7] || "").toString().toLowerCase();
+           var isInputPcs = isCountUom(uom);
+           
+           var addedValue = 0;
+           if (joTargetIsPcs) {
+               // We need the result in PCS. If itemW is missing/0, we fallback to 0 to prevent Infinity unless the input was already in PCS.
+               addedValue = isInputPcs ? qty : (itemW > 0 ? (qty / itemW) : 0);
+           } else {
+               // We need the result in KG. If itemW is missing/0, we fallback to raw qty to prevent complete loss.
+               addedValue = isInputPcs ? (itemW > 0 ? (qty * itemW) : qty) : qty;
+           }
+
+           if (sheetName === 'Extrusion') joTotals[jo].extrusion += addedValue;
+           if (sheetName === 'Cutting') joTotals[jo].cutting += addedValue;
+        }
+
+        if (sheetName === 'Packing') {
+          var packSize = parseFloat(data[k][4]) || 0; 
+          var pUom = (data[k][5] || "").toString().toLowerCase();
+          var pQty = parseFloat(data[k][6]) || 0;
+          var palletWt = parseFloat(data[k][7]) || 0;
+          var isComplete = (data[k][10] || "").toString().toLowerCase() === "yes";
+          var isPackPcs = (pUom.indexOf('pcs') !== -1 || pUom.indexOf('piece') !== -1);
+          
+          // Calculate physical counts
+          var totalPackPcs = isPackPcs ? (packSize * pQty) : (itemW > 0 ? ((packSize * pQty) / itemW) : 0);
+          var totalPackKg = isPackPcs ? (packSize * pQty * itemW) : (packSize * pQty);
+
+          // Select the correct format based on the Master List Target
+          joTotals[jo].packing += joTargetIsPcs ? totalPackPcs : totalPackKg;
+          
+          joTotals[jo].palletWeight += palletWt;
+          if (isComplete) joTotals[jo].isReadyToShip = true;
+          if (packSize) joTotals[jo].packingSize = packSize;
+          if (data[k][5]) joTotals[jo].packingUom = data[k][5].toString();
+        }
+
+        if (sheetName === 'Dispatch') {
+          // Dispatch quantities are kept straightforward
+          joTotals[jo].dispatched += parseFloat(data[k][3]) || 0;
+        }
+      }
+    }
+    
+    aggregateTotals('Extrusion'); aggregateTotals('Cutting'); aggregateTotals('Packing'); aggregateTotals('Dispatch');
+    results.joTotals = joTotals;
+
+    return ContentService.createTextOutput(JSON.stringify({ status: "success", data: results })).setMimeType(ContentService.MimeType.JSON);
+  } catch (err) {
+    return ContentService.createTextOutput(JSON.stringify({ status: "error", message: err.toString() })).setMimeType(ContentService.MimeType.JSON);
+  }
+}
